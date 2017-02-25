@@ -1,0 +1,16 @@
+These utilities allow to "extend" data beyond the normal land mask to the entire world.
+No attempt was made to make the "pretty" - they just supposed to work.
+
+extend_veg.f - extends land cover. Data is assumed to be missing if sum of all fractions for a particular cell is < 1.
+extend_laimax_0.f - extends laimax data. Data is assumed to be missing if the value < 0.0001 .
+extend_height_0.f - extends height data (and its std). Data is assumed to be missing if the value < 0.0001 .
+extend_lai_0.f - extends LAI. Data is assumed to be missing if the sum of LAIs for particular PFT over the year is < 0.0001 .
+
+The data is assumed to be provided in the files: veg.nc, laimax.nc, height.nc, lai.nc respectively. These files are overwritten with "extended" data, so make sure to make a copy before running these commands. 
+
+The data is extended to the same latitude first and then to the neighbouring latitudes until the entire world is covered.
+
+To compile each of the files, use something like:
+
+gfortran extend_veg_0.f -I /opt/netcdf/3.6.3/include -L  /opt/netcdf/3.6.3/lib -l netcdf
+
