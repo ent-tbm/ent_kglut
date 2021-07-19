@@ -12,6 +12,7 @@ print('config_file must contain the following:', quote=FALSE)
 print(' res < spatial resolution 2x2h | 4x5 | hxh | qxq >', quote = FALSE)
 print(' pathin < input path/ >', quote = FALSE)
 print(' pathout < output path/ >', quote = FALSE)
+print(' id <run id >', quote = FALSE)
 print(' temp < temperature (Celsius) monhtly maps in netcdf file of dimension (IM,JM,12) >', quote = FALSE)
 print(' prec < precipitation (mm/month) monthly maps in netcdf file of dimension (IM, JM 12) >', quote = FALSE)
 print(' tname < netcdf variable name for temp file, e.g. tsurf >', quote = FALSE)
@@ -27,14 +28,28 @@ source("../Rfunctions/KoeppenGeiger.R")
 library(rworldmap)
 
 #Parse config file
+if (FALSE) {
 top=1
 res = strsplit(readLines(con=configfile, n=top)[[top]]," ")[[1]][2]
 pathin = paste(strsplit(readLines(con=configfile, n=top+1)[[top+1]]," ")[[1]][2], "/", sep="")
 pathout = paste(strsplit(readLines(con=configfile, n=top+2)[[top+2]]," ")[[1]][2], "/", sep="")
-tempfile = strsplit(readLines(con=configfile, n=top+3)[[top+3]]," ")[[1]][2]
-precfile = strsplit(readLines(con=configfile, n=top+4)[[top+4]]," ")[[1]][2]
-tname = strsplit(readLines(con=configfile, n=top+5)[[top+5]]," ")[[1]][2]
-pname = strsplit(readLines(con=configfile, n=top+6)[[top+6]]," ")[[1]][2]
+id = strsplit(readLines(con=configfile, n=top+3)[[top+3]]," ")[[1]][2]
+tempfile = strsplit(readLines(con=configfile, n=top+4)[[top+4]]," ")[[1]][2]
+precfile = strsplit(readLines(con=configfile, n=top+5)[[top+5]]," ")[[1]][2]
+tname = strsplit(readLines(con=configfile, n=top+6)[[top+6]]," ")[[1]][2]
+pname = strsplit(readLines(con=configfile, n=top+7)[[top+7]]," ")[[1]][2]
+}
+
+textin = read.table(file=configfile, header=FALSE, sep=" ")
+#print(textin)
+res = as.character(textin[match("res", textin[,1]),2])
+pathin=as.character(textin[match("pathin", textin[,1]),2])
+pathout=as.character(textin[match("pathout", textin[,1]),2])
+id=as.character(textin[match("id", textin[,1]),2])
+tempfile=as.character(textin[match("temp", textin[,1]),2])
+precfile=as.character(textin[match("prec", textin[,1]),2])
+tname=as.character(textin[match("tname", textin[,1]),2])
+pname=as.character(textin[match("pname", textin[,1]),2])
 
 if (FALSE) {
 print(res, quote = FALSE )
@@ -46,11 +61,10 @@ print(tname, quote = FALSE )
 print(pname, quote = FALSE )
 }
 
-#idn = strsplit(tempfile, res)[[1]][3]
-idn = strsplit(tempfile, ".nc")[[1]][1]
+#idn = strsplit(tempfile, ".nc")[[1]][1]
 #print(idn)
-idn2 = strsplit(idn, "_")[[1]]
-id = idn2[length(idn2)]
+#idn2 = strsplit(idn, "_")[[1]]
+#id = idn2[length(idn2)]
 #print(id)
 
 #Generate the classification
@@ -82,9 +96,7 @@ KGnum = run.KG(Tnc=Tnc,
 	if.new=FALSE)
 
 #Plot 
-#PLOTFILENAME=paste(pathout, "/", "KG",res,"_Rplots_",id, ".pdf", sep="")
-#PLOTFILENAME=paste(pathout, "/", "KG",res,"_Rplots_", tempfile, "_", precfile, ".pdf", sep="")
-PLOTFILENAME=paste(pathout, "/", "KG",res,"_Rplots_", tempfile, ".pdf", sep="")
+PLOTFILENAME=paste(pathout, "/", "KG",res,"_Rplots_", id, ".pdf", sep="")
 pdf(PLOTFILENAME, width=9.6, height=6)
 par(omi=c(0,0,0,1)) #(bottom, left, top, right)
 par(omi=c(0,0,0,0), oma=c(0,0,0,4)) #(bottom, left, top, right) #Use for single
@@ -96,8 +108,7 @@ legend(-180, 101, legend=KGcat[21:40,"KGcode"],col=KGrgbhex[21:40], pt.cex=2, pc
 dev.off()
 
 #Write netcdf file
-#OUTPUTFILENAME=paste(pathout, "/", "KG", res,"_biomes_",id, ".nc", sep="")
-OUTPUTFILENAME=paste(pathout, "/", "KG", res,"_biomes_",tempfile,".nc", sep="")
+OUTPUTFILENAME=paste(pathout, "/", "KG", res,"_biomes_",id, ".nc", sep="")
 write.KoeppenGeiger.netcdf(KGnum, fname=OUTPUTFILENAME, varname="KG", undef=-1e30, description=paste("Koeppen-Geiger classification of: ", tempfile, ", ", precfile,".", sep=""))
 
 
