@@ -1,0 +1,103 @@
+#KG_classify.R
+#Classify maps of temperature and precipitation, and output a map of Koeppen-Geiger classes, both netcdf and plot.
+#Temperature and precip files should be netcdf files, each with a variable of dimension (IM, JM, 12) for monthly values.
+
+args = commandArgs(trailingOnly=TRUE)
+print(args)
+numargs = length(args)
+if (numargs < 1) {
+print ('Usage:  Rscript KG_classify.R <config_file>', quote = FALSE )
+print('config_file = text file name', quote = FALSE)
+print('config_file must contain the following:', quote=FALSE)
+print(' res < spatial resolution 2x2h | 4x5 | hxh | qxq >', quote = FALSE)
+print(' pathin < input path/ >', quote = FALSE)
+print(' pathout < output path/ >', quote = FALSE)
+print(' temp < temperature (Celsius) monhtly maps in netcdf file of dimension (IM,JM,12) >', quote = FALSE)
+print(' prec < precipitation (mm/month) monthly maps in netcdf file of dimension (IM, JM 12) >', quote = FALSE)
+print(' tname < netcdf variable name for temp file, e.g. tsurf >', quote = FALSE)
+print(' pname < netcdf variable name for prec file, e.g. prec >', quote = FALSE)
+quit()
+}
+
+configfile = args[1]
+
+
+source("../Rfunctions/utils_noSDMTools.R")
+source("../Rfunctions/KoeppenGeiger.R")
+library(rworldmap)
+
+#Parse config file
+top=1
+res = strsplit(readLines(con=configfile, n=top)[[top]]," ")[[1]][2]
+pathin = paste(strsplit(readLines(con=configfile, n=top+1)[[top+1]]," ")[[1]][2], "/", sep="")
+pathout = paste(strsplit(readLines(con=configfile, n=top+2)[[top+2]]," ")[[1]][2], "/", sep="")
+tempfile = strsplit(readLines(con=configfile, n=top+3)[[top+3]]," ")[[1]][2]
+precfile = strsplit(readLines(con=configfile, n=top+4)[[top+4]]," ")[[1]][2]
+tname = strsplit(readLines(con=configfile, n=top+5)[[top+5]]," ")[[1]][2]
+pname = strsplit(readLines(con=configfile, n=top+6)[[top+6]]," ")[[1]][2]
+
+if (FALSE) {
+print(res, quote = FALSE )
+print(pathin, quote = FALSE )
+print(pathout, quote = FALSE )
+print(tempfile, quote = FALSE )
+print(precfile, quote = FALSE )
+print(tname, quote = FALSE )
+print(pname, quote = FALSE )
+}
+
+#idn = strsplit(tempfile, res)[[1]][3]
+idn = strsplit(tempfile, ".nc")[[1]][1]
+#print(idn)
+idn2 = strsplit(idn, "_")[[1]]
+id = idn2[length(idn2)]
+#print(id)
+
+#Generate the classification
+IM.JM = IM.JM.from.res(res)
+IM = IM.JM[1]
+JM = IM.JM[2]
+#print(paste("IM, JM = ", IM, JM))
+
+Tnc = paste(pathin, "/", tempfile, sep="")
+Pnc = paste(pathin, "/", precfile, sep="")
+
+#KGnum = run.KG(Tnc="TEMPERATURE_DATA",
+#	Pnc="PRECIPITATION_DATA",
+#	Tname="tmp",
+#	Pname="prec",
+#	IM=IM, JM=JM,
+#	ttext="TEMPERATURE_DATA", 
+#	ptext="PRECIPITATION_DATA",
+#	if.new=FALSE)
+
+
+KGnum = run.KG(Tnc=Tnc,
+	Pnc=Pnc,
+	Tname=tname,
+	Pname=pname,
+	IM=IM, JM=JM,
+	ttext=tempfile, 
+	ptext=precfile,
+	if.new=FALSE)
+
+#Plot 
+#PLOTFILENAME=paste(pathout, "/", "KG",res,"_Rplots_",id, ".pdf", sep="")
+#PLOTFILENAME=paste(pathout, "/", "KG",res,"_Rplots_", tempfile, "_", precfile, ".pdf", sep="")
+PLOTFILENAME=paste(pathout, "/", "KG",res,"_Rplots_", tempfile, ".pdf", sep="")
+pdf(PLOTFILENAME, width=9.6, height=6)
+par(omi=c(0,0,0,1)) #(bottom, left, top, right)
+par(omi=c(0,0,0,0), oma=c(0,0,0,4)) #(bottom, left, top, right) #Use for single
+
+plot.KG(KGnum, if.new=FALSE)
+par(xpd=TRUE)
+legend(-180, 112, legend=KGcat[1:20,"KGcode"],col=KGrgbhex[1:20], pt.cex=2, pch=15, cex=0.6, horiz=TRUE, bty="n")
+legend(-180, 101, legend=KGcat[21:40,"KGcode"],col=KGrgbhex[21:40], pt.cex=2, pch=15, cex=0.6, horiz=TRUE, bty="n")
+dev.off()
+
+#Write netcdf file
+#OUTPUTFILENAME=paste(pathout, "/", "KG", res,"_biomes_",id, ".nc", sep="")
+OUTPUTFILENAME=paste(pathout, "/", "KG", res,"_biomes_",tempfile,".nc", sep="")
+write.KoeppenGeiger.netcdf(KGnum, fname=OUTPUTFILENAME, varname="KG", undef=-1e30, description=paste("Koeppen-Geiger classification of: ", tempfile, ", ", precfile,".", sep=""))
+
+
