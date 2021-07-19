@@ -1,0 +1,15 @@
+Ent_utils.git
+
+This is a repository for programs and scripts for generating and making various alterations of Ent Terrestrial Biosphere Model (Ent TBM) data files for use in ModelE, specifically those used as the VEG, CROPS, HITEent, LAImax, and LAI monthly input files.
+
+extending_data:  Programs to extend vegetation boundary conditions across the coastlines.
+
+kglut_modelE:  Scripts to generate a lookup table of Koeppen-Geiger classification of an input (usually observed) VEG, HITEent, LAImax, and LAI monthly maps; classify a new climate from a ModelE simuations; and output new maps of VEG, HITEent, LAImax, and LAI for the new climate.
+
+Rfiles:  R driver scripts that use functions in Rfunctions.
+
+Rfunctions:  R utility functions.
+
+Rfunctions/config:  Template config input files to some R files.
+
+
