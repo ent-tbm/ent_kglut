@@ -1,0 +1,79 @@
+README: Köppen-Geiger classfication of climate and GISS ModelE Ent Terrestrial Biosphere Model vegetation boundary conditions
+AUTHOR - James Lui, Nancy Kiang
+CONTACT - james.lui@nasa.gov, nancy.y.kiang@nasa.gov
+LAST UPDATED - 2021-07-19
+
+Scripts to automatically run and generate GISS ModelE Ent vegetation boundary condition input files (VEG, HITEent, LAImax, LAI monthly) for alternative climates. There are two primary scripts that are run in two independent steps. 
+
+Short summary:
+1. obs2EntKGLUT.sh: Takes observed vegetation and climate and generates Köppen-Geiger classification of cover fraction, height, lai annual max and monthly in a lookup table. 
+	data: Default input observations are in the data directory.
+        config: Default config file "config_obs2EntKGLUT.txt" specifies the default input observations in the data directory.
+	calls: prectemp2biome.sh, regress_biome2laihite.py, trim_Ent_KG_LUT.R, csvLAIdominanthemi.py, csvremoveSTD, csv2lut.py.
+
+2. LUTaltclimate2modelEinput.sh: Takes alternative climate (monthly temperature and precip) from ModelE aij files, and applies the lookup table to generate alternative ModelE map input files of vegetation boundary conditions.  
+        config: User-specified, with example in "config_LUTaltclimate2modelEinput.txt."
+	calls: aij2prectemp.py, prectemp2biome.sh, lut2finalout.py, Ent_map_lc_weighted.R
+
+In general, the first step obs2EntKHLUT.sh only needs to be run once. Thereafter, users will run the second step LUTaltclimate2modelEinput.sh frequently on their various simulated climates.
+
+================================================================================================================================================================
+Detailed summary:
+---------------------------------------------
+obs2EntKGLUT.sh:
+
+This script generates a lookup table from a series of input files specified by the config file: config_obs2EntKGLUT.txt
+
+prec, temp: precipitation and temperature data in netCDF format for the yearly period of 12 months. The units for precipitation is mm/month and for temperature it is in Celsius. For this script to generate the correct values in the end, these files should have the oceans masked. These files generate a biome file that is used by the next scripts.
+
+lai, laimax, height, lc: data to be regressed into a lookup table in netCDF format. For this set, LAI must have the data for 12 months while the others are static. These files generate a lookup table in the form of csv files, one for each dataset, ordered by PFT and biome type, by regressing the data and weighing by grid surface area, and LC (for LAI, LAImax, height). It also generates another csv file which describes the number of samples taken. Some PFT/Biome combinations may not have any samples while others may only have 1. For full details on how to fine tune this part of the script, check the other README file. For LAI, the initial table may not be correct due to differences in the sampling between northern and southern hemispheres. For LC, small fractions may be present in the file.
+
+resolution: describes the resolution of all input data. Accepted formats: 4X5, 2X2H, 1X1, HXH, QXQ. Input data must have the same resolution or it will not work.
+
+metadata_dataversion: (optional, but for the sake of everyone required) the version of the input files.
+
+outdir: output directory, all files generated will be placed into this directory. 
+
+netcdf_format: format of the final lookup table (see netCDF API documentation for python -> https://unidata.github.io/netcdf4-python/#creatingopeningclosing-a-netcdf-file). NETCDF3-CLASSIC is a safe option
+
+lctrimfrac: threshold for land cover values to be trimmed from the final LC lookupt table. Default should be 0.08.
+
+lai_threshold_replace: threshold for monthly LAI to be replaced by the dominant hemisphere (% difference). Some regressed values for LAI may have totally different range of values by hemisphere. This script aims to resolve that by having all LAI values for each hemisphere be in the same range with opposite seasonality. Default should be 0.1.
+
+metadata_datasourceLUT: (also optional, but not really) metadata specifying all data sources and versions. Should specify how the lookup table was generated (Values for cover fraction are weighed by grid surface area. Values for LAI, LAImax, and height are weighed by grid surface area and cover fraction.) as well as where they came from and the version of the files.
+
+----------------------------------------------
+
+Calls:`
+prectemp2biome.sh takes in prec and temp from the config file and generates a biome map based on the Koeppen-Geiger classification, V$(resolution)_entKG_biomes_0123abc.nc and also a pdf of the biome map, Rplots_XXXXXX.pdf 
+
+regress_biome2laihite.py takes in biome from the previous script and outputs csv files with the raw data (EntKG_regression$(type)_raw_0123abc.nc) as well as a file detailing the number of samples taken (EntKG_regressionsamples_0123abc.csv)
+ 
+Three scripts are called to filter out the csv files for the final lookup table script - trim_Ent_KG_LUT.R trims cover fraction values based on a threshold, csvLAIdominanthemi.py takes the dominant hemisphere and replaces the values of the non-dominant hemisphere in the LAI file based on a threshold of percent difference, csvremoveSTD removes the standard deviation values from the LAImax and height files.
+
+csv2lut.py generates the final lookup table, Ent_v$(dimensions)_KoeppenGeiegerLUT_0123abc.nc
+
+***********************************************
+
+LUTaltclimate2modelEinput.sh:
+
+This script generates input files in netCDF format based on alternate climitology to be used in modelE
+
+aij_dir: directory of the aij files to be read
+
+aij_jan: the JAN file of the aij files to be read. All 12 files JAN-DEC must exist. They should already have the correctly formatted names if output by scaleacc (XXX$(year1)-$(year2).aij$(runname).nc) and contains precipitation and temperature data. As of writing, precipitation should be in units of mm/day and temperature in Celcius.
+
+lut: The path of the lookup table generated by the previous script
+
+resolution, outdir, netcdf_format, metadata_dataversion, metadata_datasourcelut: see above
+
+----------------------------------------------
+
+Calls:
+aij2prectemp.py takes in the 12 aij files and outputs temperature and precipitation netCDF files (prec/temp_$(resolution)_$(year1)-$(year2)_$(runname)_0123abc.nc) to be read in by prectemp2biome.sh while converting the units of precipitation from mm/day to mm/month.
+
+prectemp2biome.sh (see above)
+
+lut2finalout.py takes in the biome file and the lookup table file and generates lai, laimax, height, and lc files for input into modelE based on the biome distribution and the values of the lookup table. 
+
+Ent_map_lc_weighted.R generates lc-weighted average value maps of all pfts together, the dominant pft type, and pft maps of them. 
