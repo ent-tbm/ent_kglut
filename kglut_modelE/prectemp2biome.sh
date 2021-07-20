@@ -43,7 +43,7 @@ while IFS=$'\t' read -r -a args; do
 	# Make a copy of the template file and replace all variables
 
 	# Replace file variables
-	cp "KG_run_template.R" "KG_run.R"
+	cp "../Rfiles/KG_run_template.R" "KG_run.R"
 	sed -i "s|TEMPERATURE_DATA|$(echo $temp | sed 's/\./\\\./g')|g" "KG_run.R"	
 	sed -i "s|PRECIPITATION_DATA|$(echo $prec | sed 's/\./\\\./g')|g" "KG_run.R"
 	sed -i "s|OUTPUT_FILE_NAME|$(echo $out | sed 's/\./\\\./g')|g" "KG_run.R"

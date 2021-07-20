@@ -29,6 +29,8 @@ The biome classification will go over any grid cells where a value is present, s
 
 To run you will need R 3.6.3+ loaded, then type ./prectemp2biome.sh <name of your text file>.
 
+A newer script KG_classify.R also can be used, see the source code for documentation.
+
 *******************************************************************************
 
 REGRESSION OF BIOMES TO LC LAI LAIMAX HITEENT

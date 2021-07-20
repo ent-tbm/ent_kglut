@@ -45,7 +45,7 @@ metadata_datasourceLUT: (also optional, but not really) metadata specifying all 
 ----------------------------------------------
 
 Calls:`
-prectemp2biome.sh takes in prec and temp from the config file and generates a biome map based on the Koeppen-Geiger classification, V$(resolution)_entKG_biomes_0123abc.nc and also a pdf of the biome map, Rplots_XXXXXX.pdf 
+KG_classify.R takes in prec and temp from the config file and generates a biome map based on the Koeppen-Geiger classification, V$(resolution)_entKG_biomes_0123abc.nc and also a pdf of the biome map, KG$(resolution)_Rplots_XXXXXX.pdf 
 
 regress_biome2laihite.py takes in biome from the previous script and outputs csv files with the raw data (EntKG_regression$(type)_raw_0123abc.nc) as well as a file detailing the number of samples taken (EntKG_regressionsamples_0123abc.csv)
  
@@ -70,9 +70,9 @@ resolution, outdir, netcdf_format, metadata_dataversion, metadata_datasourcelut:
 ----------------------------------------------
 
 Calls:
-aij2prectemp.py takes in the 12 aij files and outputs temperature and precipitation netCDF files (prec/temp_$(resolution)_$(year1)-$(year2)_$(runname)_0123abc.nc) to be read in by prectemp2biome.sh while converting the units of precipitation from mm/day to mm/month.
+aij2prectemp.py takes in the 12 aij files and outputs temperature and precipitation netCDF files (prec/temp_$(resolution)_$(year1)-$(year2)_$(runname)_0123abc.nc) to be read in by KG_classify.R while converting the units of precipitation from mm/day to mm/month.
 
-prectemp2biome.sh (see above)
+KG_classify.R (see above)
 
 lut2finalout.py takes in the biome file and the lookup table file and generates lai, laimax, height, and lc files for input into modelE based on the biome distribution and the values of the lookup table. 
 
