@@ -28,7 +28,7 @@ Detailed summary:
 
 obs2EntKGLUT.sh:
 
-This script generates a lookup table from a series of input files specified by the config file: config_obs2EntKGLUT.txt
+This script generates a lookup table from a series of input files specified by the config file: config_obs2EntKGLUT.txt. Relative paths are relative to the kglut_modelE directory.
 
 prec, temp: precipitation and temperature data in netCDF format for the yearly period of 12 months. The units for precipitation is mm/month and for temperature it is in Celsius. For this script to generate the correct values in the end, these files should have the oceans masked. These files generate a biome file that is used by the next scripts.
 
@@ -67,7 +67,7 @@ csv2lut.py generates the final lookup table, Ent_v$(dimensions)_KoeppenGeiegerLU
 
 LUTaltclimate2modelEinput.sh:
 
-This script generates input files in netCDF format based on alternate climitology to be used in modelE
+This script generates input files in netCDF format based on alternate climitology to be used in modelE using input from the config file: config_LUTaltclimate2modelEinput.sh. Relative paths are relative to the kglut_modelE directory.
 
 aij_dir: directory of the aij files to be read
 
