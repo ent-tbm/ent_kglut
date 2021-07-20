@@ -1,8 +1,8 @@
 aij_dir=/discover/nobackup/dlitchmo/E2p1_anl_PI_Eocene_VEGDTL/decadalFolder/ScaledData/
 aij_jan=JAN2121-2130.aijE2p1_anl_PI_Eocene_VEGDTL.nc
-lut=/discover/nobackup/jlui1/Koeppen/Koeppen-Geiger/script_out/EntGVSD_v1.0.KG2004_LUT.nc
+lut=../user/output/Ent_v2X2H_KoeppenGeigerLUT_60ef725.nc
 resolution=2X2H
-outdir=../auto_out/
+outdir=../user/output/
 netcdf_format=NETCDF3_CLASSIC
 metadata_dataversion=MODIS Average of 2001-2005, v4, March 2014
 metadata_datasourcelut=Ent Global Vegetation Structure Dataset (Ent GVSD)  v1.0, classified into Koeppen-Geiger biome groupings with average monthly 2001-2010 surface temperature from the Climate Research Unit of the University of East Anglia  (CRU TS3.22) and precipitation from the Global Precipitation Climatology Centre (GPCC v.6). Estimated monthly LAI generated from input biomes and weighed by grid-surface area and cover fraction.
