@@ -22,6 +22,16 @@ if [ $pyinstance -eq 0 ]; then
   exit 3
 fi
 
+Rinstance=$(module list | grep -c "R/")
+if [ $Rinstance -eq 0 ]; then
+  echo "R is not loaded, run the command "module load R/3.6.3" (or the latest version) and try again"
+  exit 3
+fi
+
+# Set directory
+path=$(cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P)
+cd "$path"
+
 # Loop over the input file
 
 while IFS=$'=' read -r -a args; do
