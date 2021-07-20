@@ -22,7 +22,7 @@ Short summary:
 
 In general, the first step obs2EntKHLUT.sh only needs to be run once. Thereafter, users will run the second step LUTaltclimate2modelEinput.sh frequently on their various simulated climates.
 
-================================================================================================================================================================
+==========================================================================================================================================
 Detailed summary:
 ---------------------------------------------
 
