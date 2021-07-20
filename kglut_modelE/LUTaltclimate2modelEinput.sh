@@ -146,13 +146,24 @@ EOF
 python "aij2prectemp_${append_rng}.py"
 rm "aij2prectemp_${append_rng}.py"
 
-# run prectemp2biome.sh
-echo -e "${outdirn}${prec}\t${outdirn}${temp}\t${outdirn}${biome}" > "ptb_${append_rng}.txt"
-./prectemp2biome.sh "ptb_${append_rng}.txt"
+# use KG_classify instead ~~run prectemp2biome.sh~~
+#echo -e "${prec}\t${temp}\t${outdirn}${biome}" > "ptb_${append_rng}.txt"
+#./prectemp2biome.sh "ptb_${append_rng}.txt"
+cp "KG_classify_config.txt" "KG_classify_config_${append_rng}.txt"
 
-mv "Rplots_KG.pdf" "${outdirn}Rplots_${runname}_${append_rng}.pdf"
-rm "ptb_${append_rng}.txt"
-rm "Rplots.pdf"
+ex "KG_classify_config_${append_rng}.txt" <<EOF
+  1s/@@RESOLUTION/${resolution}/
+  3s/@@OUTDIR/${outdir}/
+  4s/@@ID/${append_rng}/
+  5s/@@TEMP/${outdir}${temp}/
+  6s/@@PREC/${outdir}${prec}/
+  wq
+EOF
+
+Rscript "../Rfiles/KG_classify.R" "KG_classify_config_${append_rng}.txt"
+
+mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
+rm "KG_classify_config_${append_rng}.txt"
 
 # run lut2finalout.py
 cp "lut2finalout.py" "lut2finalout_${append_rng}.py"
