@@ -1,0 +1,8 @@
+res @@RESOLUTION
+pathin @@OUTDIR
+pathout @@OUTDIR
+lc @@LC
+height @@HEIGHT
+laimax @@LAIMAX
+lai @@LAI
+

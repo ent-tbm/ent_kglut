@@ -73,9 +73,10 @@ IM = IM.JM[1]
 JM = IM.JM[2]
 #print(paste("IM, JM = ", IM, JM))
 
-Tnc = paste(pathin, "/", tempfile, sep="")
-Pnc = paste(pathin, "/", precfile, sep="")
-
+Tnc = paste(pathin, "", tempfile, sep="")
+Pnc = paste(pathin, "", precfile, sep="")
+print(Tnc)
+print(Pnc)
 #KGnum = run.KG(Tnc="TEMPERATURE_DATA",
 #	Pnc="PRECIPITATION_DATA",
 #	Tname="tmp",

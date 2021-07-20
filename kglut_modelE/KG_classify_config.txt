@@ -1,0 +1,8 @@
+res @@RESOLUTION
+pathin 
+pathout @@OUTDIR
+id @@ID
+temp @@TEMP
+prec @@PREC
+tname tmp
+pname prec

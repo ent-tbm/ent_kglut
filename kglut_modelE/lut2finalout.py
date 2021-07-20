@@ -1,0 +1,230 @@
+# Converts lookup table file and input biomes to LC LAI LAImax HITEent netCDF files for use as inputs in modelE and its branches
+# AUTHOR - James Lui
+# Contact - james.lui1@nasa.gov
+
+import numpy as np
+import netCDF4 as nc
+from datetime import datetime
+
+outdimensions = @@DIMENSIONS
+lat = @@LATDIM
+lon = @@LONDIM
+time = np.arange(1, 13)
+
+outNETCDF_format = "@@NETCDF_FORMAT"
+
+biome_file = "@@BIOME"
+LUT_file = "@@LUT"
+
+LAI_datasource = "@@METADATA_DATAVERSION" 
+LAImax_datasource = "@@METADATA_DATAVERSION"
+HITEent_datasource = "@@METADATA_DATAVERSION"
+LC_datasource = "@@METADATA_DATAVERSION"
+
+# Ent Global Vegetation Structure Dataset (Ent GVSD)  v1.0, classified into Koeppen-Geiger biome groupings with average monthly 2001-2010 surface temperature from the Climate Research Unit of the University of East Anglia  (CRU TS3.22) and precipitation from the Global Precipitation Climatology Centre (GPCC v.6).
+
+outdir = "@@OUTDIR"
+LAI_out = "@@LAI_OUT"
+LAImax_out = "@@LAIMAX_OUT"
+HITEent_out = "@@HEIGHT_OUT"
+LC_out = "@@LC_OUT"
+
+default_biome = 31
+fillvalue = -1e+30
+
+LAI = np.zeros((18, 40, 12)) # PFT Biome Month
+LAIs= np.zeros((18, 40, 12)) # SouthernHemi
+LAImax = np.zeros((18, 40)) # PFT Biome
+HITEent = np.zeros((18, 40))
+LC = np.zeros((18, 40))
+
+pftIgnore = 2
+pfts = { # name longname ignore
+    1 : ["ever_br_early", "1 - Evergeen Broadleaf Early Succ", False], #T
+    2 : ["ever_br_late", "2 - Evergreen Broadleaf Late Succ", False],
+    3 : ["ever_nd_early", "3 - Evergreen Needleleaf Early Succ", False], #T
+    4 : ["ever_nd_late", "4 - Evergreen Needleleaf Late Succ", False],
+    5 : ["cold_br_early", "5 - Cold Deciduous Broadleaf Early Succ", False], #T
+    6 : ["cold_br_late", "6 - Cold Deciduous Broadleaf Late Succ", False],
+    7 : ["drought_br", "7 - Drought Deciduous Broadleaf", False],
+    8 : ["decid_nd", "8 - Deciduous Needleleaf", False],
+    9 : ["cold_shrub", "9 - Cold Adapted Shrub", False],
+    10: ["arid_shrub", "10 - Arid Adapted Shrub", False],
+    11: ["c3_grass_per", "11 - C3 Grass Perennial", False],
+    12: ["c4_grass", "12 - C4 Grass", False],
+    13: ["c3_grass_ann", "13 - C3 Grass Annual", False],
+    14: ["c3_grass_arct", "14 - Arctic C3 Grass", False],
+    15: ["crops_herb", "15 - Crops Herb", False], #T
+    16: ["crops_woody", "16 - Crops Woody", False], #T
+    17: ["bare_bright", "17 - Bright Bare Soil", False], #T
+    18: ["bare_dark", "18 - Dark Bare Soil", False] #T
+    }
+
+print("Fetching biomes")
+with nc.Dataset(biome_file) as dataset:
+    biomes = dataset["KG"][:]
+
+print("Fetching from LUT")
+with nc.Dataset(LUT_file, mode='r') as dataset:
+  LC = dataset['lc'][:]
+  HITEent = dataset['height'][:]
+  LAImax = dataset['laimax'][:]
+  allLAI = dataset['lai'][:]
+  LAI = allLAI[0][:]
+  LAIs = allLAI[1][:]
+
+dimlat, dimlon = outdimensions
+
+print("Writing LAI file (this may take a while)")
+with nc.Dataset(outdir+LAI_out, mode='w', format=outNETCDF_format) as dataset:
+  dataset.setncattr("title", "Estimated LAI")
+  dataset.setncattr("source", LUT_file)
+  dataset.setncattr("data_source", LAI_datasource)
+  dataset.setncattr("info", "@@METADATA_DATASOURCELUT")
+  dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov, allegra.n.legrand@nasa.gov")
+  dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
+  dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+  dataset.createDimension('lat', size=dimlat)
+  dataset.createDimension('lon', size=dimlon)
+  dataset.createDimension('time', size=0)
+
+  dataset.createVariable('lat', 'f4', ('lat'))
+  dataset.createVariable('lon', 'f4', ('lon'))
+  dataset.createVariable('time', 'i4', ('time'))
+  dataset['lat'][:] = lat
+  dataset['lon'][:] = lon
+  dataset['time'][:] = time
+  dataset['lat'].setncattr("long_name", "latitude")
+  dataset['lat'].setncattr("units", "degrees_north")
+  dataset['lon'].setncattr("long_name", "longitude")
+  dataset['lon'].setncattr("units", "degrees_east")
+  dataset['time'].setncattr("long_name", "time")
+  dataset['time'].setncattr("units", "months")
+
+  for pft, pftvalue in pfts.items():
+    dataset.createVariable(pftvalue[0], 'f4', dimensions=('time', 'lat', 'lon'), fill_value=fillvalue)
+    dataset[pftvalue[0]].setncattr("long_name", pftvalue[1]+" LAI")
+    dataset[pftvalue[0]].setncattr("units", "m2/m2")
+    if (pftvalue[2]):
+      continue
+    else:
+      data = np.zeros((12, dimlat, dimlon)) # Generate LAI values from table, split grid into north and south
+      for i in range(dimlat//2): # southern hemisphere
+        for j in range(dimlon):
+          KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
+          for month in range(12):
+            data[month][i][j] = LAIs[pft-1][KG-1][month]
+      for i in range(dimlat//2, dimlat):
+        for j in range(dimlon):
+          KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
+          for month in range(12):
+            data[month][i][j] = LAI[pft-1][KG-1][month]
+
+      dataset[pftvalue[0]][:] = data
+
+print("Writing LAImax file")
+with nc.Dataset(outdir+LAImax_out, mode='w', format=outNETCDF_format) as dataset:
+  dataset.setncattr("title", "Estimated LAImax")
+  dataset.setncattr("source", LUT_file)
+  dataset.setncattr("data_source", LAImax_datasource)
+  dataset.setncattr("info", "@@METADATA_DATASOURCELUT")
+  dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov, allegra.n.legrand@nasa.gov")
+  dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
+  dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+  dataset.createDimension('lat', size=dimlat)
+  dataset.createDimension('lon', size=dimlon)
+
+  dataset.createVariable('lat', 'f4', ('lat'))
+  dataset.createVariable('lon', 'f4', ('lon'))
+  dataset['lat'][:] = lat
+  dataset['lon'][:] = lon
+  dataset['lat'].setncattr("long_name", "latitude")
+  dataset['lat'].setncattr("units", "degrees_north")
+  dataset['lon'].setncattr("long_name", "longitude")
+  dataset['lon'].setncattr("units", "degrees_east")
+  for pft, pftvalue in pfts.items():
+    dataset.createVariable(pftvalue[0], 'f4', dimensions=('lat', 'lon'), fill_value=fillvalue)
+    dataset[pftvalue[0]].setncattr("long_name", pftvalue[1]+" LAImax")
+    dataset[pftvalue[0]].setncattr("units", "m2/m2")
+    if (pftvalue[2]):
+      continue
+    else:
+      data = np.zeros(outdimensions)
+      for i in range(dimlat):
+        for j in range(dimlon):
+          KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
+          data[i][j] = LAImax[pft-1][KG-1]
+
+      dataset[pftvalue[0]][:] = data
+
+print("Writing HITEent file")
+with nc.Dataset(outdir+HITEent_out, mode='w', format=outNETCDF_format) as dataset:
+  dataset.setncattr("title", "Estimated Height")
+  dataset.setncattr("source", LUT_file)
+  dataset.setncattr("data_source", HITEent_datasource)
+  dataset.setncattr("info", "@@METADATA_DATASOURCELUT")
+  dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov, allegra.n.legrand@nasa.gov")
+  dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
+  dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+  dataset.createDimension('lat', size=dimlat)
+  dataset.createDimension('lon', size=dimlon)
+
+  dataset.createVariable('lat', 'f4', ('lat'))
+  dataset.createVariable('lon', 'f4', ('lon'))
+  dataset['lat'][:] = lat
+  dataset['lon'][:] = lon
+  dataset['lat'].setncattr("long_name", "latitude")
+  dataset['lat'].setncattr("units", "degrees_north")
+  dataset['lon'].setncattr("long_name", "longitude")
+  dataset['lon'].setncattr("units", "degrees_east")
+
+  for pft, pftvalue in pfts.items():
+    dataset.createVariable(pftvalue[0], 'f4', dimensions=('lat', 'lon'), fill_value=fillvalue)
+    dataset[pftvalue[0]].setncattr("long_name", pftvalue[1]+" height")
+    dataset[pftvalue[0]].setncattr("units", "m")
+    if (pftvalue[2]):
+      continue
+    else:
+      data = np.zeros(outdimensions)
+      for i in range(dimlat):
+        for j in range(dimlon):
+          KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
+          data[i][j] = HITEent[pft-1][KG-1]
+
+      dataset[pftvalue[0]][:] = data
+
+print("Writing LC file")
+with nc.Dataset(outdir+LC_out, mode='w', format=outNETCDF_format) as dataset:
+  dataset.setncattr("title", "Estimated Height")
+  dataset.setncattr("source", LUT_file)
+  dataset.setncattr("data_source", LC_datasource)
+  dataset.setncattr("info", "@@METADATA_DATASOURCELUT")
+  dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov, allegra.n.legrand@nasa.gov")
+  dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
+  dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+  dataset.createDimension('lat', size=dimlat)
+  dataset.createDimension('lon', size=dimlon)
+
+  dataset.createVariable('lat', 'f4', ('lat'))
+  dataset.createVariable('lon', 'f4', ('lon'))
+  dataset['lat'][:] = lat
+  dataset['lon'][:] = lon
+  dataset['lat'].setncattr("long_name", "latitude")
+  dataset['lat'].setncattr("units", "degrees_north")
+  dataset['lon'].setncattr("long_name", "longitude")
+  dataset['lon'].setncattr("units", "degrees_east")
+
+  for pft, pftvalue in pfts.items():
+    dataset.createVariable(pftvalue[0], 'f4', dimensions=('lat', 'lon'), fill_value=fillvalue)
+    dataset[pftvalue[0]].setncattr("long_name", pftvalue[1]+" cover fraction")
+    dataset[pftvalue[0]].setncattr("units", "fraction")
+    if (pftvalue[2]):
+      continue
+    else:
+      data = np.zeros(outdimensions)
+      for i in range(dimlat):
+        for j in range(dimlon):
+          KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
+          data[i][j] = LC[pft-1][KG-1]
+
+      dataset[pftvalue[0]][:] = data

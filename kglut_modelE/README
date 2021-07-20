@@ -1,28 +1,12 @@
-README: Köppen-Geiger classfication of climate and GISS ModelE Ent Terrestrial Biosphere Model vegetation boundary conditions
-AUTHOR - James Lui, Nancy Kiang
-CONTACT - james.lui@nasa.gov, nancy.y.kiang@nasa.gov
+AUTHOR - James Lui
+CONTACT - james.lui@nasa.gov
 LAST UPDATED - 2021-07-19
 
-Scripts to automatically run and generate GISS ModelE Ent vegetation boundary condition input files (VEG, HITEent, LAImax, LAI monthly) for alternative climates. There are two primary scripts that are run in two independent steps. 
+Scripts to automatically run and generate files
 
-Short summary:
-1. obs2EntKGLUT.sh: Takes observed vegetation and climate and generates Köppen-Geiger classification of cover fraction, height, lai annual max and monthly in a lookup table. 
-	data: Default input observations are in the data directory.
-        config: Default config file "config_obs2EntKGLUT.txt" specifies the default input observations in the data directory.
-	calls: prectemp2biome.sh, regress_biome2laihite.py, trim_Ent_KG_LUT.R, csvLAIdominanthemi.py, csvremoveSTD, csv2lut.py.
-
-2. LUTaltclimate2modelEinput.sh: Takes alternative climate (monthly temperature and precip) from ModelE aij files, and applies the lookup table to generate alternative ModelE map input files of vegetation boundary conditions.  
-        config: User-specified, with example in "config_LUTaltclimate2modelEinput.txt."
-	calls: aij2prectemp.py, prectemp2biome.sh, lut2finalout.py, Ent_map_lc_weighted.R
-
-In general, the first step obs2EntKHLUT.sh only needs to be run once. Thereafter, users will run the second step LUTaltclimate2modelEinput.sh frequently on their various simulated climates.
-
-================================================================================================================================================================
-Detailed summary:
----------------------------------------------
 obs2EntKGLUT.sh:
 
-This script generates a lookup table from a series of input files specified by the config file: config_obs2EntKGLUT.txt
+This script generates a lookup table from a series of input files specified by the config file
 
 prec, temp: precipitation and temperature data in netCDF format for the yearly period of 12 months. The units for precipitation is mm/month and for temperature it is in Celsius. For this script to generate the correct values in the end, these files should have the oceans masked. These files generate a biome file that is used by the next scripts.
 

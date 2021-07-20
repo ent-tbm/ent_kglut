@@ -1,0 +1,71 @@
+AUTHOR - James Lui
+CONTACT - james.lui@nasa.gov
+LAST UPDATED - 2021-07-12
+
+INSTRUCTIONS ON HOW TO RUN THESE SCRIPTS
+-> generate precipitation data and temperature data from aij files
+-> generate Koeppen-Geiger biome types from precipitation data and temperature data
+-> generate regression values for LC, LAI, LAImax, height from biome types + uncurated netCDF files
+-> generate lookup table from regression values
+-> generate curated netCDF files from lookup table and desired corresponding Koeppen-Geiger biome types
+
+*******************************************************************************
+
+AIJ TO PREC AND TEMP
+The aij files are monthly files with all aij characteristics as output for each month by modelE and its branches. This script is only interested in extracting temperature and precipitation.
+
+Edit the script “aij2prectmp.py” to the file names and directories for both input files and output files. The fill value can also be chosen. Since the variable names might be different depending on which version of the model is being run, tell the script what variable is precipitation (inprecname = “prec”) and temperature (intempname = “tsurf”) in the aij files. For the outputs do not change the names from “prec” and “temp” as the next script will need them (unless it’s been changed there as well).
+
+The dimensions of the file can also be specified (here it’s 144x90 with 12 months, don’t change the 12 months part), but the appropriate lat/lon grids must be generated as well (or fetch them from the input files (lat = dataset["lat"][:])). The input aij files in the example are given in units of mm/day, but the next script uses mm/month. Change the daymonth array to properly convert units. Both temperatures are given in Celsius. It should be straightforward if to convert from Kelvin or god forbid Farenheit (if you’re reading this most definitely not).
+
+To run the script, make sure you have python 3.7+ and netCDF loaded and type "python aij2prectmp.py" in console.
+
+*******************************************************************************
+
+PREC AND TEMP TO BIOMES
+If there are many prec and temp files to covert to biomes, this script can batch convert them. In a text file, write the names for the files, tab separated, for input precipitation, input temperature, and then the name of the output file in that order. Do not edit the .R files present as the script will not work if something breaks. To put more than one conversion, add the next three file names on a new line.
+
+The biome classification will go over any grid cells where a value is present, so it will classify ocean cells as well. It will put in a masked value if it cannot classify a certain cell.
+
+To run you will need R 3.6.3+ loaded, then type ./prectemp2biome.sh <name of your text file>.
+
+*******************************************************************************
+
+REGRESSION OF BIOMES TO LC LAI LAIMAX HITEENT
+This script samples LC, LAI, LAImax, and height from source files for every biome and generates csv files detailing the average value with standard deviation of LC, LAI, LAImax, and height. LC is weighed using grid surface area (axyp, here it is called wxyp as it is in arbitrary units), while the other three are weighed using grid surface area and cover fraction. This script also generates netcdf files for an desired biome layout, useful for generating datasets for running with paleo-biomes or with alternate Earth biomes though these files are uncurated (see below sections). 
+
+The LAI file must be a 12-month yearly file.
+
+The dictionary "biome_coords" details the behavior of the script for each biome and how to take the samples. Some biomes may not exist so these are skipped with None. The first two are hard-coded coordinates to where to take a biome. This should only be used if a biome only exists as one or two gridcells. The next four are boolean values, with the first (isSouthernHemi) describing if the previous coordinates are in the southern hemisphere or in conjunction with the next options (read on). The second boolean value (takeSample) is if a sample should be taken. The third boolean value (ignoreHemiVariations) is if hemispheric variations (seasonality) should be ignored, useful for tropical biomes. The fourth value (hasBothHemi) is if the biome exists in both hemipsheres. If the biome does not exist in both hemispheres then isSouthernHemi describes where the biome exists and script will roll the data by 6 months for the opposite biome.
+
+This file also outputs a samples file, which will detail how many gridcells were used for each sampling. If the sampling number contains an R this means that those samples (for LAI) are a 6-month roll of the opposite hemisphere.
+
+The dictionary "pfts" lists all the PFTs with a boolean to skip regressing it.
+
+The input lat/lon must be the same for all input files. They describe the coordinates corresponding to the arrays in the input files. Copy-paste it in or use numpy's arange function to generate it. Change the dimensions to that of the files. The same definition is also done with the output generated netCDF files. There is also the option to set a fill value and a default biome if it is not defined for some gridcells. 
+
+Because the height file here uses hgt_<PFTNAME> as its variable name, it’s added as a workaround to fetch those variables. 
+
+To run this file type "python regress_biome2laihite.py"
+
+**
+
+TRIMMING LC
+
+Cover fraction can be trimmed automatically using the R script "trim_ent_KG_LUT.R". Edit the file and replace the input csv file and run it with "R CMD BATCH trim_ent_KG_LUT.R" or "Rscript trim_ent_KG_LUT.R"
+
+*******************************************************************************
+
+CSV TO LOOKUP TABLE
+This script converts csv tables into a netCDF lookup table. Presumably the csv values have been curated and/or trimmed to remove and fix errors in the values as a result of the dataset. For LAI, they may be curated such that for the same biome and PFT, the values for both hemispheres are roughly comparable. If not, the dominant hemisphere's data (sometimes an entire hemisphere's data will be 0 because there is nothing to sample) should be rolled over by 6 months for the other hemisphere. This will ignore standard deviations and will only encode the /VAL /Nval /Sval rows of the csv files into the final output. Do not remove the header line and do not change the formatting. Standard deviation rows can be removed from the csv files for better curation but they must be removed for all files if this is the case.
+
+The final lookup table will contain values for LC, LAI, LAImax, height based on biome and PFT, and in the case of LAI, for each hemisphere and per month. The names of each biome type and PFT are also encoded into the file corresponding to the enumerated biome/PFT number.
+
+To run this file type "python csv2lut.py"
+
+*******************************************************************************
+
+LOOKUP TABLE TO LC LAI LAIMAX HITEENT
+After the values for the csv files have been finalized and converted into a lookup table file as above, put the name of the lookup table and the corresponding biome for output into this script and run it. This will generate netCDF files for LC, LAI, LAImax, height similar to the regression file but with the lookup table.
+
+To run this file type "python lut2finalout.py"

@@ -1,0 +1,1 @@
+/discover/nobackup/jlui1/Koeppen/Koeppen-Geiger/Example_input_files/GPCC_v6_PREC_means_2001-2010_2HX2.nc	/discover/nobackup/jlui1/Koeppen/Koeppen-Geiger/Example_input_files/cru_ts3.22_TS_means_2001-2010_2HX2.nc	V144x90_EntKG_biomes_4b3544c.nc
