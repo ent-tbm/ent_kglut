@@ -5,22 +5,25 @@ CONTACT - james.lui@nasa.gov, nancy.y.kiang@nasa.gov
 Scripts to automatically run and generate GISS ModelE Ent vegetation boundary condition input files (VEG, HITEent, LAImax, LAI monthly) for alternative climates. There are two primary scripts that are run in two independent steps. 
 
 Required modules:  R, Python, and NetCDF
-On discover, modules tha work are:
+On discover, modules that work are:
 module load R/3.6.3
 module load python/GEOSpyD/Min4.8.3_py3.8
 module load netcdf-4.5.0_impi_intel-19.1.0.166
 
 Short summary:
-1. obs2EntKGLUT.sh: Takes observed vegetation and climate and generates Köppen-Geiger classification of cover fraction, height, lai annual max and monthly in a lookup table. 
+1. obs2EntKGLUT.sh: Takes observed vegetation and climate and generates Köppen-Geiger classification of cover fraction, height, lai annual max and monthly in a lookup table (LUT). 
         data: Default input observations are in the data directory.
         config: Default config file "config_obs2EntKGLUT.txt" specifies the default input observations in the data directory.
         calls: prectemp2biome.sh, regress_biome2laihite.py, trim_Ent_KG_LUT.R, csvLAIdominanthemi.py, csvremoveSTD, csv2lut.py.
+   A frozen LUT is provided at:
+	/discover/nobackup/projects/giss_ana/pub/Ent_TBM/EntGVSD/entgvsd_v1/entgvsd_v1.0/KoeppenGeiger/
+	https://portal.nccs.nasa.gov/datashare/GISS/Ent_TBM/EntGVSD/entgvsd_v1/entgvsd_v1.0/KoeppenGeiger/	
 
 2. LUTaltclimate2modelEinput.sh: Takes alternative climate (monthly temperature and precip) from ModelE aij files, and applies the lookup table to generate alternative ModelE map input files of vegetation boundary conditions.  
         config: User-specified, with example in "config_LUTaltclimate2modelEinput.txt."
         calls: aij2prectemp.py, prectemp2biome.sh, lut2finalout.py, Ent_map_lc_weighted.R
 
-In general, the first step obs2EntKHLUT.sh only needs to be run once. Thereafter, users will run the second step LUTaltclimate2modelEinput.sh frequently on their various simulated climates.
+In general, the first step obs2EntKHLUT.sh only needs to be run once, and the user should use the frozen LUT rather than generating their own, unless they are knowledgeable about vegetation. Thereafter, users will run the second step LUTaltclimate2modelEinput.sh frequently on their various simulated climates.
 
 ==========================================================================================================================================
 Detailed summary:
@@ -50,8 +53,11 @@ metadata_datasourceLUT: (also optional, but not really) metadata specifying all 
 
 TO RUN:
 1. Make or choose the config file
-2. Run the script with:
-   ./obs2EntKGLUT.sh <config_file>
+2. cd user
+3. From the user directory, run the script with:
+   ./../kglut_modelE/obs2EntKGLUT.sh <config_file>
+   (NOTE: If the config file is in the user directory, you may have to specify it with the path ../user/<config_file>
+4. Outputs will be in user/output/.
 ----------------------------------------------
 
 Calls:`
@@ -79,8 +85,11 @@ resolution, outdir, netcdf_format, metadata_dataversion, metadata_datasourcelut:
 
 TO RUN:
 1. Make or choose the config file
-2. Run the script with:
-    ./LUTaltclimate2modelEinput.sh <config_file>. 
+2. cd user
+3. From the user directory, run the script with:
+    ./../kglut_modelE/LUTaltclimate2modelEinput.sh <config_file>
+   (NOTE: If the config file is in the user directory, you may have to specify it with the path ../user/<config_file>
+4. Outputs will be in user/output/.
 ----------------------------------------------
 
 Calls:
