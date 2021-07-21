@@ -1,8 +1,8 @@
 res @@RESOLUTION
 pathin @@OUTDIR
 pathout @@OUTDIR
-lc @@LC
-height @@HEIGHT
-laimax @@LAIMAX
-lai @@LAI
+lc @@LC @@NA
+height @@HEIGHT @@HGT
+laimax @@LAIMAX @@NA
+lai @@LAI @@NA
 

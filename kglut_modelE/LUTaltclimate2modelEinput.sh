@@ -29,10 +29,13 @@ if [ $Rinstance -eq 0 ]; then
 fi
 
 # Set directory
+ppwd=$(pwd)
 path=$(cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P)
 cd "$path"
 
 # Loop over the input file
+
+dohgt=false
 
 while IFS=$'=' read -r -a args; do
   keyword=${args[0]}
@@ -50,12 +53,17 @@ while IFS=$'=' read -r -a args; do
     outdirn=$arg
   elif [ "$keyword" = "netcdf_format" ]; then
     netcdf_format=$arg
+  elif [ "$keyword" = "hgt" ]; then
+    if [ "$arg" = "YES" ]; then
+      hgt="hgt_"
+      dohgt=true
+    fi
   elif [ "$keyword" = "metadata_dataversion" ]; then
-    metadata_dataversion=$arg
+    metadata_dataversion=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "metadata_datasourcelut" ]; then
-    metadata_datasourcelut=$arg
+    metadata_datasourcelut=$(echo ${arg//"/"/"\/"})
   fi
-done < $1
+done < "${ppwd}/${1}"
 
 # resolution
 # change to all caps
@@ -131,9 +139,9 @@ height_out="V${dimname}_height_${years}_${runname}_${append_rng}.nc"
 lc_out="V${dimname}_lc_${years}_${runname}_${append_rng}.nc"
 
 # run aij2prectemp.py
-cp "aij2prectemp.py" "aij2prectemp_${append_rng}.py"
+cp "aij2prectemp.py" "../user/aij2prectemp_${append_rng}.py"
 
-ex "aij2prectemp_${append_rng}.py" <<EOF
+ex "../user/aij2prectemp_${append_rng}.py" <<EOF
   6s/@@INDIR/${indir}/
   7s/@@OUTDIR/${outdir}/
   19s/@@JAN/${JAN}/
@@ -153,15 +161,15 @@ ex "aij2prectemp_${append_rng}.py" <<EOF
   wq
 EOF
 
-python "aij2prectemp_${append_rng}.py"
-rm "aij2prectemp_${append_rng}.py"
+python "../user/aij2prectemp_${append_rng}.py"
+#rm "aij2prectemp_${append_rng}.py"
 
 # use KG_classify instead ~~run prectemp2biome.sh~~
 #echo -e "${prec}\t${temp}\t${outdirn}${biome}" > "ptb_${append_rng}.txt"
 #./prectemp2biome.sh "ptb_${append_rng}.txt"
-cp "KG_classify_config.txt" "KG_classify_config_${append_rng}.txt"
+cp "KG_classify_config.txt" "../user/KG_classify_config_${append_rng}.txt"
 
-ex "KG_classify_config_${append_rng}.txt" <<EOF
+ex "../user/KG_classify_config_${append_rng}.txt" <<EOF
   1s/@@RESOLUTION/${resolution}/
   3s/@@OUTDIR/${outdir}/
   4s/@@ID/${append_rng}/
@@ -170,15 +178,15 @@ ex "KG_classify_config_${append_rng}.txt" <<EOF
   wq
 EOF
 
-Rscript "../Rfiles/KG_classify.R" "KG_classify_config_${append_rng}.txt"
+Rscript "../Rfiles/KG_classify.R" "../user/KG_classify_config_${append_rng}.txt"
 
 mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
-rm "KG_classify_config_${append_rng}.txt"
+#rm "KG_classify_config_${append_rng}.txt"
 
 # run lut2finalout.py
-cp "lut2finalout.py" "lut2finalout_${append_rng}.py"
+cp "lut2finalout.py" "../user/lut2finalout_${append_rng}.py"
 
-ex "lut2finalout_${append_rng}.py" <<EOF
+ex "../user/lut2finalout_${append_rng}.py" <<EOF
   9s/@@DIMENSIONS/${dimensions}/
   10s/@@LATDIM/${latdim}/
   11s/@@LONDIM/${londim}/
@@ -195,13 +203,25 @@ ex "lut2finalout_${append_rng}.py" <<EOF
   wq
 EOF
 
-python "lut2finalout_${append_rng}.py"
-rm "lut2finalout_${append_rng}.py"
+if [ $dohgt ]; then
+  ex "../user/lut2finalout_${append_rng}.py" <<EOF 
+    24s/@@HGT/${hgt}/
+    wq
+EOF
+else
+  ex "../user/lut2finalout_${append_rng}.py" <<EOF
+    24s/@@HGT//
+    ew
+EOF
+fi
+
+python "../user/lut2finalout_${append_rng}.py"
+#rm "lut2finalout_${append_rng}.py"
 
 # run Ent_map_lc_weighted.R
-cp "Ent_map_lcwtd_config.txt" "Ent_map_lcwtd_config_${append_rng}.txt"
+cp "Ent_map_lcwtd_config.txt" "../user/Ent_map_lcwtd_config_${append_rng}.txt"
 
-ex "Ent_map_lcwtd_config_${append_rng}.txt" <<EOF
+ex "../user/Ent_map_lcwtd_config_${append_rng}.txt" <<EOF
   1s/@@RESOLUTION/${resolution}/
   2,3s/@@OUTDIR/${outdir}/
   4s/@@LC/${lc_out}/
@@ -211,5 +231,18 @@ ex "Ent_map_lcwtd_config_${append_rng}.txt" <<EOF
   wq
 EOF
 
-Rscript "Ent_map_lc_weighted.R" "Ent_map_lcwtd_config_${append_rng}.txt" "TRUE"
-rm "Ent_map_lcwtd_config_${append_rng}.txt"
+if [ $dohgt ]; then
+  ex "../user/Ent_map_lcwtd_config_${append_rng}.txt" <<EOF
+    5s/@@HGT/hgt/
+    4,7s/@@NA/NA
+    wq
+EOF
+else
+  ex "../user/Ent_map_lcwtd_config_${append_rng}.txt" <<EOF
+    4,7s/ @@NA//
+    wq
+EOF
+fi
+
+Rscript "../Rfiles/Ent_map_lc_weighted.R" "../user/Ent_map_lcwtd_config_${append_rng}.txt" "TRUE"
+#rm "Ent_map_lcwtd_config_${append_rng}.txt"

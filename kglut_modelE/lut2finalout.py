@@ -21,7 +21,7 @@ LAImax_datasource = "@@METADATA_DATAVERSION"
 HITEent_datasource = "@@METADATA_DATAVERSION"
 LC_datasource = "@@METADATA_DATAVERSION"
 
-# Ent Global Vegetation Structure Dataset (Ent GVSD)  v1.0, classified into Koeppen-Geiger biome groupings with average monthly 2001-2010 surface temperature from the Climate Research Unit of the University of East Anglia  (CRU TS3.22) and precipitation from the Global Precipitation Climatology Centre (GPCC v.6).
+hgt = "@@HGT"
 
 outdir = "@@OUTDIR"
 LAI_out = "@@LAI_OUT"
@@ -179,9 +179,9 @@ with nc.Dataset(outdir+HITEent_out, mode='w', format=outNETCDF_format) as datase
   dataset['lon'].setncattr("units", "degrees_east")
 
   for pft, pftvalue in pfts.items():
-    dataset.createVariable(pftvalue[0], 'f4', dimensions=('lat', 'lon'), fill_value=fillvalue)
-    dataset[pftvalue[0]].setncattr("long_name", pftvalue[1]+" height")
-    dataset[pftvalue[0]].setncattr("units", "m")
+    dataset.createVariable(hgt+pftvalue[0], 'f4', dimensions=('lat', 'lon'), fill_value=fillvalue)
+    dataset[hgt+pftvalue[0]].setncattr("long_name", pftvalue[1]+" height")
+    dataset[hgt+pftvalue[0]].setncattr("units", "m")
     if (pftvalue[2]):
       continue
     else:
@@ -191,7 +191,7 @@ with nc.Dataset(outdir+HITEent_out, mode='w', format=outNETCDF_format) as datase
           KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
           data[i][j] = HITEent[pft-1][KG-1]
 
-      dataset[pftvalue[0]][:] = data
+      dataset[hgt+pftvalue[0]][:] = data
 
 print("Writing LC file")
 with nc.Dataset(outdir+LC_out, mode='w', format=outNETCDF_format) as dataset:

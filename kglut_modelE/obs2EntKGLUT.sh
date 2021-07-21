@@ -29,6 +29,7 @@ if [ $Rinstance -eq 0 ]; then
 fi
 
 # Set directory
+ppwd=$(pwd)
 path=$(cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P)
 cd "$path"
 
@@ -65,7 +66,7 @@ while IFS=$'=' read -r -a args; do
   elif [ "$keyword" = "metadata_datasourcelut" ]; then
     metadata_datasourcelut=$(echo ${arg//"/"/"\/"})
   fi
-done < $1
+done < "${ppwd}/${1}"
 
 # resolution
 # change to all caps
@@ -132,9 +133,9 @@ lut_out="Ent_v${resolution}_KoeppenGeigerLUT_${append_rng}.nc"
 # use KG_classify instead ~~run prectemp2biome.sh~~
 #echo -e "${prec}\t${temp}\t${outdirn}${biome}" > "ptb_${append_rng}.txt"
 #./prectemp2biome.sh "ptb_${append_rng}.txt"
-cp "KG_classify_config.txt" "KG_classify_config_${append_rng}.txt"
+cp "KG_classify_config.txt" "../user/KG_classify_config_${append_rng}.txt"
 
-ex "KG_classify_config_${append_rng}.txt" <<EOF
+ex "../user/KG_classify_config_${append_rng}.txt" <<EOF
   1s/@@RESOLUTION/${resolution}/
   3s/@@OUTDIR/${outdir}/
   4s/@@ID/${append_rng}/
@@ -143,15 +144,15 @@ ex "KG_classify_config_${append_rng}.txt" <<EOF
   wq
 EOF
 
-Rscript "../Rfiles/KG_classify.R" "KG_classify_config_${append_rng}.txt"
+Rscript "../Rfiles/KG_classify.R" "../user/KG_classify_config_${append_rng}.txt"
 
 mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
-rm "KG_classify_config_${append_rng}.txt"
+#rm "KG_classify_config_${append_rng}.txt"
 
 # run regress_biome2laihite.py
-cp "regress_biome2laihite.py" "regress_biome2laihite_${append_rng}.py"
+cp "regress_biome2laihite.py" "../user/regress_biome2laihite_${append_rng}.py"
 
-ex "regress_biome2laihite_${append_rng}.py" <<EOF
+ex "../user/regress_biome2laihite_${append_rng}.py" <<EOF
   10s/@@BIOME/${outdir}${biome}/
   11s/@@LAI/$lai/
   12s/@@LAIMAX/$laimax/
@@ -169,13 +170,13 @@ ex "regress_biome2laihite_${append_rng}.py" <<EOF
   wq
 EOF
 
-python "regress_biome2laihite_${append_rng}.py"
-rm "regress_biome2laihite_${append_rng}.py"
+python "../user/regress_biome2laihite_${append_rng}.py"
+#rm "regress_biome2laihite_${append_rng}.py"
 
 # run csvLAIdominanthemi.py
-cp "csvLAIdominanthemi.py" "csvLAIdominanthemi_${append_rng}.py"
+cp "csvLAIdominanthemi.py" "../user/csvLAIdominanthemi_${append_rng}.py"
 
-ex "csvLAIdominanthemi_${append_rng}.py" <<EOF
+ex "../user/csvLAIdominanthemi_${append_rng}.py" <<EOF
   7s/@@LAI_CSV_FILE_RAW/${outdir}${lai_csv_file_raw}/
   12s/@@LAI_THRESHOLD_REPLACE/$lai_threshold_replace/
   9s/@@OUTDIR/$outdir/
@@ -183,13 +184,13 @@ ex "csvLAIdominanthemi_${append_rng}.py" <<EOF
   wq
 EOF
 
-python "csvLAIdominanthemi_${append_rng}.py"
-rm "csvLAIdominanthemi_${append_rng}.py"
+python "../user/csvLAIdominanthemi_${append_rng}.py"
+#rm "csvLAIdominanthemi_${append_rng}.py"
 
 # run csvremoveSTD.py
-cp "csvremoveSTD.py" "csvremoveSTD_${append_rng}.py"
+cp "csvremoveSTD.py" "../user/csvremoveSTD_${append_rng}.py"
 
-ex "csvremoveSTD_${append_rng}.py" <<EOF
+ex "../user/csvremoveSTD_${append_rng}.py" <<EOF
   3s/@@LAIMAX_CSV_FILE_RAW/${outdir}${laimax_csv_file_raw}/
   4s/@@HEIGHT_CSV_FILE_RAW/${outdir}${height_csv_file_raw}/
   6s/@@OUTDIR/$outdir/
@@ -198,27 +199,27 @@ ex "csvremoveSTD_${append_rng}.py" <<EOF
   wq
 EOF
 
-python "csvremoveSTD_${append_rng}.py"
-rm "csvremoveSTD_${append_rng}.py"
+python "../user/csvremoveSTD_${append_rng}.py"
+#rm "csvremoveSTD_${append_rng}.py"
 
 # run trim_Ent_KG_LUT.R
-cp "../Rfiles/trim_Ent_KG_LUT.R" "trim_Ent_KG_LUT_${append_rng}.R"
+cp "../Rfiles/trim_Ent_KG_LUT.R" "../user/trim_Ent_KG_LUT_${append_rng}.R"
 
-ex "trim_Ent_KG_LUT_${append_rng}.R" <<EOF
+ex "../user/trim_Ent_KG_LUT_${append_rng}.R" <<EOF
   23s/@@LC_CSV_FILE_RAW/${outdir}${lc_csv_file_raw}/
-  33s/@@LCTRIMFRAC/$lctrimfrac
+  33s/@@LCTRIMFRAC/$lctrimfrac/
   24s/@@OUTDIR/$outdir/
   27s/@@LC_CSV_FILE/$lc_csv_file/
   wq
 EOF
 
-Rscript "trim_Ent_KG_LUT_${append_rng}.R"
-rm "trim_Ent_KG_LUT_${append_rng}.R"
+Rscript "../user/trim_Ent_KG_LUT_${append_rng}.R"
+#rm "trim_Ent_KG_LUT_${append_rng}.R"
 
 # run csv2lut.py
-cp "csv2lut.py" "csv2lut_${append_rng}.py"
+cp "csv2lut.py" "../user/csv2lut_${append_rng}.py"
 
-ex "csv2lut_${append_rng}.py" <<EOF
+ex "../user/csv2lut_${append_rng}.py" <<EOF
   11s/@@DIMENSIONS/$dimensions/
   12s/@@LATDIM/$latdim/
   13s/@@LONDIM/$londim/
@@ -234,5 +235,5 @@ ex "csv2lut_${append_rng}.py" <<EOF
   wq
 EOF
 
-python "csv2lut_${append_rng}.py"
-rm "csv2lut_${append_rng}.py"
+python "../user/csv2lut_${append_rng}.py"
+#rm "csv2lut_${append_rng}.py"
