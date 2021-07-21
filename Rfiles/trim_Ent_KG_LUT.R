@@ -7,7 +7,7 @@
 
 #----------- Edit R locations --------------
 #R path for R utility scripts
-Rpath = "../Rfunctions"
+Rpath = "../Rfunctions/"
 
 #R packages needed. Installed locally. Comment out if already installed previously.
 #R CMD INSTALL -l "/discover/nobackup/projects/giss_ana/users/nkiang/aDATA/Rfiles/Rlibraries/"  mypackage.tgz

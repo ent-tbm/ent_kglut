@@ -39,8 +39,10 @@ textin = readLines(con=configfile, n=8)
 
 top=1
 res = strsplit(readLines(con=configfile, n=top)[[top]]," ")[[1]][2]
-pathin = paste(strsplit(readLines(con=configfile, n=top+1)[[top+1]]," ")[[1]][2], "/", sep="")
-pathout = paste(strsplit(readLines(con=configfile, n=top+2)[[top+2]]," ")[[1]][2], "/", sep="")
+pathin = strsplit(readLines(con=configfile, n=top+1)[[top+1]]," ")[[1]][2]
+if (pathin[length(pathin)]!="/") { pathin = paste(pathin,  "/", sep="") }
+pathout = strsplit(readLines(con=configfile, n=top+2)[[top+2]]," ")[[1]][2]
+if (pathout[length(pathout)]!="/") { pathout = paste(pathout,  "/", sep="") }
 fnames = read.table(configfile, header=FALSE, sep="", skip=top+2)
 filelc = fnames[match("lc", fnames[,1]),2]
 
@@ -92,7 +94,7 @@ laimaxwtdlc = Ent_calc_lc_weighted_map_GISS(
 	pathout=pathout,
 	varname="laimax",  longname="leaf area index (LAI) annual maximum", vardescr="cover-weighted maximum annual LAI", varpre="",
 	units="m^2/m^2", lctypes=EntGVSD_COV13, 
-	if.pdf=if.pdf,
+	if.pdf=if.pdf, zlim=c(0,6),
 	info=filelaimax)
 
 #LAI monthly cover-weighted map
@@ -103,6 +105,6 @@ laiwtdlc = Ent_calc_lc_weighted_map_GISS(
 	pathout=pathout,
 	varname="lai",  longname="leaf area index (LAI) monthly", vardescr="cover-weighted monthly LAI", varpre="", 
 	units="m^2/m^2", lctypes=EntGVSD_COV13, 
-	if.time=TRUE, if.pdf=if.pdf,
+	if.time=TRUE, if.pdf=if.pdf, zlim=c(0,6),
 	info=filelai)
 
