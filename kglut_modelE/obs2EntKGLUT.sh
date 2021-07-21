@@ -108,6 +108,7 @@ else
 fi
 
 append_rng=$(date | md5sum | cut -c 1-7)
+userout="../user/output/"
 
 # generate filenames 
 
@@ -133,9 +134,9 @@ lut_out="Ent_v${resolution}_KoeppenGeigerLUT_${append_rng}.nc"
 # use KG_classify instead ~~run prectemp2biome.sh~~
 #echo -e "${prec}\t${temp}\t${outdirn}${biome}" > "ptb_${append_rng}.txt"
 #./prectemp2biome.sh "ptb_${append_rng}.txt"
-cp "KG_classify_config.txt" "../user/KG_classify_config_${append_rng}.txt"
+cp "KG_classify_config.txt" "${userout}KG_classify_config_${append_rng}.txt"
 
-ex "../user/KG_classify_config_${append_rng}.txt" <<EOF
+ex "${userout}KG_classify_config_${append_rng}.txt" <<EOF
   1s/@@RESOLUTION/${resolution}/
   3s/@@OUTDIR/${outdir}/
   4s/@@ID/${append_rng}/
@@ -144,15 +145,15 @@ ex "../user/KG_classify_config_${append_rng}.txt" <<EOF
   wq
 EOF
 
-Rscript "../Rfiles/KG_classify.R" "../user/KG_classify_config_${append_rng}.txt"
+Rscript "../Rfiles/KG_classify.R" "${userout}KG_classify_config_${append_rng}.txt"
 
 mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
 #rm "KG_classify_config_${append_rng}.txt"
 
 # run regress_biome2laihite.py
-cp "regress_biome2laihite.py" "../user/regress_biome2laihite_${append_rng}.py"
+cp "regress_biome2laihite.py" "${userout}regress_biome2laihite_${append_rng}.py"
 
-ex "../user/regress_biome2laihite_${append_rng}.py" <<EOF
+ex "${userout}regress_biome2laihite_${append_rng}.py" <<EOF
   10s/@@BIOME/${outdir}${biome}/
   11s/@@LAI/$lai/
   12s/@@LAIMAX/$laimax/
@@ -170,13 +171,13 @@ ex "../user/regress_biome2laihite_${append_rng}.py" <<EOF
   wq
 EOF
 
-python "../user/regress_biome2laihite_${append_rng}.py"
+python "${userout}regress_biome2laihite_${append_rng}.py"
 #rm "regress_biome2laihite_${append_rng}.py"
 
 # run csvLAIdominanthemi.py
-cp "csvLAIdominanthemi.py" "../user/csvLAIdominanthemi_${append_rng}.py"
+cp "csvLAIdominanthemi.py" "${userout}csvLAIdominanthemi_${append_rng}.py"
 
-ex "../user/csvLAIdominanthemi_${append_rng}.py" <<EOF
+ex "${userout}csvLAIdominanthemi_${append_rng}.py" <<EOF
   7s/@@LAI_CSV_FILE_RAW/${outdir}${lai_csv_file_raw}/
   12s/@@LAI_THRESHOLD_REPLACE/$lai_threshold_replace/
   9s/@@OUTDIR/$outdir/
@@ -184,13 +185,13 @@ ex "../user/csvLAIdominanthemi_${append_rng}.py" <<EOF
   wq
 EOF
 
-python "../user/csvLAIdominanthemi_${append_rng}.py"
+python "${userout}csvLAIdominanthemi_${append_rng}.py"
 #rm "csvLAIdominanthemi_${append_rng}.py"
 
 # run csvremoveSTD.py
-cp "csvremoveSTD.py" "../user/csvremoveSTD_${append_rng}.py"
+cp "csvremoveSTD.py" "${userout}csvremoveSTD_${append_rng}.py"
 
-ex "../user/csvremoveSTD_${append_rng}.py" <<EOF
+ex "${userout}csvremoveSTD_${append_rng}.py" <<EOF
   3s/@@LAIMAX_CSV_FILE_RAW/${outdir}${laimax_csv_file_raw}/
   4s/@@HEIGHT_CSV_FILE_RAW/${outdir}${height_csv_file_raw}/
   6s/@@OUTDIR/$outdir/
@@ -199,13 +200,13 @@ ex "../user/csvremoveSTD_${append_rng}.py" <<EOF
   wq
 EOF
 
-python "../user/csvremoveSTD_${append_rng}.py"
+python "${userout}csvremoveSTD_${append_rng}.py"
 #rm "csvremoveSTD_${append_rng}.py"
 
 # run trim_Ent_KG_LUT.R
-cp "../Rfiles/trim_Ent_KG_LUT.R" "../user/trim_Ent_KG_LUT_${append_rng}.R"
+cp "../Rfiles/trim_Ent_KG_LUT.R" "${userout}trim_Ent_KG_LUT_${append_rng}.R"
 
-ex "../user/trim_Ent_KG_LUT_${append_rng}.R" <<EOF
+ex "${userout}trim_Ent_KG_LUT_${append_rng}.R" <<EOF
   23s/@@LC_CSV_FILE_RAW/${outdir}${lc_csv_file_raw}/
   33s/@@LCTRIMFRAC/$lctrimfrac/
   24s/@@OUTDIR/$outdir/
@@ -213,13 +214,13 @@ ex "../user/trim_Ent_KG_LUT_${append_rng}.R" <<EOF
   wq
 EOF
 
-Rscript "../user/trim_Ent_KG_LUT_${append_rng}.R"
+Rscript "${userout}trim_Ent_KG_LUT_${append_rng}.R"
 #rm "trim_Ent_KG_LUT_${append_rng}.R"
 
 # run csv2lut.py
-cp "csv2lut.py" "../user/csv2lut_${append_rng}.py"
+cp "csv2lut.py" "${userout}csv2lut_${append_rng}.py"
 
-ex "../user/csv2lut_${append_rng}.py" <<EOF
+ex "${userout}csv2lut_${append_rng}.py" <<EOF
   11s/@@DIMENSIONS/$dimensions/
   12s/@@LATDIM/$latdim/
   13s/@@LONDIM/$londim/
@@ -235,5 +236,5 @@ ex "../user/csv2lut_${append_rng}.py" <<EOF
   wq
 EOF
 
-python "../user/csv2lut_${append_rng}.py"
+python "${userout}csv2lut_${append_rng}.py"
 #rm "csv2lut_${append_rng}.py"
