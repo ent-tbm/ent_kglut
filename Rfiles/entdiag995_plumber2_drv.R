@@ -1,8 +1,8 @@
 DEBUG=FALSE
 #entdiag995_plumber2_drv.R
 #Driver for calling routines in entdiag995fn.R to plot Ent outputs from PLUMBER2 runs.
-#This version reads in an input file from the command line.
-Rpath = "/discover/nobackup/projects/giss_ana/users/nkiang/aDATA/Rfiles/Rfunctions/"  #Must include the last "/"
+#This version reads in an input file from the command line in the user directory.
+Rpath = "../Rfiles/Rfunctions/"  #Must include the last "/"
 
 #--------------------------------------------------------------------
 #HOW-TO OLD: No input file, with edited inputs below.
