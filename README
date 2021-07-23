@@ -8,6 +8,8 @@ extending_data:  Programs to extend vegetation boundary conditions across the co
 
 kglut_modelE:  Scripts to generate a lookup table of Koeppen-Geiger classification of (usually observed) climate (monthly temperature and precipiation) and vegetation canopy boundary conditions for ModelE (VEG, HITEent, LAImax, and LAI monthly maps); classify a new climate from a ModelE simuations; and output new maps of ModelE input files for VEG, HITEent, LAImax, and LAI for the new climate.
 
+reg_testing:  Scripts for performing regression testing of changes to the Ent TBM codes.
+
 Rfiles:  R driver scripts that use functions in Rfunctions.
 
 Rfunctions:  R utility functions.
