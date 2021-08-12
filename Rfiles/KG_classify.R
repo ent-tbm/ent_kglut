@@ -61,6 +61,10 @@ print(tname, quote = FALSE )
 print(pname, quote = FALSE )
 }
 
+if (!dir.exists(pathout)) {
+	dir.create(pathout)
+}
+
 #idn = strsplit(tempfile, ".nc")[[1]][1]
 #print(idn)
 #idn2 = strsplit(idn, "_")[[1]]
