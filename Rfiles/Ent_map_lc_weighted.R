@@ -55,7 +55,7 @@ domlc = Ent_calc_domlc_GISS(file=paste(pathin, filelc, sep=""), lctypes=EntGVSD_
 fnameout = paste(filelc, "_domlc.nc", sep="")
 if (if.pdf) {
 	pdf(file=paste(pathout,  fnameout, ".pdf", sep=""), width=8, height=5)
-		Ent_domlc_plot(lctype=domlc, numpft=16, res=res, legend.cex=0.6,  
+	Ent_domlc_plot(lctype=domlc, numpft=16, res=res, legend.cex=0.6,  
 		Entcolors=Entcolors16, if.new=FALSE)
 		 mtext(fnameout, cex=0.8)
 	dev.off()
