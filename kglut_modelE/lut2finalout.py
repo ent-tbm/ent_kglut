@@ -29,7 +29,7 @@ LAImax_out = "@@LAIMAX_OUT"
 HITEent_out = "@@HEIGHT_OUT"
 LC_out = "@@LC_OUT"
 
-default_biome = 31
+default_biome = 40
 fillvalue = -1e+30
 
 LAI = np.zeros((18, 40, 12)) # PFT Biome Month
