@@ -40,7 +40,7 @@ tname = strsplit(readLines(con=configfile, n=top+6)[[top+6]]," ")[[1]][2]
 pname = strsplit(readLines(con=configfile, n=top+7)[[top+7]]," ")[[1]][2]
 }
 
-textin = read.table(file=configfile, header=FALSE, sep=" ")
+textin = read.table(file=configfile, header=FALSE, quote=" ")
 #print(textin)
 res = as.character(textin[match("res", textin[,1]),2])
 pathin=as.character(textin[match("pathin", textin[,1]),2])
