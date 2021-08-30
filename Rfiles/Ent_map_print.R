@@ -105,7 +105,7 @@ dev.off()
 #lai
 filelai = fnames[match("lai", fnames[,1]),2]
 filepdf=paste0(pathout, filelai, ".pdf")
-print(filepdf)
+print(paste(filelai, filepdf))
 pdf(file=filepdf, height=7, width=11)
 mfrow=c(3,4)
 par(mfrow=mfrow, omi=c(0,0.0,1.5,0.5), mar=c(1,1,2,2)+0.1)
