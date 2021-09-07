@@ -52,7 +52,7 @@ quit()
 configfile = args[1]
 if (DEBUG) { print(con=stdout(), paste(configfile))}
 
-source(paste(Rpath, "/../Rfunctions/entdiag995_plumber2fn.R", sep=""))
+#source(paste(Rpath, "/../Rfunctions/entdiag995_plumber2fn.R", sep=""))
 
 #Read config file
 textin = read.table(configfile, header=FALSE, sep="")
@@ -64,6 +64,8 @@ info = textin[match("info", textin[,1]),2]
 datadir = textin[match("datadir", textin[,1]),2]
 savedir = textin[match("savedir", textin[,1]),2]
 fileforce = textin[match("fileforce", textin[,1]),2]
+
+source(paste(Rpath, "/../Rfunctions/entdiag995_plumber2fn.R", sep=""))
 
 if (DEBUG) { 
 print(con=stdout(), RUN)
