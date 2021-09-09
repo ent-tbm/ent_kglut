@@ -123,8 +123,9 @@ par(mfrow=c(4,4))
 par(omi=c(0,0,0,0), oma=c(0,1,4,1), mar=c(2,3,4,4))
 ra1 = match("ra001001" ,varnames)
 ralast = match("ra027016_hemis", varnames)
-if  (!is.na(ralast)) {
-if (ralast==nvars) {
+if  (is.na(ralast)) {
+ irange = 3:nvars
+} else if (ralast==nvars) {
 	irange = 3:(ra1-1)
 } else {
 	irange = c(3:(ra1-1), (ralast+1):nvars)
@@ -155,18 +156,18 @@ for (i in irange) { #non-ra diagnostics
 		plot(coastsCoarse, add=TRUE, col=gray(0.3), lwd=0.3)
 	}
 	mtext(outer=TRUE, paste(fname, Sys.Date()))
-}}
+}
 dev.off()
 
-pdf(paste0(pathout,"/", fname, "_Entradiags.pdf"), height=7, width=10)
-par(mfrow=c(4,4))
-par(omi=c(0,0,0,0), oma=c(0,1,4,1), mar=c(2,3,4,4))
 lastvar = 1
 zlim=NULL
 #Plot ra diagnostics
 ra1 = match("ra001001" ,varnames)
 ralast = match("ra027016_hemis", varnames)
 if (!is.na(ralast)) {
+pdf(paste0(pathout,"/", fname, "_Entradiags.pdf"), height=7, width=10)
+par(mfrow=c(4,4))
+par(omi=c(0,0,0,0), oma=c(0,1,4,1), mar=c(2,3,4,4))
 for (i in ra1:ralast) {
 	mapz = var.get.nc(nc, varnames[i])
 	hemis = length(str_split(varnames[i], "hemis" )[[1]])>1
@@ -196,8 +197,9 @@ for (i in ra1:ralast) {
 	mtext(outer=TRUE, paste(fname, Sys.Date()))
 	
 	lastvar = vi	
-}}
+}
 dev.off()
+}
 
 # Map single variable
 #		map.GCM.Ent.ncid(ncid=nc, res="2x2.5", varname=entdiag, pftlist=EntGVSD_PFT13, colors=colors, type="any", zlim=NULL, unitstype=1, if.zeroNA=TRUE, titletype=3, if.coasts=FALSE)
