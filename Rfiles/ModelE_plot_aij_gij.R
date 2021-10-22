@@ -20,7 +20,7 @@ args = commandArgs(trailingOnly=TRUE)
 print(args)
 numargs = length(args)
 if (numargs < 2) {
-print ('Usage:  Rscript ../ModelE_plot_aij_gij.R <pathin/> <filename>', quote = FALSE )
+print ('Usage:  Rscript ../Rfiles/ModelE_plot_aij_gij.R <pathin/> <filename>', quote = FALSE )
 print ('Generate maps of ModelE aij or gij diagnostics.', quote=FALSE)
 print('pathin/ = path where diagnostics file is.', quote = FALSE)
 print('filename = name of ModelE aij or gij diagnostics netcdf file.', quote=FALSE)
@@ -107,7 +107,8 @@ setdiff(vars.aij.james.nohemis[, "varname"], vars.aij.Egigcc_exp25.nohemis[-(gij
 #---- Make maps of all diagnostics -----
 varnames <- character(nvars) 
 for(i in seq_len(nvars)) { 
-varnames[i] <- var.inq.nc(nc, i-1)$name } 
+varnames[i] <- var.inq.nc(nc, i-1)$name
+} 
 
 axyp = var.get.nc(nc, "axyp")
 
@@ -117,7 +118,7 @@ axyp = var.get.nc(nc, "axyp")
 #pdf(file=paste(fname, "_nora.pdf", sep=""), height=7, width=10)
 pdf(file=paste0(pathout,"/",fname, ".pdf"), height=7, width=10)
 #quartz(height=6, width=10)
-res="2HX2"
+res=res.from.IM.JM(dim(axyp)[1], dim(axyp)[2])
 colors = giss.palette(40)
 par(mfrow=c(4,4))
 par(omi=c(0,0,0,0), oma=c(0,1,4,1), mar=c(2,3,4,4))
@@ -130,10 +131,11 @@ if  (is.na(ralast)) {
 } else {
 	irange = c(3:(ra1-1), (ralast+1):nvars)
 }
+ print(paste("nvars", nvars, "irange", toString(irange)))
 for (i in irange) { #non-ra diagnostics
 #for (i in 3:nvars) {	
 #for (i in 3:20) {	
-	#print(paste(i, varnames[i]))
+	print(paste(i, varnames[i]))
 	hemis = length(str_split(varnames[i], "hemis" )[[1]])>1
 	print(paste(i, varnames[i], hemis))
 	if (!hemis) {
