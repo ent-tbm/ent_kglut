@@ -46,6 +46,11 @@ while IFS=$'=' read -r -a args; do
     aij_jan=$arg
   elif [ "$keyword" = "lut" ]; then
     lut=$(echo ${arg//"/"/"\/"})
+    if ! [ -f "$lut" ]; then
+      echo "${lut} not found, searching for newest file beginning with prefix"
+      lut=$(ls -t "${lut}*" | head -1)
+      echo "Using ${lut}"
+    fi
   elif [ "$keyword" = "resolution" ]; then
     resolution=$arg
   elif [ "$keyword" = "outdir" ]; then
@@ -54,7 +59,8 @@ while IFS=$'=' read -r -a args; do
   elif [ "$keyword" = "netcdf_format" ]; then
     netcdf_format=$arg
   elif [ "$keyword" = "hgt" ]; then
-    if [ "$arg" = "YES" ]; then
+    arg=$(echo $arg | tr [:lower:] [:upper:])
+    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ]; then
       hgt="hgt_"
       dohgt=true
     fi
@@ -64,7 +70,7 @@ while IFS=$'=' read -r -a args; do
     metadata_datasourcelut=$(echo ${arg//"/"/"\/"})
   fi
 done < "${ppwd}/${1}"
-
+exit 0
 # resolution
 # change to all caps
 resolution=$(echo $resolution | tr [:lower:] [:upper:])
