@@ -70,7 +70,7 @@ while IFS=$'=' read -r -a args; do
     metadata_datasourcelut=$(echo ${arg//"/"/"\/"})
   fi
 done < "${ppwd}/${1}"
-exit 0
+
 # resolution
 # change to all caps
 resolution=$(echo $resolution | tr [:lower:] [:upper:])
