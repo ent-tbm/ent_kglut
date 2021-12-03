@@ -1,5 +1,5 @@
 Ent_utils.git
-
+-------------
 This is a repository for programs and scripts for generating and making various alterations of Ent Terrestrial Biosphere Model (Ent TBM) data files for use in ModelE, specifically those used as the VEG, CROPS, HITEent, LAImax, and LAI monthly input files.
 
 user:  The user should run all scripts from this directory using relative paths.
