@@ -1,5 +1,5 @@
 #trim_Ent_KG_LUT.R
-#Trimming of small cover fractions in regression of Ent types in Köppen-Geiger biomes
+#Trimming of small cover fractions in regression of Ent types in Koeppen-Geiger biomes
 #To run:
 # 1. Edit local R paths.
 # 2. Edit file names and option below.
