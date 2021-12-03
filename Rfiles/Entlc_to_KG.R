@@ -13,8 +13,8 @@ print('Outputs to default "output" directory.', quote=FALSE)
 quit()
 }
 
-source("../Rfunctions/utils_noSDMTools.R")
-source("../Rfunctions/KoeppenGeiger.R")
+source("../Rfiles/utils_noSDMTools.R")
+source("../Rfiles/KoeppenGeiger.R")
 
 configfile = args[1]
 textin = readLines(con=configfile, n=8)

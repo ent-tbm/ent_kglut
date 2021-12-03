@@ -1,0 +1,9 @@
+res 2HX2
+pathin input
+pathout output
+id 2121-2130_E2p1_anl_PI_Eocene_VEGDTL_7306314
+temp temp_2X2H_2121-2130_E2p1_anl_PI_Eocene_VEGDTL_7306314.nc
+prec prec_2X2H_2121-2130_E2p1_anl_PI_Eocene_VEGDTL_7306314.nc
+tname tmp
+pname prec
+

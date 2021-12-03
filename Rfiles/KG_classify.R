@@ -23,8 +23,8 @@ quit()
 configfile = args[1]
 
 
-source("../Rfunctions/utils_noSDMTools.R")
-source("../Rfunctions/KoeppenGeiger.R")
+source("../Rfiles/utils_noSDMTools.R")
+source("../Rfiles/KoeppenGeiger.R")
 library(rworldmap)
 
 #Parse config file

@@ -1,4 +1,4 @@
-README: Koeppen-Geiger classfication of climate and GISS ModelE Ent Terrestrial Biosphere Model vegetation boundary conditions
+README: Köppen-Geiger classfication of climate and GISS ModelE Ent Terrestrial Biosphere Model vegetation boundary conditions
 AUTHOR - James Lui, Nancy Kiang
 CONTACT - james.lui@nasa.gov, nancy.y.kiang@nasa.gov
 
@@ -13,8 +13,9 @@ module load netcdf-4.5.0_impi_intel-19.1.0.166
 Short summary:
 
 A. Generate a lookup table of Koeppen-Geiger biome classes and corresponding mixes of Ent TBM vegetation boundary conditions (lc-land cover type fraction, height-canopy height, laimax-maximum annual leaf area index, lai-monthly lai).  This step only needs to be run once, and the user should use the frozen LUT rather than generating their own, unless they are knowledgeable about vegetation.
-   obs2EntKGLUT.sh: Takes observed vegetation and climate and generates Koeppen-Geiger classification of cover fraction, height, lai annual max and monthly in a lookup table (LUT). 
-        data: Default input observations are in the data directory.
+   obs2EntKGLUT.sh: Takes observed vegetation and climate and generates Köppen-Geiger classification of cover fraction, height, lai annual max and monthly in a lookup table (LUT). 
+        data: Default input observations are in the data directory. Run data_link.sh to set up soft links to data files for users on the NASA Center for Climate
+              Simulation (NCCS) discover linux cluster, or run data_copy.sh to copy the files from the NCCS data port.
         config: Default config file "config_obs2EntKGLUT.txt" specifies the default input observations in the data directory.
         calls: prectemp2biome.sh, regress_biome2laihite.py, trim_Ent_KG_LUT.R, csvLAIdominanthemi.py, csvremoveSTD, csv2lut.py.
    A frozen LUT is provided at:
@@ -35,6 +36,9 @@ D. R plotting scripts.  A number of R scripts can be used manually to generate m
  
 ==========================================================================================================================================
 Detailed summary:
+
+   Before running any classification scripts, set up the data input files as described in the Short summary section A.
+
 ---------------------------------------------
 
 A. obs2EntKGLUT.sh:

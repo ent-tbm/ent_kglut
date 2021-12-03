@@ -1,4 +1,4 @@
-#trim_Ent_KG_LUT.R
+ourctrim_Ent_KG_LUT.R
 #Trimming of small cover fractions in regression of Ent types in Koeppen-Geiger biomes
 #To run:
 # 1. Edit local R paths.
@@ -7,7 +7,7 @@
 
 #----------- Edit R locations --------------
 #R path for R utility scripts
-Rpath = "../Rfunctions/"
+Rpath = "../Rfiles/"
 
 #R packages needed. Installed locally. Comment out if already installed previously.
 #R CMD INSTALL -l "/discover/nobackup/projects/giss_ana/users/nkiang/aDATA/Rfiles/Rlibraries/"  mypackage.tgz

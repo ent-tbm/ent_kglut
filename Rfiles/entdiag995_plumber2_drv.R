@@ -2,7 +2,7 @@ DEBUG=FALSE
 #entdiag995_plumber2_drv.R
 #Driver for calling routines in entdiag995fn.R to plot Ent outputs from PLUMBER2 runs.
 #This version reads in an input file from the command line in the user directory.
-#Rpath = "../Rfiles/Rfunctions/"  #Must include the last "/"
+#Rpath = "../Rfiles/"  #Must include the last "/"
 
 #--------------------------------------------------------------------
 #HOW-TO OLD: No input file, with edited inputs below.
@@ -52,8 +52,6 @@ quit()
 configfile = args[1]
 if (DEBUG) { print(con=stdout(), paste(configfile))}
 
-#source(paste(Rpath, "/../Rfunctions/entdiag995_plumber2fn.R", sep=""))
-
 #Read config file
 textin = read.table(configfile, header=FALSE, sep="")
 
@@ -65,7 +63,7 @@ datadir = textin[match("datadir", textin[,1]),2]
 savedir = textin[match("savedir", textin[,1]),2]
 fileforce = textin[match("fileforce", textin[,1]),2]
 
-source(paste(Rpath, "/../Rfunctions/entdiag995_plumber2fn.R", sep=""))
+source(paste0(Rpath, "/entdiag995_plumber2fn.R"))
 
 if (DEBUG) { 
 print(con=stdout(), RUN)

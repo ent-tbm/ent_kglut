@@ -43,7 +43,7 @@ library(stringr)
 library(RNetCDF)
 library(ncdf4) # For nc_open, natt_get does not bail if attr does not exit
 
-source("../Rfunctions/utils_noSDMTools.R")
+source("../Rfiles/utils_noSDMTools.R")
 
 nc4 = nc_open(paste0(path,fname))
 

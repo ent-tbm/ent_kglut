@@ -31,7 +31,7 @@ if (numargs>1) {
 	if.pdf=FALSE
 }
 
-source("../Rfunctions/utils_noSDMTools.R")
+source("../Rfiles/utils_noSDMTools.R")
 library("RNetCDF")
 
 textin = readLines(con=configfile, n=8)

@@ -24,7 +24,7 @@ print('*If this prefix is needed, then all the other file name lines must have t
 quit()
 }
 
-source("../Rfunctions/utils_noSDMTools.R")
+source("../Rfiles/utils_noSDMTools.R")
 library("RNetCDF")
 
 configfile = args[1]

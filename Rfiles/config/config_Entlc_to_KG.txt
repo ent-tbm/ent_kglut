@@ -1,0 +1,4 @@
+entlc /discover/nobackup/projects/giss/prod_input_files/V144x90_EntMM16_lc_max_trimmed_scaled_nocrops_pmip6kyVEGsens.nc
+kglut /discover/nobackup/projects/giss_ana/pub/Ent_TBM/EntGVSD/entgvsd_v1/entgvsd_v1.0/KoeppenGeiger/EntGVSDv1.0_V2X2H_KoeppenGeigerLUT_17e3459.nc
+id pmip6kyVEGsens
+

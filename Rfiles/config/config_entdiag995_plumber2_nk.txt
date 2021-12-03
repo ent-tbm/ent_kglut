@@ -1,0 +1,7 @@
+Rpath ../Rfiles/
+run rd_lsm_pheno_tumba_plumber2
+info PLUMBER2-Tumbarumba-pheno
+datadir /discover/nobackup/nkiang/DATA/Entdata/Tumbarumba/
+savedir /discover/nobackup/projects/giss_ana/users/nkiang/GCMRUNS_ana/
+fileforce AU-Tum_2002-2016_OzFlux_Met_ent.nc
+

@@ -6,8 +6,8 @@
 #			#
 #########################
 
-source("utils_noSDMTools.R")
-source("KoeppenGeiger.R")
+source("../Rfiles/utils_noSDMTools.R")
+source("../Rfiles/KoeppenGeiger.R")
 library(rworldmap)
 
 #Offline, make your input files:
