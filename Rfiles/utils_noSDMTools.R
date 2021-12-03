@@ -2040,8 +2040,8 @@ return(newx)
 
 simultaneous_CBs <- function(linear_model, newdata, level = 0.95, if.lines=TRUE){
     #Source: https://stats.stackexchange.com/questions/231632/how-to-plot-simultaneous-and-pointwise-confidence-bands-for-linear-regression-wi
-    # Working-Hotelling 1 – α confidence bands for the model linear_model
-    # at points newdata with α = 1 - level
+    # Working-Hotelling 1-alpha  confidence bands for the model linear_model
+    # at points newdata with alpha = 1 - level
     #** THIS JUST GIVES THE SAME THING AS tcrit(alpha=0.05, df) * se.mean, or same as
     #**      dt(0.05/2, df=n-p) * predict(lmmod, se.fit)$se
 
@@ -2063,7 +2063,7 @@ simultaneous_CBs <- function(linear_model, newdata, level = 0.95, if.lines=TRUE)
     } else {
         Y_h <- CI$fit[,"fit"]       
     }
-    # Working-Hotelling 1 – α confidence bands
+    # Working-Hotelling 1-alpha confidence bands
     LB <- Y_h - W*CI$se.fit
     UB <- Y_h + W*CI$se.fit
     

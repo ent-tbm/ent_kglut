@@ -24,8 +24,8 @@ KGclasses = c("Af","Am","As","Aw","BSh","BSk","BWh","BWk"
      ,"Dsa","Dsb","Dsc","Dsd","Dwa","Dwb","Dwc","Dwd","Dfa","Dfb","Dfc","Dfd"
      ,"ET","EF" )
 
-MONTHcap = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
-MONTH = c("January","February","March","April","May","June","July","August","September","October", "November","December")
+ONTHcap = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+ONTH = c("January","February","March","April","May","June","July","August","September","October", "November","December")
 
 #Lookup table for KG categories and map colors.
 KGcat = as.data.frame(t(array(dim=c(6,40),
