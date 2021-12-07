@@ -6,8 +6,13 @@
 #			#
 #########################
 
-source("../Rfiless/utils_noSDMTools.R")
-source("../Rfiles/KoeppenGeiger.R")
+Rpath = paste0(Sys.getenv("R_Ent"), "/")
+if (Rpath=="") {
+  cat("Please set environment variable R_Ent to the path to your Rfiles directory")
+  quit()
+}
+source(paste0(Rpath, "/utils_noSDMTools.R"))
+source(paste0(Rpath, "/KoeppenGeiger.R"))
 library(rworldmap)
 
 #Offline, make your input files:

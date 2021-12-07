@@ -1,6 +1,12 @@
 #koeppengeiger.R
 #source("KoeppenGeiger.R")
-source("../Rfiles/utils_noSDMTools.R")
+Rpath = paste0(Sys.getenv("R_Ent"), "/")
+if (Rpath=="") {
+  cat("Please set environment variable R_Ent to the path to your Rfiles directory")
+  quit()
+}
+source(paste0("/utils_noSDMTools.R"))
+
 #Packages to install:  sp, fields, spam, maps, maptools, rworldmap, SDMTools(legend.gradient, only does vertical), plotrix(color.legend, can do horizontal and vertical)
 library(sp)
 library(fields) 

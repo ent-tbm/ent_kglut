@@ -7,7 +7,12 @@ ourctrim_Ent_KG_LUT.R
 
 #----------- Edit R locations --------------
 #R path for R utility scripts
-Rpath = "../Rfiles/"
+#Rpath = "../Rfiles/"
+Rpath = paste0(Sys.getenv("R_Ent"), "/")
+if (Rpath=="") {
+  cat("Please set environment variable R_Ent to the path to your Rfiles directory")
+  quit()
+}
 
 #R packages needed. Installed locally. Comment out if already installed previously.
 #R CMD INSTALL -l "/discover/nobackup/projects/giss_ana/users/nkiang/aDATA/Rfiles/Rlibraries/"  mypackage.tgz

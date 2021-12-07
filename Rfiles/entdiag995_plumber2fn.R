@@ -1,7 +1,13 @@
 #entdiag995_plumber2fn.R
 #Functions for plotting Ent diagnostics from PLUMBER2 runs
 
-Rpath = paste(Rpath, "../Rfiles/", sep="")
+#Rpath = paste(Rpath, "../Rfiles/", sep="")
+Rpath = paste0(Sys.getenv("R_Ent"), "/")
+
+if (Rpath=="") {
+  cat("Please set environment variable R_Ent to the path to your Rfiles directory")
+  quit()
+}
 
 #source(paste(Rpath, "utils.R", sep=""))
 source(paste(Rpath, "/utils_noSDMTools.R", sep=""))

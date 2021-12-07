@@ -24,7 +24,13 @@ print('*If this prefix is needed, then all the other file name lines must have t
 quit()
 }
 
-source("../Rfiles/utils_noSDMTools.R")
+Rpath = paste0(Sys.getenv("R_Ent"), "/")
+if (Rpath=="") {
+  cat("Please set environment variable R_Ent to the path to your Rfiles directory")
+  quit()
+}
+
+source(paste0(Rpath, "/utils_noSDMTools.R"))
 library("RNetCDF")
 
 configfile = args[1]

@@ -43,7 +43,12 @@ library(stringr)
 library(RNetCDF)
 library(ncdf4) # For nc_open, natt_get does not bail if attr does not exit
 
-source("../Rfiles/utils_noSDMTools.R")
+Rpath = paste0(Sys.getenv("R_Ent"), "/")
+if (Rpath=="") {
+  cat("Please set environment variable R_Ent to the path to your Rfiles directory")
+  quit()
+}
+source(paste0(Rpath, "/utils_noSDMTools.R"))
 
 nc4 = nc_open(paste0(path,fname))
 
