@@ -76,5 +76,6 @@ print(fileforce)
 #Do plots
 pathdiag = paste(savedir, RUN, sep="")
 if (DEBUG) { print(con=stdout(), pathdiag) }
-plumber2_ent(filedrv=paste(datadir, fileforce, sep=""), pathdiag=pathdiag, pathout=pathdiag, info=info, if.new=TRUE, option=1)
+cat(paste0('filedrv:',datadir, "/", fileforce))
+plumber2_ent(filedrv=paste0(datadir, "/", fileforce), pathdiag=pathdiag, pathout=pathdiag, info=info, if.new=TRUE, option=1)
 

@@ -743,7 +743,7 @@ mapstat = function(mapz, axyp, dig=3, if.global=TRUE, short=FALSE) {
 		tot.text = ""
 	}
 	if (!short) {
-		return(paste('min =',signif(na.min(mapz),dig), 'mean =', signif(meanz,dig), 'max =', signif(na.max(mapz), 'global =', tot.text, dig)))
+		return(paste('min =',signif(na.min(mapz),dig), 'mean =', signif(meanz,dig), 'max =', signif(na.max(mapz),dig), 'global =', tot.text))
 	} else {
 		return(paste("(", signif(na.min(mapz),dig), ', ', signif(meanz,dig), ', ', signif(na.max(mapz),dig), ")", tot.text, sep=""))
 	}
