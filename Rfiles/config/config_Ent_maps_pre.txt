@@ -1,8 +1,8 @@
 res 2HX2
-pathin input
-pathout output
-lc V144x90_EntMM16_lc_max_trimmed_scaled.nc NA
-height V144x90_EntMM16_height_trimmed_scaled_ext.nc hgt
-laimax V144x90_EntMM16_lai_max_trimmed_scaled_ext.nc NA
-lai V144x90_EntMM16_lai_trimmed_scaled_ext.nc NA
+pathin /discover/nobackup/projects/giss_ana/pub/Ent_TBM/EntGVSD/entgvsd_v1/entgvsd_v1.0/2HX2/modelE
+pathout ./output
+lc V144x90_EntGVSD_v1.0_MM16_lc_max_trimmed_scaled.nc 
+height V144x90_EntGVSD_v1.0_MM16_height_trimmed_scaled.nc
+laimax V144x90_EntGVSD_v1.0_MM16_lai_max_trimmed_scaled.nc
+lai V144x90_EntGVSD_v1.0_MM16_lai_trimmed_scaled.nc
 
