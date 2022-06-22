@@ -1,7 +1,7 @@
 res 2HX2
-pathin input
-pathout output
-lc V144x90_EntMM16_lc_max_trimmed_scaled.nc
+pathin /discover/nobackup/projects/giss/prod_input_files/
+pathout ./output
+lc V144x90_EntMM16_lc_max_trimmed_scaled_nocrops.ext.nc
 height V144x90_EntMM16_height_trimmed_scaled_ext.nc
 laimax V144x90_EntMM16_lai_max_trimmed_scaled_ext.nc
 lai V144x90_EntMM16_lai_trimmed_scaled_ext.nc
