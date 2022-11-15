@@ -44,7 +44,8 @@ print ('  run <run_name>', quote = FALSE )
 print ('  info <title and output file name>', quote = FALSE )
 print ('  datadir <directory location of fileforce file (below)>', quote = FALSE)
 print ('  rundir <savedisk directory containing run output directory>', quote = FALSE )
-print ('  fileforce <name of met and veg forcings input file to run', quote = FALSE )
+print ('  fileforce <name of met and veg forcings input file to run>', quote = FALSE )
+print ('  printoption <1-print only fort.995; 2-print both fort.995 and fort.1082>', quote = FALSE )
 quit()
 }
 
@@ -62,7 +63,8 @@ info = textin[match("info", textin[,1]),2]
 datadir = textin[match("datadir", textin[,1]),2]
 savedir = textin[match("savedir", textin[,1]),2]
 fileforce = textin[match("fileforce", textin[,1]),2]
-
+printoption = as.numeric(textin[match("printoption", textin[,1]),2])
+cat( Rpath )
 source(paste0(Rpath, "/entdiag995_plumber2fn.R"))
 
 if (DEBUG) { 
@@ -77,5 +79,5 @@ print(fileforce)
 pathdiag = paste(savedir, RUN, sep="")
 if (DEBUG) { print(con=stdout(), pathdiag) }
 cat(paste0('filedrv:',datadir, "/", fileforce))
-plumber2_ent(filedrv=paste0(datadir, "/", fileforce), pathdiag=pathdiag, pathout=pathdiag, info=info, if.new=TRUE, option=1)
+plumber2_ent(filedrv=paste0(datadir, "/", fileforce), pathdiag=pathdiag, pathout=pathdiag, info=info, if.new=TRUE, option=printoption)
 

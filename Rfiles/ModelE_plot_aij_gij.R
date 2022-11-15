@@ -48,6 +48,7 @@ if (Rpath=="") {
   cat("Please set environment variable R_Ent to the path to your Rfiles directory")
   quit()
 }
+cat(Rpath, "\n")
 source(paste0(Rpath, "/utils_noSDMTools.R"))
 
 nc4 = nc_open(paste0(path,fname))

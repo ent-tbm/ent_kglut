@@ -64,7 +64,7 @@ plumber2_ent = function(filedrv, pathdiag, pathout=NULL, info="PLUMBER2 sitename
   plot(tyrp, laip, xlab="year", ylab="LAI", type="l"); points(tyrp, laip, pch=16, cex=0.3); title(paste("observed LAI"))
   mtext(outer=TRUE, info )
  
-  if (option==1) {
+  if (option==1 | option==2) {
   	fort.995 = read.table(paste(pathdiag, "/fort.995", sep=""), header=FALSE)
   	#fort.980 = read.table(paste(pathdiag, "/fort.980", sep=""), header=FALSE)
   	
@@ -87,8 +87,22 @@ plumber2_ent = function(filedrv, pathdiag, pathout=NULL, info="PLUMBER2 sitename
 	#		line=0, type="l",daily=24,if.dailyonly=FALSE)
 
   	
-  } else if (option==2) {
-    print("option 2 fort.982 TBD next")	
+    if (option==2) {
+      #ACTS
+      fort.1082 = read.table(paste(pathdiag, "/fort.1082", sep=""), header=FALSE)
+      fort.1082 = fort.1082[,1:21]
+
+      #quartz(width=6, height=8)
+      #pdf(file=paste(run, "_1082.pdf", sep=""), width=6, height=8)
+      par(mfrow=c(3,2), omi=c(0,0,0.5,0.5), ask=TRUE )
+      #temp=plotgort1082(d, fort.1082, lai=fort.995[,"lai"], titletext="rd_ent_fbb_mmsf_acts_ca")
+      #plotacts1080(d, fort.1080, titletext="MMSF ACTS")
+      temp=plotgort1082(d, fort.1082, lai=fort.995[,"lai"], alim=0.6, titletext=info)
+    }
+
+    dev.off()
+  } else {
+    print("option 2 fort.982 or other TBD next")	
   }
   
   dev.off()
