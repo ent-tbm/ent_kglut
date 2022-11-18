@@ -22,7 +22,9 @@ quit()
 
 configfile = args[1]
 
-Rpath = paste0(Sys.getenv("R_Ent"), "/")
+Rpath = Sys.getenv("R_Ent")
+Rpath
+
 if (Rpath=="") {
   cat("Please set environment variable R_Ent to the path to your Rfiles directory")
   quit()
@@ -81,8 +83,8 @@ IM = IM.JM[1]
 JM = IM.JM[2]
 #print(paste("IM, JM = ", IM, JM))
 
-Tnc = paste(pathin, "", tempfile, sep="")
-Pnc = paste(pathin, "", precfile, sep="")
+Tnc = paste(pathin, "/", tempfile, sep="")
+Pnc = paste(pathin, "/", precfile, sep="")
 print(Tnc)
 print(Pnc)
 #KGnum = run.KG(Tnc="TEMPERATURE_DATA",
