@@ -1,0 +1,8 @@
+res 2HX2
+pathin input
+pathout output
+id CRU_TS3.22_GPCC_v6_1951-1980_2HX2
+temp cru_ts3.22_TS_means_1951-1980_2HX2.nc
+prec GPCC_v6_PREC_means_1951-1980_2HX2.nc
+tname tmp
+pname prec
