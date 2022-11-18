@@ -1,6 +1,16 @@
 #KG_classify.R
 #Classify maps of temperature and precipitation, and output a map of Koeppen-Geiger classes, both netcdf and plot.
 #Temperature and precip files should be netcdf files, each with a variable of dimension (IM, JM, 12) for monthly values.
+#To test existing climate files on discover:
+# export R_Ent=path to your Rfiles directory
+# cd Ent_utils/user
+# cd input #If no input directory, then mkdir input
+# ln -s /discover/nobackup/nkiang/DATA/CRU_TS3.22/CRU_TS3.22_2HX2/cru_ts3.22_TMN_means_1951-1980_2HX2.nc cru_ts3.22_TMN_means_1951-1980_2HX2.nc 
+# ln -s /discover/nobackup/nkiang/DATA/GPCC/GPCC_v6_2HX2/GPCC_v6_PREC_means_1951-1980_2HX2.nc GPCC_v6_PREC_means_1951-1980_2HX2.nc
+# cd ..  #cd back into user directory
+#If no output directory, then mkdir output
+# Rscript $R_Ent/KG_classify.R  $R_Ent/config/config_KG_classify_1951-1980.txt
+#Netcdf file will be generate and put in your output directory.
 
 args = commandArgs(trailingOnly=TRUE)
 print(args)
