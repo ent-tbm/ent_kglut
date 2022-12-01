@@ -1,7 +1,7 @@
 README: Koeppen-Geiger classfication of climate and GISS ModelE Ent Terrestrial Biosphere Model vegetation boundary conditions
 AUTHOR - James Lui, Nancy Kiang
 CONTACT - james.lui@nasa.gov, nancy.y.kiang@nasa.gov
-To cite:  Nancy Y. Kiang, personal communication
+To cite:  Nancy Y. Kiang, James Lui, personal communication
 
 Scripts to automatically run and generate GISS ModelE Ent vegetation boundary condition input files (VEG, HITEent, LAImax, LAI monthly) for alternative climates using Koeppen-Geiger (KG) classifications, following Kottek & Rubel (2006, DOI: 10.1127/0941-2948/2006/0130), with slight modification using 4-month seasons to classify As and Aw (documented in the code). 
 
