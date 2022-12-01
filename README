@@ -1,4 +1,7 @@
 Ent_utils.git
+Contact: Nancy.Y.Kiang@nasa.gov
+Cite:  See comments in the different scripts for authors and citations for different utilities.
+
 -------------
 This is a repository for programs and scripts for generating and making various alterations of Ent Terrestrial Biosphere Model (Ent TBM) data files for use in ModelE, specifically those used as the VEG, CROPS, HITEent, LAImax, and LAI monthly input files.
 
