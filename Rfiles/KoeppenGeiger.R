@@ -1,5 +1,10 @@
-#koeppengeiger.R
-#source("KoeppenGeiger.R")
+#KoeppenGeiger.R
+#Author:  Nancy Y. Kiang
+#Cite:   "Based on, with slight modifications to:
+#         Rubel, F. and Kottek, M., 2010. Observed and projected climate shifts 1901-2100 depicted by world maps of the Koppen-Geiger climate classification. Meteorologische Zeitschrift, 19(2): 135-141.
+#         Kottek, M., Grieser, J., Beck, C., Rudolf, B. and Rubel, F., 2006. World map of the Koppen-Geiger climate classification updated. Meteorologische Zeitschrift, 15(3): 259-263."
+#Acknowledge: Classifcation R code by Nancy Y. Kiang
+
 Rpath = paste0(Sys.getenv("R_Ent"), "/")
 if (Rpath=="") {
   cat("Please set environment variable R_Ent to the path to your Rfiles directory")
