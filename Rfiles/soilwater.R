@@ -156,21 +156,28 @@ undef = att.get.nc(ncid, "bs_wlay1", "missing_value")
      relsat_bs_lay = svol_liq_bs_lay / poros
      relsat_vs_lay = svol_liq_vs_lay / poros 
      relsat_lay = div0.array3( (relsat_bs_lay*bsfrz + relsat_vs_lay*vsfrz ), soilfrz, undefin = undef, undefout=0)
-     #relsat_bs = (dz/sum(dz)) %*% relsat_bs_lay
-     #relsat_vs = (dz/sum(dz)) %*% relsat_vs_lay
-     #relsat = (dz/sum(dz)) %*% relsat_lay
+     #relsat = array(NA, dim=dim(soilfr)
+     #for (i in 1:IM) {
+     #  for (j in 1:JM) {
+     #    relsat[i,j] = (dz[1,1,]/soildepth.m) %*% relsat_lay[i,j,]
+     #  }
+     #}
+ 
 
 #Relative extractable water (REW) = (svol - s_hygro)/(s_sat - s_hygro)  ( fraction of porosity excluding hygroscopic fraction)
     # As fraction of total soil volume available pore space
-    rew_bs_lay = (svol_liq_bs_lay - hygro_bs_lay) /(poros - hygro)
-    rew_vs_lay = (svol_liq_vs_lay - hygro_vs_lay) /(poros - hygro)
+    rew_bs_lay = (svol_liq_bs_lay - hygro_bs_lay) /(poros - hygro); rew_bs_lay[rew_bs_lay<-1.e-08] = 0.0 #fix round-off error
+    rew_vs_lay = (svol_liq_vs_lay - hygro_vs_lay) /(poros - hygro); rew_vs_lay[rew_vs_lay<-1.e-08] = 0.0 #fix round-off error
     # As fraction of non-frozen fraction
     #rew_bs_lay = (svol_liq_bs_lay - hygro_bs_lay) /((1-bs_iflay)*(poros - hygro))
     #rew_vs_lay = (svol_liq_vs_lay - hygro_vs_lay) /((1-vs_iflay)*(poros - hygro))
     rew_lay = div0.array3((rew_bs_lay*bsfrz + rew_vs_lay*vsfrz), soilfrz, undefin = undef, undefout=0)
-    #rew_bs = (dz/sum(dz)) %*% rew_bs_lay
-    #rew_vs = (dz/sum(dz)) %*% rew_vs_lay
-    #rew = (dz/sum(dz)) %*% rew_lay
+    rew = array(NA, dim=dim(soilfr))
+    for (i in 1:IM) { 
+      for (j in 1:JM) {
+        rew[i,j] = (dz[1,1,]/soildepth.m) %*% rew_lay[i,j,]
+      }
+    }
 
 #Available liquid water in soil (kg m-2)
     gavail_bs_lay.kg.m2.soil = (1.0-bs_iflay)*bs_wlay - hygro_bs_lay*dz*rho.h2o
@@ -304,6 +311,11 @@ att.put.nc(nco, "rew_lay", "long_name", "NC_CHAR", "SOIL RELATIVE EXTRACTABLE WA
 att.put.nc(nco, "rew_lay", "units", "NC_CHAR", "fraction")
 att.put.nc(nco, "rew_lay", "missing_value", "NC_FLOAT", undef)
 
+var.def.nc(nco, "rew", "NC_FLOAT", dimensions=c("lon","lat"))
+att.put.nc(nco, "rew", "long_name", "NC_CHAR", "SOIL RELATIVE EXTRACTABLE WATER DEPTH AVERAGE")
+att.put.nc(nco, "rew", "units", "NC_CHAR", "fraction")
+att.put.nc(nco, "rew", "missing_value", "NC_FLOAT", undef)
+
 var.def.nc(nco, "gavail_bs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "gavail_bs_lay", "long_name", "NC_CHAR", "BARE SOIL AVAILABLE WATER")
 att.put.nc(nco, "gavail_bs_lay", "units", "NC_CHAR", "kg/m^2 bare soil")
@@ -355,6 +367,7 @@ var.put.nc(nco, "relsat_lay", relsat_lay)
 var.put.nc(nco, "rew_bs_lay", rew_bs_lay)
 var.put.nc(nco, "rew_vs_lay", rew_vs_lay)
 var.put.nc(nco, "rew_lay", rew_lay)
+var.put.nc(nco, "rew", rew)
 var.put.nc(nco, "gavail_bs_lay", gavail_bs_lay.kg.m2.soil)
 var.put.nc(nco, "gavail_vs_lay", gavail_vs_lay.kg.m2.soil)
 var.put.nc(nco, "gavail_lay", gavail_lay.kg.m2.soil)
