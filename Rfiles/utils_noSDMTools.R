@@ -90,8 +90,8 @@ div0.array2 =  function(num, div, undefin = -1e30, undefout=0) {
     ndim = length(dims)
     
     divresult = array(0, dim=dims)
-    for (i in dims[1]) {
-        for (j in dims[2]) {
+    for (i in 1:dims[1]) {
+        for (j in 1:dims[2]) {
             if (num[i,j]==undefin | div[i,j]==undefin) {
                 divresult[i,j] = undefout
             } else if (div[i,j]==0) {
@@ -104,6 +104,27 @@ div0.array2 =  function(num, div, undefin = -1e30, undefout=0) {
     return(divresult)
 }
 
+div0.array3 =  function(num, div, undefin = -1e30, undefout=0) {
+    #For 3D array
+    dims = dim(num)
+    
+    divresult = array(0, dim=dims)
+    for (i in 1:dims[1]) {
+        for (j in 1:dims[2]) {
+          for (k in 1:dims[3]) {
+            if (num[i,j,k]==undefin | div[i,j,k]==undefin) {
+                divresult[i,j,k] = undefout
+            } else if (div[i,j,k]==0) { 
+                divresult[i,j,k] = 0
+            } else { 
+                divresult[i,j,k] = num[i,j,k]/div[i,j,k]
+            }
+          }
+        }
+    }   
+    return(divresult)
+}
+ 
 
 resetPar <- function() {
     dev.new()
