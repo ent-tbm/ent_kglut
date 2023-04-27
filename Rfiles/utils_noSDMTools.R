@@ -2595,4 +2595,22 @@ lm_predict <- function (lmObject, newdata, diag = TRUE) {
   list(fit = pred, var.fit = VCOV, df = lmObject$df.residual, residual.var = sig2)
   }
   
+
+get.nc4 = function(ncid, nc4, varname) {
+    #Get nc3 attributes with RNetCDF
+    #Get nc4 multi-dimensional array with ncd4
+    mapz = var.get.nc(ncid, varname)
+    #print(mapz)
+    units = att.get.nc(ncid, varname, "units")
+    #print(units)
+    if (ncatt_get(nc4, varname, "missing_value")$hasatt) { #ncatt_get is library(ncdf4)
+       undef = att.get.nc(ncid, varname, "missing_value")
+       mapz[mapz==undef] = NA
+    } else {
+       undef = NA
+    }
+    #print(undef)
+    return( list(mapz, units, undef) )
+}
+
  
