@@ -161,8 +161,12 @@ undef = att.get.nc(ncid, "bs_wlay1", "missing_value")
      #relsat = (dz/sum(dz)) %*% relsat_lay
 
 #Relative extractable water (REW) = (svol - s_hygro)/(s_sat - s_hygro)  ( fraction of porosity excluding hygroscopic fraction)
-    rew_bs_lay = (svol_liq_bs_lay - hygro_bs_lay) /(poros - hygro_bs_lay)
-    rew_vs_lay = (svol_liq_vs_lay - hygro_vs_lay) /(poros - hygro_vs_lay)
+    # As fraction of total soil volume available pore space
+    rew_bs_lay = (svol_liq_bs_lay - hygro_bs_lay) /(poros - hygro)
+    rew_vs_lay = (svol_liq_vs_lay - hygro_vs_lay) /(poros - hygro)
+    # As fraction of non-frozen fraction
+    #rew_bs_lay = (svol_liq_bs_lay - hygro_bs_lay) /((1-bs_iflay)*(poros - hygro))
+    #rew_vs_lay = (svol_liq_vs_lay - hygro_vs_lay) /((1-vs_iflay)*(poros - hygro))
     rew_lay = div0.array3((rew_bs_lay*bsfrz + rew_vs_lay*vsfrz), soilfrz, undefin = undef, undefout=0)
     #rew_bs = (dz/sum(dz)) %*% rew_bs_lay
     #rew_vs = (dz/sum(dz)) %*% rew_vs_lay
