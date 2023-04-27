@@ -3,7 +3,7 @@
 
 #Input files
 args = commandArgs(trailingOnly=TRUE)
-print(args)
+#print(args)
 numargs = length(args)
 if (numargs < 2) {
 cat("Usage:  Rscript ../Rfiles/hygroscopic.R <SOIL file> <aij file>\n" )
@@ -11,7 +11,7 @@ cat("Generate netcdf file of soil hygroscopic water, hygro_wlay(IM,JM,1:ngm).\n"
 cat("SOIL = ModelE SOIL input file used for run.\n")
 cat("aij = ModelE aij or gij diagnostics netcdf file.\n")
 cat("Sample command:\n")
-cat("Rscript $R_Ent/relsat_REW.R /discover/nobackup/projects/giss/prod_input_files/planet/SOIL/soil_siltloam_4x5.nc /discover/nobackup/projects/giss_ana/users/rruedy/planet_runs/LP065nSM40/quasi_clim/ANN1002-1101.aijLP065nSM40.nc \n")
+cat("Rscript $R_Ent/soilwater.R /discover/nobackup/projects/giss/prod_input_files/planet/SOIL/soil_siltloam_4x5.nc /discover/nobackup/projects/giss_ana/users/rruedy/planet_runs/LP065nSM40/quasi_clim/ANN1002-1101.aijLP065nSM40.nc \n")
 quit()
 } 
 
@@ -77,8 +77,8 @@ bsfr = var.get.nc(ncid, "bsfr")/100
 vsfr = var.get.nc(ncid, "vsfr")/100
 lakefr = var.get.nc(ncid, "lakefr")/100
 
-!print('vs_wlay1')
-!print(vs_wlay[,,1])
+#print('vs_wlay1')
+#print(vs_wlay[,,1])
 
 #Make 3D arrays for cover fractions
 soilfrz = array(soilfr, dim=dimdz)
