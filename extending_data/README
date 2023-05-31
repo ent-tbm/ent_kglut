@@ -1,3 +1,8 @@
+**** DANGER: AS OF 5/31/2023, THESE UTILITIES ARE QUICK-AND-DIRTY ROUTINES THAT HARD-CODE THE GRID, FILE NAME, AND
+***         THEY OVERWRITE THE INPUT FILE!!!! 
+***         TEST ON COPIES OF NETCDF FILES AND NOT ON ORIGINAL FILES!!!
+******************************************************************************************************************
+
 These utilities allow to "extend" data beyond the normal land mask to the entire world.
 No attempt was made to make the "pretty" - they just supposed to work.
 
@@ -13,5 +18,5 @@ The data is extended to the same latitude first and then to the neighbouring lat
 To compile each of the files, use something like:
 Suggested on discover as of 5/31/2023:
 set NETCDFHOME=/usr/local/other/netcdf4/4.7.2/gcc-9.2/
-gfortran extend_veg_0.f -I $NETCDFHOME/include -L NETCDFHOME/lib -l netcdf
+gfortran extend_veg_0.f -I $NETCDFHOME/include -L$NETCDFHOME/lib -lnetcdf -lnetcdff 
 
