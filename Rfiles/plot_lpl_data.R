@@ -1,6 +1,5 @@
 #plot_lpl_data.R
 #Plot lpl_data time series of carbon diagnostics with helpful unit conversions.
-#THIS FILE IS NOT PLUG AND PLAY.  USER MUST EDIT PATHS AND FILE NAMES.
 
 #The I_LP file should have had these quantities:
 #aij
@@ -32,6 +31,15 @@
 
 undef = -1.e30
 
+args = commandArgs(trailingOnly=TRUE)
+cat('\n', 'args:', args, '\n')
+numargs = length(args)
+if (numargs < 1) {
+cat('Usage:  Rscript plot_lpl_data.R <run_name>', '\n')
+cat('Assumes run output is in /discover/nobackup/projects/giss/prod_runs/','\n')
+quit()
+}
+
 
 # Time series --------------
 #path="/discover/nobackup/projects/giss_ana/users/rruedy/planet_runs/"
@@ -39,7 +47,8 @@ path="/discover/nobackup/projects/giss/prod_runs/"
 
 #runs=c( "E21_PI_lcspinnk", "E21_PI_lcspinnkc", "E21_PI_lcspinnkcb", "E21_PI_lcspinnkcbb", "E21_PI_lcspinnkc2")
 #runs=c( "E21_PI_lcspinnkcbb",  "E21_PI_lcspinnkcb2")
-runs=c( "E21_PI_lcspinnkcc") #,  "E21_PI_lcspinnkc2")
+#runs=c( "E21_PI_lcspinnkcc") #,  "E21_PI_lcspinnkc2")
+runs=args[1]
 
 colr=c(2,3,1)
 #nyr=100
@@ -50,7 +59,7 @@ if (TRUE) {  #individual runs plots
 for (runname in runs) {
 
 #pdf(paste0(runname,"_",Sys.Date(),".pdf"))
-pdf(paste0(runname,"_",Sys.Date(),"post-spin3.pdf"))
+pdf(paste0(runname,"_",Sys.Date(),".pdf"))
 
 
 #files = paste0(diags, ".", runname)
@@ -68,7 +77,7 @@ for (f in 1:length(files)) {
 	lpl_dat = read.table(file, header=FALSE, skip=4)
 
         index = TRUE #All
-        index = lpl_dat[,1]>=1929 & lpl_dat[,1]<=2029 #For E21_PI_lcspinnkcc
+        #index = lpl_dat[,1]>=1929 & lpl_dat[,1]<=2029 #For E21_PI_lcspinnkcc
 	plot(lpl_dat[index,1], lpl_dat[index,2], xlab="Year", ylab=textin, type="l", main=textin, cex.main=.6)
 	n = nrow(lpl_dat[index,]); cat("nrow:", n,"\n")
 	lm100 = lm(y ~ x, data=data.frame(x=lpl_dat[index,1], y=lpl_dat[index,2])[(n-nyr):n,])
@@ -81,10 +90,14 @@ for (f in 1:length(files)) {
         len=length(f)
         diag=strsplit(f[len], paste0(".",runname))[[1]]
         cat(diag, "\n")
-        if (diag=="gpp_land") { gpp=lpl_dat[,2]; ytime=lpl_dat[,1]  }
-        if (diag=="autoResp") { respauto=lpl_dat[,2]; ytime=lpl_dat[,1] }
-        if (diag=="soilResp") { respsoil=lpl_dat[,2]; ytime=lpl_dat[,1] }
-        if (diag=="soilC")    { soilC=lpl_dat[,2]; ytime=lpl_dat[,1] }
+        #if (diag=="gpp_land") { gpp=lpl_dat[,2]; ytime=lpl_dat[,1]  }
+        #if (diag=="autoResp") { respauto=lpl_dat[,2]; ytime=lpl_dat[,1] }
+        #if (diag=="soilresp") { cat("soilResp\n"); respsoil=lpl_dat[,2]; ytime=lpl_dat[,1] }
+        #if (diag=="soilC")    { soilC=lpl_dat[,2]; ytime=lpl_dat[,1] }
+        if (diag=="gpp") { gpp=lpl_dat[,2]; ytime=lpl_dat[,1]  }
+        if (diag=="rauto") { respauto=lpl_dat[,2]; ytime=lpl_dat[,1] }
+        if (diag=="soilresp") { cat("soilResp\n"); respsoil=lpl_dat[,2]; ytime=lpl_dat[,1] }
+        if (diag=="soilCpool")    { soilC=lpl_dat[,2]; ytime=lpl_dat[,1] }
      }
 }
 # Plot global soil and net carbon fluxes
