@@ -34,8 +34,9 @@ undef = -1.e30
 args = commandArgs(trailingOnly=TRUE)
 cat('\n', 'args:', args, '\n')
 numargs = length(args)
-if (numargs < 1) {
-cat('Usage:  Rscript plot_lpl_data.R <run_name>', '\n')
+if (numargs < 1 | numargs > 2) {
+cat('Usage:  Rscript plot_lpl_data.R <run_name> <optional nsteps>', '\n')
+cat(' nsteps:  Number of time steps of output to average in plot info. Default 30 assuming years.','\n')
 cat('Assumes run output is in /discover/nobackup/projects/giss/prod_runs/','\n')
 quit()
 }
@@ -49,27 +50,31 @@ path="/discover/nobackup/projects/giss/prod_runs/"
 #runs=c( "E21_PI_lcspinnkcbb",  "E21_PI_lcspinnkcb2")
 #runs=c( "E21_PI_lcspinnkcc") #,  "E21_PI_lcspinnkc2")
 runs=args[1]
+if (numargs == 2) {
+  nyr=args[2]  #nyr is actually nsteps
+} else {
+  #nyr=100
+  nyr=30
+  #nyr=1
+}
 
 colr=c(2,3,1)
-#nyr=100
-nyr=30
-#nyr=1
-
 if (TRUE) {  #individual runs plots
 for (runname in runs) {
 
 #pdf(paste0(runname,"_",Sys.Date(),".pdf"))
 pdf(paste0(runname,"_",Sys.Date(),".pdf"))
 
+lpldir = "/lpl_data/"
 
 #files = paste0(diags, ".", runname)
-files = list.files(paste0(path, runname, "/lpl_data/"))
+files = list.files(paste0(path, runname, lpldir))
 cat(files,"\n")
 
 par(mfrow=c(3,3), oma=c(0,0,1,0), ask=FALSE)
 for (f in 1:length(files)) {
      if (length(strsplit(files[f],runname)[[1]])==1) {
-	file = paste0(path, runname, "/lpl_data/",files[f])
+	file = paste0(path, runname, lpldir, files[f])
         cat(file, "\n")
 	#lpl_dat = read.table(file, header=TRUE, skip=3)
 	#plot(lpl_dat[,"Years"], lpl_dat[,"Glob"], xlab="Years", ylab=diags[f], type="l", main=runname)
@@ -82,7 +87,7 @@ for (f in 1:length(files)) {
 	n = nrow(lpl_dat[index,]); cat("nrow:", n,"\n")
 	lm100 = lm(y ~ x, data=data.frame(x=lpl_dat[index,1], y=lpl_dat[index,2])[(n-nyr):n,])
 	#mtext(diags[f], cex=0.5, line=.8)
-	mtext(paste("last",nyr,"yr mean =", signif(mean(lm100$model[,'y'],4))," dy/dyr =", signif(lm100$coef['x'],4)), cex=0.5)
+	mtext(paste("last",nyr,"timesteps mean =", signif(mean(lm100$model[,'y'],4))," dy/dyr =", signif(lm100$coef['x'],4)), cex=0.5)
 	mtext(outer=TRUE, runname, line=-1)
 
         #Collect carbon fluxes
