@@ -1,9 +1,11 @@
 #soilwater.R
+#Author: Nancy.Y.Kiang@nasa.gov
 #Given input ModelE aij netcdf file, output netcdf of soil relative saturation and REW by soil layer, and other soil water quantities.
 
 #Input files
 args = commandArgs(trailingOnly=TRUE)
-#print(args)
+cat(paste('soilwater.R args: ', args, "\n"))
+
 numargs = length(args)
 if (numargs < 2) {
 cat("Usage:  Rscript $R_Ent/soilwater.R <SOIL file> <aij file>\n" )
@@ -37,7 +39,7 @@ library(ncdf4)
 #----------------------------------------
 #SOIL file
 ncsoil = open.nc(con=SOIL, write=FALSE) #SOIL input file
-dz = var.get.nc(ncsoil, "dz")
+dz = var.get.nc(ncsoil, "dz"); cat('dim dz:', dim(dz), '\n') #[IM,JM,ngm]
 q = var.get.nc(ncsoil, "q") #soil texture array reads in as q(JM,IM,imt,ngm)
 close.nc(ncsoil)
 
@@ -70,6 +72,7 @@ bs_wlay[is.na(bs_wlay)] = 0.0
 vs_wlay[is.na(vs_wlay)] = 0.0
 bs_iflay[is.na(bs_iflay)] = 0.0
 vs_iflay[is.na(vs_iflay)] = 0.0
+undef=-1.e30
 
 axyp = var.get.nc(ncid, "axyp")
 soilfr = var.get.nc(ncid, "soilfr")/100
@@ -77,15 +80,10 @@ bsfr = var.get.nc(ncid, "bsfr")/100
 vsfr = var.get.nc(ncid, "vsfr")/100
 lakefr = var.get.nc(ncid, "lakefr")/100
 
-#print('vs_wlay1')
-#print(vs_wlay[,,1])
-
 #Make 3D arrays for cover fractions
 soilfrz = array(soilfr, dim=dimdz)
 bsfrz = array(bsfr, dim=dimdz)
 vsfrz = array(vsfr, dim=dimdz)
-
-undef = att.get.nc(ncid, "bs_wlay1", "missing_value")
 
 
 #-- Calculations ---------------------------------------------------------------
@@ -116,6 +114,7 @@ undef = att.get.nc(ncid, "bs_wlay1", "missing_value")
         }
       }
     }
+    #cat('poros: \n'); summary(poros)
 
 #Hygroscopic.texture volumetric fraction by soil texture only by layer (volume hygroscopic water / volume conductive soil)
     hygro.texture = array(NA, dim=dim(qtexturetot))
@@ -138,24 +137,32 @@ undef = att.get.nc(ncid, "bs_wlay1", "missing_value")
     }
 
 #Volumetric soil water (vol. soil water / vol. soil)
+cat('\n svol \n')
      svol_bs_lay = bs_wlay/(dz * rho.h2o)
      svol_vs_lay = vs_wlay/(dz * rho.h2o)
      svol_lay = div0.array3( num=(svol_bs_lay*bsfrz + svol_vs_lay*vsfrz), div=soilfrz, undefin = undef, undefout=0)
 
 #Volumetric soil LIQUID water (vol. soil water / vol. soil)
-     svol_liq_bs_lay = (1.-bs_iflay)*bs_wlay/(dz * rho.h2o)
+cat('\n svol_liq \n')
+     svol_liq_bs_lay = (1.-bs_iflay)*bs_wlay/(dz * rho.h2o); cat('dim svol_liq_*_lay:', dim(svol_liq_bs_lay), '\n')
      svol_liq_vs_lay = (1.-vs_iflay)*vs_wlay/(dz * rho.h2o)
      svol_liq_lay = div0.array3( (svol_liq_bs_lay*bsfrz + svol_liq_vs_lay*vsfrz), soilfrz, undefin = -1e30, undefout=0)
+     #cat(svol_liq_bs_lay[144,86,6], bs_iflay[144,86,6], bs_wlay[144,86,6], dz[144,86,6], '\n')
 
 #Hygroscopic water in liquid fraction of soil by layer ( volume unfrozen hygroscopic water / volume soil)
+cat('\n hygro \n')
     hygro_bs_lay = (1.0-bs_iflay)*hygro; hygro_bs_lay[bsfrz==0.0] = 0.0
     hygro_vs_lay = (1.0-vs_iflay)*hygro; hygro_vs_lay[vsfrz==0.0] = 0.0
     hygro_lay = div0.array3( (hygro_bs_lay*bsfrz + hygro_vs_lay*vsfrz), soilfrz, undefin = undef, undefout=0)
 
 #Relative saturation (liquid water / porosity)
-     relsat_bs_lay = svol_liq_bs_lay / poros
-     relsat_vs_lay = svol_liq_vs_lay / poros 
+cat('\n relsat \n')
+     relsat_bs_lay = div0.array3(svol_liq_bs_lay, poros, undefin=undef, undefout=0)
+     relsat_vs_lay = div0.array3(svol_liq_vs_lay, poros, undefin=undef, undefout=0) 
+     #summary(relsat_bs_lay); summary(bsfrz);  summary(relsat_vs_lay); summary(vsfrz); summary(soilfrz)
+     #summary(relsat_bs_lay*bsfrz); summary(relsat_vs_lay*vsfrz)
      relsat_lay = div0.array3( (relsat_bs_lay*bsfrz + relsat_vs_lay*vsfrz ), soilfrz, undefin = undef, undefout=0)
+
      #relsat = array(NA, dim=dim(soilfr)
      #for (i in 1:IM) {
      #  for (j in 1:JM) {
@@ -165,12 +172,13 @@ undef = att.get.nc(ncid, "bs_wlay1", "missing_value")
  
 
 #Relative extractable water (REW) = (svol - s_hygro)/(s_sat - s_hygro)  ( fraction of porosity excluding hygroscopic fraction)
+cat('\n rew \n')
     # As fraction of total soil volume available pore space
-    rew_bs_lay = (svol_liq_bs_lay - hygro_bs_lay) /(poros - hygro); rew_bs_lay[rew_bs_lay<-1.e-08] = 0.0 #fix round-off error
-    rew_vs_lay = (svol_liq_vs_lay - hygro_vs_lay) /(poros - hygro); rew_vs_lay[rew_vs_lay<-1.e-08] = 0.0 #fix round-off error
+    rew_bs_lay = div0.array3((svol_liq_bs_lay - hygro_bs_lay), (poros - hygro), undefin=undef, undefout=0)#; rew_bs_lay[rew_bs_lay<-1.e-08] = 0.0 #fix round-off error
+    rew_vs_lay = div0.array3((svol_liq_vs_lay - hygro_vs_lay), (poros - hygro), undefin=undef, undefout=0)#; rew_vs_lay[rew_vs_lay<-1.e-08] = 0.0 #fix round-off error
     # As fraction of non-frozen fraction
-    #rew_bs_lay = (svol_liq_bs_lay - hygro_bs_lay) /((1-bs_iflay)*(poros - hygro))
-    #rew_vs_lay = (svol_liq_vs_lay - hygro_vs_lay) /((1-vs_iflay)*(poros - hygro))
+    ##rew_bs_lay = (svol_liq_bs_lay - hygro_bs_lay) /((1-bs_iflay)*(poros - hygro))
+    ##rew_vs_lay = (svol_liq_vs_lay - hygro_vs_lay) /((1-vs_iflay)*(poros - hygro))
     rew_lay = div0.array3((rew_bs_lay*bsfrz + rew_vs_lay*vsfrz), soilfrz, undefin = undef, undefout=0)
     rew = array(NA, dim=dim(soilfr))
     for (i in 1:IM) { 
@@ -180,6 +188,7 @@ undef = att.get.nc(ncid, "bs_wlay1", "missing_value")
     }
 
 #Available liquid water in soil (kg m-2)
+cat('\n gavail \n')
     gavail_bs_lay.kg.m2.soil = (1.0-bs_iflay)*bs_wlay - hygro_bs_lay*dz*rho.h2o
     gavail_vs_lay.kg.m2.soil = (1.0-vs_iflay)*vs_wlay - hygro_vs_lay*dz*rho.h2o
     gavail_lay.kg.m2.soil = div0.array3( (gavail_bs_lay.kg.m2.soil*bsfrz + gavail_vs_lay.kg.m2.soil*vsfrz), soilfrz, undefin = undef, undefout=0)
@@ -203,139 +212,171 @@ nco = open.nc(con=fileout, write=TRUE)
 dim.def.nc(nco, "ngm", ngm)
 dim.def.nc(nco, "imt", imt)
 
+var.def.nc(nco, "dz", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
+att.put.nc(nco, "dz", "long_name", "NC_CHAR", "SOIL LAYER THICKNESS")
+att.put.nc(nco, "dz", "units", "NC_CHAR", "m^2")
+att.put.nc(nco, "dz", "missing_value", "NC_FLOAT", undef)
 
+#cat("soilfr \n")
 var.def.nc(nco, "soilfr", "NC_FLOAT", dimensions=c("lon","lat"))
 att.put.nc(nco, "soilfr", "long_name", "NC_CHAR", "SOIL FRACTION")
 att.put.nc(nco, "soilfr", "units", "NC_CHAR", "1")
 att.put.nc(nco, "soilfr", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "bsfr", "NC_FLOAT", dimensions=c("lon","lat"))
 att.put.nc(nco, "bsfr", "long_name", "NC_CHAR", "BARE SOIL FRACTION")
 att.put.nc(nco, "bsfr", "units", "NC_CHAR", "1")
 
+#cat(" \n")
 var.def.nc(nco, "vsfr", "NC_FLOAT", dimensions=c("lon","lat"))
 att.put.nc(nco, "vsfr", "long_name", "NC_CHAR", "VEGETATION FRACTION")
 att.put.nc(nco, "vsfr", "units", "NC_CHAR", "1")
 
+#cat(" \n")
 var.def.nc(nco, "lakefr", "NC_FLOAT", dimensions=c("lon","lat"))
 att.put.nc(nco, "lakefr", "long_name", "NC_CHAR", "LAKE FRACTION")
 att.put.nc(nco, "lakefr", "units", "NC_CHAR", "1")
 
+#cat(" \n")
 var.def.nc(nco, "porosity.texture", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "porosity.texture", "long_name", "NC_CHAR", "POROSITY OF NON-BEDROCK SOIL TEXTURE")
 att.put.nc(nco, "porosity.texture", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "porosity.texture", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "porosity", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "porosity", "long_name", "NC_CHAR", "POROSITY OF TOTAL SOIL VOLUME INCL. BEDROCK")
 att.put.nc(nco, "porosity", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "porosity", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "hygro.texture", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "hygro.texture", "long_name", "NC_CHAR", "HYGROSCOPIC SOIL WATER BASED ON NON-BEDROCK SOIL TEXTURE (vol. H2O / vol. soil)")
 att.put.nc(nco, "hygro.texture", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "hygro.texture", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "hygro", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "hygro", "long_name", "NC_CHAR", "HYGROSCOPIC SOIL WATER OF TOTAL SOIL VOLUME INCL. BEDROCK (vol. H2O / vol. bare soil)")
 att.put.nc(nco, "hygro", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "hygro", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "hygro_bs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "hygro_bs_lay", "long_name", "NC_CHAR", "BARE SOIL HYGROSCOPIC WATER IN NON-FROZEN SOIL (vol. H2O / vol. bare soil)")
 att.put.nc(nco, "hygro_bs_lay", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "hygro_bs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "hygro_vs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "hygro_vs_lay", "long_name", "NC_CHAR", "VEGETATED SOIL HYGROSCOPIC WATER IN NON-FROZEN SOIL (vol. H2O / vol. veg soil)")
 att.put.nc(nco, "hygro_vs_lay", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "hygro_vs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "svol_bs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "svol_bs_lay", "long_name", "NC_CHAR", "BARE SOIL VOLUMETRIC SOIL WATER (vol. H2O / vol. bare soil)")
 att.put.nc(nco, "svol_bs_lay", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "svol_bs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "svol_liq_bs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "svol_liq_bs_lay", "long_name", "NC_CHAR", "BARE SOIL VOLUMETRIC LIQUID SOIL WATER (vol. H2O / vol. bare soil)")
 att.put.nc(nco, "svol_liq_bs_lay", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "svol_liq_bs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "svol_vs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "svol_vs_lay", "long_name", "NC_CHAR", "VEGETATED SOIL VOLUMETRIC SOIL WATER (vol. H2O / vol. veg soil)")
 att.put.nc(nco, "svol_vs_lay", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "svol_vs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "svol_liq_vs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "svol_liq_vs_lay", "long_name", "NC_CHAR", "VEGETATED SOIL VOLUMETRIC LIQUID SOIL WATER (vol. H2O / vol. veg soil)")
 att.put.nc(nco, "svol_liq_vs_lay", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "svol_liq_vs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "svol_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "svol_lay", "long_name", "NC_CHAR", "VOLUMETRIC SOIL WATER (vol. H2O / vol. soil)")
 att.put.nc(nco, "svol_lay", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "svol_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "svol_liq_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "svol_liq_lay", "long_name", "NC_CHAR", "VOLUMETRIC LIQUID SOIL WATER (vol. H2O / vol. soil)")
 att.put.nc(nco, "svol_liq_lay", "units", "NC_CHAR", "vol/vol")
 att.put.nc(nco, "svol_liq_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "relsat_bs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "relsat_bs_lay", "long_name", "NC_CHAR", "BARE SOIL RELATIVE SATURATION")
 att.put.nc(nco, "relsat_bs_lay", "units", "NC_CHAR", "fraction")
 att.put.nc(nco, "relsat_bs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "relsat_vs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "relsat_vs_lay", "long_name", "NC_CHAR", "VEGETATED SOIL RELATIVE SATURATION")
 att.put.nc(nco, "relsat_vs_lay", "units", "NC_CHAR", "fraction")
 att.put.nc(nco, "relsat_vs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "relsat_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "relsat_lay", "long_name", "NC_CHAR", "SOIL RELATIVE SATURATION")
 att.put.nc(nco, "relsat_lay", "units", "NC_CHAR", "fraction")
 att.put.nc(nco, "relsat_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "rew_bs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "rew_bs_lay", "long_name", "NC_CHAR", "BARE SOIL RELATIVE EXTRACTABLE WATER")
 att.put.nc(nco, "rew_bs_lay", "units", "NC_CHAR", "fraction")
 att.put.nc(nco, "rew_bs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "rew_vs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "rew_vs_lay", "long_name", "NC_CHAR", "VEGETATED SOIL RELATIVE EXTRACTABLE WATER")
 att.put.nc(nco, "rew_vs_lay", "units", "NC_CHAR", "fraction")
 att.put.nc(nco, "rew_vs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "rew_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "rew_lay", "long_name", "NC_CHAR", "SOIL RELATIVE EXTRACTABLE WATER")
 att.put.nc(nco, "rew_lay", "units", "NC_CHAR", "fraction")
 att.put.nc(nco, "rew_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "rew", "NC_FLOAT", dimensions=c("lon","lat"))
 att.put.nc(nco, "rew", "long_name", "NC_CHAR", "SOIL RELATIVE EXTRACTABLE WATER DEPTH AVERAGE")
 att.put.nc(nco, "rew", "units", "NC_CHAR", "fraction")
 att.put.nc(nco, "rew", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "gavail_bs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "gavail_bs_lay", "long_name", "NC_CHAR", "BARE SOIL AVAILABLE WATER")
 att.put.nc(nco, "gavail_bs_lay", "units", "NC_CHAR", "kg/m^2 bare soil")
 att.put.nc(nco, "gavail_bs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "gavail_vs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "gavail_vs_lay", "long_name", "NC_CHAR", "VEGETATED SOIL AVAILABLE WATER")
 att.put.nc(nco, "gavail_vs_lay", "units", "NC_CHAR", "kg/m^2 veg soil")
 att.put.nc(nco, "gavail_vs_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "gavail_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "gavail_lay", "long_name", "NC_CHAR", "SOIL AVAILABLE WATER")
 att.put.nc(nco, "gavail_lay", "units", "NC_CHAR", "kg/m^2 soil")
 att.put.nc(nco, "gavail_lay", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 #var.def.nc(nco, "ghygro_tot", "NC_FLOAT", dimensions=c("lon","lat"))
 #att.put.nc(nco, "ghygro_tot", "long_name", "NC_CHAR", "TOTAL SOIL HYGROSCOPIC WATER")
 #att.put.nc(nco, "ghygro_tot", "units", "NC_CHAR", "kg/m^2 soil")
 #att.put.nc(nco, "ghygro_tot", "missing_value", "NC_FLOAT", undef)
 
+#cat(" \n")
 var.def.nc(nco, "gavail_tot", "NC_FLOAT", dimensions=c("lon","lat"))
 att.put.nc(nco, "gavail_tot", "long_name", "NC_CHAR", "TOTAL SOIL AVAILABLE WATER")
 att.put.nc(nco, "gavail_tot", "units", "NC_CHAR", "kg/m^2 soil")
@@ -345,6 +386,7 @@ att.put.nc(nco, "gavail_tot", "missing_value", "NC_FLOAT", undef)
 
 
 var.put.nc(nco, "axyp", axyp)
+var.put.nc(nco, "dz", dz)
 var.put.nc(nco, "soilfr", soilfr)
 var.put.nc(nco, "bsfr", bsfr)
 var.put.nc(nco, "vsfr", vsfr)

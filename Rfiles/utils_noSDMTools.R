@@ -104,7 +104,7 @@ div0.array2 =  function(num, div, undefin = -1e30, undefout=0) {
     return(divresult)
 }
 
-div0.array3 =  function(num, div, undefin = -1e30, undefout=0) {
+div0.array3 =  function(num, div, undefin = -1e30, undefout=0, if.verbose=FALSE) {
     #For 3D array
     dims = dim(num)
     
@@ -112,6 +112,13 @@ div0.array3 =  function(num, div, undefin = -1e30, undefout=0) {
     for (i in 1:dims[1]) {
         for (j in 1:dims[2]) {
           for (k in 1:dims[3]) {
+            #Misc debug statements
+            if (if.verbose) { cat(i,j,k, num[i,j,k], div[i,j,k],'\n');cat(num[i,j,k]==undefin, is.na(num[i,j,k]),'\n'); cat(div[i,j,k]==undefin,is.na(div[i,j,k]),'\n')}
+            #if ( is.na(num[i,j,k]==undefin | div[i,j,k]==undefin ) ) { cat('is.na \n', i,j,k,num[i,j,k], num[i,j,k]==undefin, div[i,j,k], div[i,j,k]==undefin , (num[i,j,k]==undefin | div[i,j,k]==undefin), '\n') }
+            #if (is.na(num[i,j,k]) | is.na(div[i,j,k]) ) {
+            #    divresult[i,j,k] = undefout
+            #} else 
+
             if (num[i,j,k]==undefin | div[i,j,k]==undefin) {
                 divresult[i,j,k] = undefout
             } else if (div[i,j,k]==0) { 
