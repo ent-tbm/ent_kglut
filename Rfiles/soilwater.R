@@ -73,6 +73,9 @@ vs_wlay[is.na(vs_wlay)] = 0.0
 bs_iflay[is.na(bs_iflay)] = 0.0
 vs_iflay[is.na(vs_iflay)] = 0.0
 undef=-1.e30
+rerr=-1.e-6 #round-off error allowed
+bifindex=(1.-bs_iflay)<0.0 & (1.-bs_iflay)> rerr #For fixing round-off errors. Use small number instead zero to check for actual errors. 
+vifindex=(1.-vs_iflay)<0.0 & (1.-vs_iflay)> rerr #For fixing round-off errors
 
 axyp = var.get.nc(ncid, "axyp")
 soilfr = var.get.nc(ncid, "soilfr")/100
@@ -144,15 +147,15 @@ cat('\n svol \n')
 
 #Volumetric soil LIQUID water (vol. soil water / vol. soil)
 cat('\n svol_liq \n')
-     svol_liq_bs_lay = (1.-bs_iflay)*bs_wlay/(dz * rho.h2o); cat('dim svol_liq_*_lay:', dim(svol_liq_bs_lay), '\n')
-     svol_liq_vs_lay = (1.-vs_iflay)*vs_wlay/(dz * rho.h2o)
+     svol_liq_bs_lay = (1.-bs_iflay)*bs_wlay/(dz * rho.h2o); svol_liq_bs_lay[bifindex]=0.0
+     svol_liq_vs_lay = (1.-vs_iflay)*vs_wlay/(dz * rho.h2o); svol_liq_vs_lay[vifindex]=0.0
      svol_liq_lay = div0.array3( (svol_liq_bs_lay*bsfrz + svol_liq_vs_lay*vsfrz), soilfrz, undefin = -1e30, undefout=0)
      #cat(svol_liq_bs_lay[144,86,6], bs_iflay[144,86,6], bs_wlay[144,86,6], dz[144,86,6], '\n')
 
 #Hygroscopic water in liquid fraction of soil by layer ( volume unfrozen hygroscopic water / volume soil)
 cat('\n hygro \n')
-    hygro_bs_lay = (1.0-bs_iflay)*hygro; hygro_bs_lay[bsfrz==0.0] = 0.0
-    hygro_vs_lay = (1.0-vs_iflay)*hygro; hygro_vs_lay[vsfrz==0.0] = 0.0
+    hygro_bs_lay = (1.0-bs_iflay)*hygro; hygro_bs_lay[bsfrz==0.0] = 0.0; hygro_bs_lay[bifindex]=0.0
+    hygro_vs_lay = (1.0-vs_iflay)*hygro; hygro_vs_lay[vsfrz==0.0] = 0.0; hygro_vs_lay[vifindex]=0.0
     hygro_lay = div0.array3( (hygro_bs_lay*bsfrz + hygro_vs_lay*vsfrz), soilfrz, undefin = undef, undefout=0)
 
 #Relative saturation (liquid water / porosity)
@@ -163,19 +166,19 @@ cat('\n relsat \n')
      #summary(relsat_bs_lay*bsfrz); summary(relsat_vs_lay*vsfrz)
      relsat_lay = div0.array3( (relsat_bs_lay*bsfrz + relsat_vs_lay*vsfrz ), soilfrz, undefin = undef, undefout=0)
 
-     #relsat = array(NA, dim=dim(soilfr)
-     #for (i in 1:IM) {
-     #  for (j in 1:JM) {
-     #    relsat[i,j] = (dz[1,1,]/soildepth.m) %*% relsat_lay[i,j,]
-     #  }
-     #}
+     relsat = array(NA, dim=dim(soilfr))
+     for (i in 1:IM) {
+       for (j in 1:JM) {
+         relsat[i,j] = (dz[1,1,]/soildepth.m) %*% relsat_lay[i,j,]
+       }
+     }
  
 
 #Relative extractable water (REW) = (svol - s_hygro)/(s_sat - s_hygro)  ( fraction of porosity excluding hygroscopic fraction)
 cat('\n rew \n')
     # As fraction of total soil volume available pore space
-    rew_bs_lay = div0.array3((svol_liq_bs_lay - hygro_bs_lay), (poros - hygro), undefin=undef, undefout=0)#; rew_bs_lay[rew_bs_lay<-1.e-08] = 0.0 #fix round-off error
-    rew_vs_lay = div0.array3((svol_liq_vs_lay - hygro_vs_lay), (poros - hygro), undefin=undef, undefout=0)#; rew_vs_lay[rew_vs_lay<-1.e-08] = 0.0 #fix round-off error
+    rew_bs_lay = div0.array3((svol_liq_bs_lay - hygro_bs_lay), (poros - hygro), undefin=undef, undefout=0); rew_bs_lay[rew_bs_lay<0.0 & rew_bs_lay>rerr] = 0.0 #fix round-off error
+    rew_vs_lay = div0.array3((svol_liq_vs_lay - hygro_vs_lay), (poros - hygro), undefin=undef, undefout=0); rew_vs_lay[rew_vs_lay<0.0 & rew_vs_lay>rerr] = 0.0 #fix round-off error
     # As fraction of non-frozen fraction
     ##rew_bs_lay = (svol_liq_bs_lay - hygro_bs_lay) /((1-bs_iflay)*(poros - hygro))
     ##rew_vs_lay = (svol_liq_vs_lay - hygro_vs_lay) /((1-vs_iflay)*(poros - hygro))
@@ -189,12 +192,12 @@ cat('\n rew \n')
 
 #Available liquid water in soil (kg m-2)
 cat('\n gavail \n')
-    gavail_bs_lay.kg.m2.soil = (1.0-bs_iflay)*bs_wlay - hygro_bs_lay*dz*rho.h2o
-    gavail_vs_lay.kg.m2.soil = (1.0-vs_iflay)*vs_wlay - hygro_vs_lay*dz*rho.h2o
+    gavail_bs_lay.kg.m2.soil = (1.0-bs_iflay)*bs_wlay - hygro_bs_lay*dz*rho.h2o; gavail_bs_lay.kg.m2.soil[gavail_bs_lay.kg.m2.soil<0.0 & gavail_bs_lay.kg.m2.soil>rerr]=0.0
+    gavail_vs_lay.kg.m2.soil = (1.0-vs_iflay)*vs_wlay - hygro_vs_lay*dz*rho.h2o; gavail_vs_lay.kg.m2.soil[gavail_vs_lay.kg.m2.soil<0.0 & gavail_vs_lay.kg.m2.soil>rerr]=0.0
     gavail_lay.kg.m2.soil = div0.array3( (gavail_bs_lay.kg.m2.soil*bsfrz + gavail_vs_lay.kg.m2.soil*vsfrz), soilfrz, undefin = undef, undefout=0)
 
     ghygro.kg.m2.soil = apply( hygro_lay*dz*rho.h2o, c(1,2), sum)
-    gavail.kg.m2.soil = (gwtr.kg.m2-gice.kg.m2-ghygro.kg.m2.soil) 
+    gavail.kg.m2.soil = (gwtr.kg.m2-gice.kg.m2-ghygro.kg.m2.soil); gavail.kg.m2.soil[gavail.kg.m2.soil<0.0]=0.0
 
 #Create netcdf file
 temp = strsplit(AIJ, "/")[[1]]
@@ -341,6 +344,12 @@ att.put.nc(nco, "relsat_lay", "units", "NC_CHAR", "fraction")
 att.put.nc(nco, "relsat_lay", "missing_value", "NC_FLOAT", undef)
 
 #cat(" \n")
+var.def.nc(nco, "relsat", "NC_FLOAT", dimensions=c("lon","lat"))
+att.put.nc(nco, "relsat", "long_name", "NC_CHAR", "SOIL RELATIVE SATURATION DEPTH AVERAGE")
+att.put.nc(nco, "relsat", "units", "NC_CHAR", "fraction")
+att.put.nc(nco, "relsat", "missing_value", "NC_FLOAT", undef)
+
+#cat(" \n")
 var.def.nc(nco, "rew_bs_lay", "NC_FLOAT", dimensions=c("lon","lat","ngm"))
 att.put.nc(nco, "rew_bs_lay", "long_name", "NC_CHAR", "BARE SOIL RELATIVE EXTRACTABLE WATER")
 att.put.nc(nco, "rew_bs_lay", "units", "NC_CHAR", "fraction")
@@ -411,14 +420,16 @@ var.put.nc(nco, "hygro_bs_lay", hygro_bs_lay)
 var.put.nc(nco, "hygro_vs_lay", hygro_vs_lay)
 var.put.nc(nco, "bs_iflay", bs_iflay)
 var.put.nc(nco, "vs_iflay", vs_iflay)
-var.put.nc(nco, "svol_liq_bs_lay", svol_liq_bs_lay)
+var.put.nc(nco, "svol_bs_lay", svol_bs_lay)
 var.put.nc(nco, "svol_vs_lay", svol_vs_lay)
+var.put.nc(nco, "svol_liq_bs_lay", svol_liq_bs_lay)
 var.put.nc(nco, "svol_liq_vs_lay", svol_liq_vs_lay)
 var.put.nc(nco, "svol_lay", svol_lay)
 var.put.nc(nco, "svol_liq_lay", svol_liq_lay)
 var.put.nc(nco, "relsat_bs_lay",relsat_bs_lay )
 var.put.nc(nco, "relsat_vs_lay", relsat_vs_lay)
 var.put.nc(nco, "relsat_lay", relsat_lay)
+var.put.nc(nco, "relsat", relsat)
 var.put.nc(nco, "rew_bs_lay", rew_bs_lay)
 var.put.nc(nco, "rew_vs_lay", rew_vs_lay)
 var.put.nc(nco, "rew_lay", rew_lay)
