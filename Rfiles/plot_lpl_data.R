@@ -34,9 +34,11 @@ undef = -1.e30
 args = commandArgs(trailingOnly=TRUE)
 cat('\n', 'args:', args, '\n')
 numargs = length(args)
+cat('numargs: ', numargs, '\n')
+
 if (numargs < 1 | numargs > 2) {
 cat('Usage:  Rscript plot_lpl_data.R <run_name> <optional nsteps>', '\n')
-cat(' nsteps:  Number of time steps of output to average in plot info. Default 30 assuming years.','\n')
+cat(' nsteps:  Number of time steps of output to average in plot info. Default 5 assuming years.','\n')
 cat('Assumes run output is in /discover/nobackup/projects/giss/prod_runs/','\n')
 quit()
 }
@@ -51,10 +53,11 @@ path="/discover/nobackup/projects/giss/prod_runs/"
 #runs=c( "E21_PI_lcspinnkcc") #,  "E21_PI_lcspinnkc2")
 runs=args[1]
 if (numargs == 2) {
-  nyr=args[2]  #nyr is actually nsteps
+  nyr=as.integer(args[2])  #nyr is actually nsteps
+  cat("Averaging ",nyr," time steps.\n")
 } else {
   #nyr=100
-  nyr=30
+  nyr=5
   #nyr=1
 }
 
@@ -72,6 +75,7 @@ files = list.files(paste0(path, runname, lpldir))
 cat(files,"\n")
 
 par(mfrow=c(3,3), oma=c(0,0,1,0), ask=FALSE)
+gpp=NULL;respauto=NULL;respsoil=NULL;soilC=NULL;ytime=NULL #Need these here so that they are saved outside the loop.
 for (f in 1:length(files)) {
      if (length(strsplit(files[f],runname)[[1]])==1) {
 	file = paste0(path, runname, lpldir, files[f])
@@ -85,6 +89,7 @@ for (f in 1:length(files)) {
         #index = lpl_dat[,1]>=1929 & lpl_dat[,1]<=2029 #For E21_PI_lcspinnkcc
 	plot(lpl_dat[index,1], lpl_dat[index,2], xlab="Year", ylab=textin, type="l", main=textin, cex.main=.6)
 	n = nrow(lpl_dat[index,]); cat("nrow:", n,"\n")
+        cat('n:',n,'  nyr:', nyr,'n-nyr: ',n-nyr,'\n')
 	lm100 = lm(y ~ x, data=data.frame(x=lpl_dat[index,1], y=lpl_dat[index,2])[(n-nyr):n,])
 	#mtext(diags[f], cex=0.5, line=.8)
 	mtext(paste("last",nyr,"timesteps mean =", signif(mean(lm100$model[,'y'],4))," dy/dyr =", signif(lm100$coef['x'],4)), cex=0.5)
@@ -110,10 +115,12 @@ if (TRUE) {
   gCm2d_to_PgCyr = (1e-15)*(1.30577E+14)*(365)
   LandNetCO2_PgCyr = gCm2d_to_PgCyr*(respsoil + respauto - gpp)
   SoilC_PgC = (1e-15)*(1.30577E+14)*1e3*soilC #kgC/m2 to PgC global
+  print(ytime)
+  print(SoilC_PgC)
 
   index = TRUE #Default
-  index = ytime>=1929 & ytime<=2029 #For E21_PI_lcspinnkcc
 
+  cat("SoilC_PgC \n")
   plot(ytime[index], SoilC_PgC[index], xlab="Year", ylab="PgC", type="l", main="Global Soil Carbon", cex.main=.6)
   n = length(ytime[index]); cat("nrow:", n,"\n")
         lm100 = lm(y ~ x, data=data.frame(x=ytime[index], y=SoilC_PgC[index])[(n-nyr):n,])
@@ -121,6 +128,7 @@ if (TRUE) {
         mtext("PgC", cex=0.5, line=.8)
         mtext(paste("last",nyr,"yr mean =", signif(mean(lm100$model[,'y'],4))," dy/dyr =", signif(lm100$coef['x'],4)), cex=0.5)
 
+  cat("LandNetCO2_PgCyr \n")
   plot(ytime[index], LandNetCO2_PgCyr[index], xlab="Year", ylab="net land CO2 flux", type="l", main="NET LAND CO2 UPWARD FLUX (Respsoil + Respauto - GPP)", cex.main=.6)
   n = length(ytime[index]); cat("nrow:", n,"\n")
         lm100 = lm(y ~ x, data=data.frame(x=ytime[index], y=LandNetCO2_PgCyr[index])[(n-nyr):n,])

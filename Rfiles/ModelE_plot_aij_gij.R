@@ -27,7 +27,7 @@ print('filename = name of ModelE aij or gij diagnostics netcdf file.', quote=FAL
 quit()
 }
 
-path = args[1]
+path = paste0(args[1], '/')
 fname = args[2]
 
 print(path)
