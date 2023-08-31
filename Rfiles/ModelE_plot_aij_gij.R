@@ -24,6 +24,7 @@ print ('Usage:  Rscript ../Rfiles/ModelE_plot_aij_gij.R <pathin/> <filename>', q
 print ('Generate maps of ModelE aij or gij diagnostics.', quote=FALSE)
 print('pathin/ = path where diagnostics file is.', quote = FALSE)
 print('filename = name of ModelE aij or gij diagnostics netcdf file.', quote=FALSE)
+print('optional numra = number of Ent ra diagnostics. Default 42; prior to 2023 was 27.',quote=FALSE)
 quit()
 }
 
@@ -33,7 +34,7 @@ fname = args[2]
 print(path)
 print(fname)
 
-pathout = 'output'
+pathout = '.'  #'output'
 if (!dir.exists(pathout)) {
         dir.create(pathout)
 }
@@ -57,8 +58,9 @@ nc = open.nc(con=paste0(path, fname), write=FALSE)
 ndims <- file.inq.nc(nc)$ndims 
 dimnames <- character(ndims) 
 for(i in seq_len(ndims)) { 
-dimnames[i] <- dim.inq.nc(nc, i-1)$name } 
+   dimnames[i] <- dim.inq.nc(nc, i-1)$name } 
 nvars <- file.inq.nc(nc)$nvars 
+
 
 CHECKAIJGIJDIFF=FALSE
 if (CHECKAIJGIJDIFF) {
@@ -116,6 +118,26 @@ for(i in seq_len(nvars)) {
 varnames[i] <- var.inq.nc(nc, i-1)$name
 } 
 
+#Find position of Ent ra diagnostics
+ra1 = match("ra001001" ,varnames)
+if (numargs > 2) { #Specify number of ra diagnostics
+  nra = as.numeric(args[3])
+} else { #Default
+  nra=42 
+}
+if (nra<10 ) {
+    v3 = paste0("00",nra)
+  } else if (nra<100) {
+    v3 = paste0("0", nra)
+  } else {
+    v3 = paste0(nra)
+}
+ralastxt = paste0("ra",v3, "016")
+ralast = match(ralastxt, varnames)
+#ralast = match("ra027016_hemis", varnames)
+#ralast = match("ra042016_hemis", varnames)
+cat('Number of Ent diagnostics, numra, ra1, rlast, ralastxt: ', v3, ": ", nra, ra1, ralast, ralastxt,"\n")
+
 axyp = var.get.nc(nc, "axyp")
 
 #val = var.get.nc(nc, varnames[1])
@@ -128,8 +150,6 @@ res=res.from.IM.JM(dim(axyp)[1], dim(axyp)[2])
 colors = giss.palette(40)
 par(mfrow=c(4,4))
 par(omi=c(0,0,0,0), oma=c(0,1,4,1), mar=c(2,3,4,4))
-ra1 = match("ra001001" ,varnames)
-ralast = match("ra027016_hemis", varnames)
 if  (is.na(ralast)) {
  irange = 3:nvars
 } else if (ralast==nvars) {
@@ -170,9 +190,9 @@ dev.off()
 lastvar = 1
 zlim=NULL
 #Plot ra diagnostics
-ra1 = match("ra001001" ,varnames)
-ralast = match("ra027016_hemis", varnames)
-if (!is.na(ralast)) {
+
+#if (!is.na(ralast)) {
+if (!is.na(ra1)) {
 pdf(paste0(pathout,"/", fname, "_Entradiags.pdf"), height=7, width=10)
 par(mfrow=c(4,4))
 par(omi=c(0,0,0,0), oma=c(0,1,4,1), mar=c(2,3,4,4))
