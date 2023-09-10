@@ -90,8 +90,8 @@ div0.array2 =  function(num, div, undefin = -1e30, undefout=0) {
     ndim = length(dims)
     
     divresult = array(0, dim=dims)
-    for (i in 1:dims[1]) {
-        for (j in 1:dims[2]) {
+    for (j in 1:dims[2]) {
+        for (i in 1:dims[1]) {
             if (num[i,j]==undefin | div[i,j]==undefin) {
                 divresult[i,j] = undefout
             } else if (div[i,j]==0) {
@@ -1830,6 +1830,17 @@ map.GCM.Ent <- function(filelc=NULL, res="2x2.5", file, varname="vf", pftlist=En
 }
 
 #------------
+var.def.put.nc = function(ncid, varname, dimensions=c('lon','lat'), longname, vartype, units, vardescr="", undef=-1e30, varval) {
+     #ncid should already be opened for an (i,j) file with dimensions defines
+     var.def.nc(ncid, varname, vartype, dimensions=dimensions)
+     att.put.nc(ncid, varname, 'long_name', 'NC_CHAR', longname)
+     att.put.nc(ncid, varname, 'units', 'NC_CHAR', units)
+     att.put.nc(ncid, varname, 'description', 'NC_CHAR', vardescr)
+     att.put.nc(ncid, varname, '_FillValue', vartype, undef)
+     var.put.nc(ncid, varname, varval)
+}
+
+#------------
 create.map.template.nc = function(res, varname, longname, units, vardescr="", timedim=NULL, timeunits="", timedescr="", description="", undef=-1e30,  fileout, contact="Nancy.Y.Kiang@nasa.gov", vartype='NC_FLOAT') {
     lon.lat = grid.lon.lat(res)
     IM = length(lon.lat[[1]])
@@ -1857,6 +1868,7 @@ create.map.template.nc = function(res, varname, longname, units, vardescr="", ti
     if (!is.null(timedim)) {
 		att.put.nc(ncid, 'time', 'units', 'NC_CHAR', timeunits)
 	}
+    att.put.nc(ncid, varname, 'long_name', 'NC_CHAR', longname)
     att.put.nc(ncid, varname, 'units', 'NC_CHAR', units)
     att.put.nc(ncid, varname, 'description', 'NC_CHAR', vardescr)
     att.put.nc(ncid, varname, '_FillValue', vartype, undef)

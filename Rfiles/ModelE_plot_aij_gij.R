@@ -20,11 +20,11 @@ args = commandArgs(trailingOnly=TRUE)
 print(args)
 numargs = length(args)
 if (numargs < 2) {
-print ('Usage:  Rscript ../Rfiles/ModelE_plot_aij_gij.R <pathin/> <filename>', quote = FALSE )
-print ('Generate maps of ModelE aij or gij diagnostics.', quote=FALSE)
-print('pathin/ = path where diagnostics file is.', quote = FALSE)
-print('filename = name of ModelE aij or gij diagnostics netcdf file.', quote=FALSE)
-print('optional numra = number of Ent ra diagnostics. Default 42; prior to 2023 was 27.',quote=FALSE)
+cat('Usage:  Rscript ../Rfiles/ModelE_plot_aij_gij.R <pathin/> <filename> <optional N|numra>', '\n' )
+cat('Generate maps of ModelE aij or gij diagnostics.', '\n')
+cat('pathin/ = path where diagnostics file is.', '\n')
+cat('filename = name of ModelE aij or gij diagnostics netcdf file.', '\n')
+cat('optional N|numra = N no Ent ra diags | numra number of Ent ra diagnostics. Default 42; prior to 2023 was 27.', '\n')
 quit()
 }
 
@@ -119,24 +119,34 @@ varnames[i] <- var.inq.nc(nc, i-1)$name
 } 
 
 #Find position of Ent ra diagnostics
-ra1 = match("ra001001" ,varnames)
 if (numargs > 2) { #Specify number of ra diagnostics
-  nra = as.numeric(args[3])
+  if (args[3] == 'N') { #No Ent ra diagnostics, any generic ij file
+      ra1 = NULL
+      nra=0
+  } else {
+    ra1 = match("ra001001" ,varnames)
+    nra = as.numeric(args[3])
+  }
 } else { #Default
+  ra1 = match("ra001001" ,varnames)
   nra=42 
 }
-if (nra<10 ) {
-    v3 = paste0("00",nra)
+if (nra > 0) {
+  if (nra<10 ) {
+      v3 = paste0("00",nra)
   } else if (nra<100) {
-    v3 = paste0("0", nra)
+     v3 = paste0("0", nra)
   } else {
     v3 = paste0(nra)
+  }
+  ralastxt = paste0("ra",v3, "016")
+  ralast = match(ralastxt, varnames)
+  #ralast = match("ra027016_hemis", varnames)
+  #ralast = match("ra042016_hemis", varnames)
+  cat('Number of Ent diagnostics, numra, ra1, rlast, ralastxt: ', v3, ": ", nra, ra1, ralast, ralastxt,"\n")
+} else {
+  ralast = NA
 }
-ralastxt = paste0("ra",v3, "016")
-ralast = match(ralastxt, varnames)
-#ralast = match("ra027016_hemis", varnames)
-#ralast = match("ra042016_hemis", varnames)
-cat('Number of Ent diagnostics, numra, ra1, rlast, ralastxt: ', v3, ": ", nra, ra1, ralast, ralastxt,"\n")
 
 axyp = var.get.nc(nc, "axyp")
 
@@ -144,7 +154,7 @@ axyp = var.get.nc(nc, "axyp")
 
 #Map all non-hemis variables of non-Ent-ra diagnostics.
 #pdf(file=paste(fname, "_nora.pdf", sep=""), height=7, width=10)
-pdf(file=paste0(pathout,"/",fname, ".pdf"), height=7, width=10)
+pdf(file=paste0(pathout,"/",fname,".", Sys.Date(), ".pdf"), height=7, width=10)
 #quartz(height=6, width=10)
 res=res.from.IM.JM(dim(axyp)[1], dim(axyp)[2])
 colors = giss.palette(40)
@@ -193,7 +203,7 @@ zlim=NULL
 
 #if (!is.na(ralast)) {
 if (!is.na(ra1)) {
-pdf(paste0(pathout,"/", fname, "_Entradiags.pdf"), height=7, width=10)
+pdf(paste0(pathout,"/", fname, "_Entradiags.",Sys.Date(),".pdf"), height=7, width=10)
 par(mfrow=c(4,4))
 par(omi=c(0,0,0,0), oma=c(0,1,4,1), mar=c(2,3,4,4))
 for (i in ra1:ralast) {

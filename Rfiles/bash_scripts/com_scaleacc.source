@@ -4,6 +4,9 @@
 #To run:
 # source com_scaleacc.source <RUN> <ACCDIR>
 
+date=$(date '+%Y-%m-%d')
+echo $date
+
 RUN=$1
 ACCDIR=$2
 xijkl=$3
