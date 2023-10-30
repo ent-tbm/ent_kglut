@@ -57,6 +57,8 @@ if [ $runname1 = $runname2 ]; then
   diffname="${diffpre}${date1}-${date2}_${runname1}.nc"
 elif [ $date1 = $date2 ]; then
   diffname="${diffpre}${date1}_${runname1}-${runname2}.nc"
+else
+  diffname="${diffpre}${date1}-${date2}_${runname1}-${runname2}.nc"
 fi
 
 echo "File 1: $file1"
