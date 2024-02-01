@@ -1,5 +1,5 @@
 res @@RESOLUTION
-pathin 
+pathin @@INDIR
 pathout @@OUTDIR
 id @@ID
 temp @@TEMP
