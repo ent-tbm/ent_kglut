@@ -417,8 +417,8 @@ plot.cat = function(x,y,categ, xlab="x",ylab="y",if.legend=TRUE, legx=NULL,legy=
 
 #--------------------------------------------------------------
 plot.multi =
-function(x="", ydat, xlab="", ylab="",ymin=0.0, legx=0, type="l",if.sepleg=FALSE, if.leg=TRUE) {
-    if (x=="") {
+function(x=NULL, ydat, xlab="", ylab="",ymin=0.0, legx=0, type="l",if.sepleg=FALSE, if.leg=TRUE) {
+    if (is.null(x)) {
         ymax = max(ydat,na.rm=TRUE)
         plot(ydat[,1],type=type, ylab=ylab, xlab=xlab, ylim=c(ymin,ymax))
         for (j in 2:ncol(ydat)) {

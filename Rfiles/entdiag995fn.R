@@ -20,13 +20,31 @@ names.fort.1082 = c("IPARdir","IPARdif","CosZen",# "cradLAI",
 			"ALBEDODIF1", "ALBEDODIF2","ALBEDODIF3","ALBEDODIF4","ALBEDODIF5","ALBEDODIF6")
 			 
 #----------------------------------------------------------------
-plot995r = function(day,dat,fluxNEE=NULL, drv=NULL,fluxET=NULL, laiobs=NULL,
-	titleouter="",line=-1.5, type="p",daily=48
+plot995r = function(day=NULL,dat,fluxNEE=NULL, drv=NULL,fluxET=NULL, laiobs=NULL,
+	titleouter="",line=-1.5, type="p" #,daily=48
 	, if.dailyonly=FALSE, if.sumpage=FALSE) {
+	#1/24/2024:  Added options to generate day time vector from timecum if present, and to plot fapar if present.
+	#	Got rid of unused and unnecessary daily time steps parameter.
 	
-	#day vector must be input
-	#day = (1:nrow(dat))/daily
-	#day = 1+ (1:nrow(dat) - 1)/daily
+	#day - optional time vector in days of year. For earlier versions of Ent_standalone that did not output timecum. 
+        #      If input, where daily=#time steps per day:
+	#   day = 1+ (1:nrow(dat) - 1)/daily  #Day 1 is midnight beginning of year.
+        #dat - fort.995 output files
+        #fluxNEE - observed NEE
+        #drv - fort.980 forcings file
+        #OPTIONAL:  fluxET - observed ET
+        #           laiobs - observed lai to compare to when prognostic LAI is run
+        #titleouter - Any text info for plot page titles.
+
+        #If no day time vector input, then calculate from timecum if present.
+	if (is.null(day)) {
+		if (!is.na(match("timecum", names(dat)))) {
+			#Make day time vector.  Assume first time point is midnight first day of year to match Fluxnet DTIME.
+			day = 1 + (dat[,"timecum"] - dat[1,"timecum"])/86400
+		} else {
+			cat("Please input the day time vector.\n")
+		}
+	}
 	xlab = "day"
 
 	if (!if.dailyonly) {
@@ -178,10 +196,21 @@ plot995r = function(day,dat,fluxNEE=NULL, drv=NULL,fluxET=NULL, laiobs=NULL,
 			lines(unique(jday), fluxdmat[,paste(flist[i])], col=i+1)
 	}
 	legend(200,max(fluxdmat),legend=c("GPP","NPP","Rauto","Soilresp"),lty=1,col=1:4)
-
 	title(paste("NPP/GPP =",sum(fluxdmat[,"NPP"])/sum(fluxdmat[,"GPP"])))
+
+	vname = "fapar"
+	if (!is.na(match(vname, names(dat)))) {
+		plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vname)
+		plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vname, xlim=c(0,10))
+		plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vname, xlim=c(100,110))
+		plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vname, xlim=c(180,190))
+		plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vname, xlim=c(250,260))
+		plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vname, xlim=c(350,360))
+	}
+
 	return(fluxdmat)
 }
+
 
 #----------------------------------------------------------------
 plot995 = function(day,dat,fluxNEE=NULL, fluxET=NULL,titleouter="",line=-1.5, type="p",daily=48,if.dailyonly=FALSE) {
