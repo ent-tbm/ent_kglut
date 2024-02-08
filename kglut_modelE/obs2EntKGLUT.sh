@@ -138,6 +138,7 @@ cp "KG_classify_config.txt" "${userout}KG_classify_config_${append_rng}.txt"
 
 ex "${userout}KG_classify_config_${append_rng}.txt" <<EOF
   1s/@@RESOLUTION/${resolution}/
+  2s/@@INDIR/${path//"/"/"\/"}/
   3s/@@OUTDIR/${outdir}/
   4s/@@ID/${append_rng}/
   5s/@@TEMP/${temp}/
@@ -207,10 +208,10 @@ python "${userout}csvremoveSTD_${append_rng}.py"
 cp "../Rfiles/trim_Ent_KG_LUT.R" "${userout}trim_Ent_KG_LUT_${append_rng}.R"
 
 ex "${userout}trim_Ent_KG_LUT_${append_rng}.R" <<EOF
-  23s/@@LC_CSV_FILE_RAW/${outdir}${lc_csv_file_raw}/
-  33s/@@LCTRIMFRAC/$lctrimfrac/
-  24s/@@OUTDIR/$outdir/
-  27s/@@LC_CSV_FILE/$lc_csv_file/
+  28s/@@LC_CSV_FILE_RAW/${outdir}${lc_csv_file_raw}/
+  38s/@@LCTRIMFRAC/$lctrimfrac/
+  29s/@@OUTDIR/$outdir/
+  32s/@@LC_CSV_FILE/$lc_csv_file/
   wq
 EOF
 
@@ -237,4 +238,5 @@ ex "${userout}csv2lut_${append_rng}.py" <<EOF
 EOF
 
 python "${userout}csv2lut_${append_rng}.py"
+echo "Output file: ${outdir}${lut_out}"
 #rm "csv2lut_${append_rng}.py"

@@ -45,12 +45,13 @@ while IFS=$'=' read -r -a args; do
   elif [ "$keyword" = "aij_jan" ]; then
     aij_jan=$arg
   elif [ "$keyword" = "lut" ]; then
-    lut=$(echo ${arg//"/"/"\/"})
+    lut=$arg
     if ! [ -f "$lut" ]; then
       echo "${lut} not found, searching for newest file beginning with prefix"
       lut=$(ls -t "${lut}*" | head -1)
       echo "Using ${lut}"
     fi
+    lut=$(echo ${lut//"/"/"\/"})
   elif [ "$keyword" = "resolution" ]; then
     resolution=$arg
   elif [ "$keyword" = "outdir" ]; then
@@ -178,6 +179,7 @@ cp "KG_classify_config.txt" "${userout}KG_classify_config_${append_rng}.txt"
 
 ex "${userout}KG_classify_config_${append_rng}.txt" <<EOF
   1s/@@RESOLUTION/${resolution}/
+  2s/@@INDIR/${path//"/"/"\/"}/
   3s/@@OUTDIR/${outdir}/
   4s/@@ID/${append_rng}/
   5s/@@TEMP/${outdir}${temp}/
