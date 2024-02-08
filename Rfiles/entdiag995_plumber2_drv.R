@@ -13,71 +13,69 @@ DEBUG=FALSE
 #4) Look at the generated pdf file of plots.
 
 #----- EDIT THE PATHS AND FILE NAMES BELOW --------------------------
+
 #RUN = "rd_lsm_ent_tumba_plumber2"
-
-#info = "PLUMBER2-Tumbarumba-pheno"
-
-#datadir ="/discover/nobackup/bvanaart/giss/data/"
 
 #savedir = "/discover/nobackup/bvanaart/giss/RUNS_current/"
 
+#datadir ="/discover/nobackup/bvanaart/giss/data/"
 #fileforce = paste(datadir, "AU-Tum_2002-2016_OzFlux_Met_ent.nc", sep="")
 
 #----- EDIT THE PATHS AND FILE NAMES ABOVE THIS LINE-------------------
 
 #HOW-TO:  With text input file.
-#0) Load the R module on discover: module load R/3.6.3
-#1) Make a text config input file (see USAGE below).
-#2) To run:  Rscript entdiag995_plumber2_drv.R <config_file.txt>
-#     or to output a log file:
-#            R CMD BATCH entdiag995_plumber2_drv.R <config_file.txt>
-#3) Check log file Rout to make sure it ran without errors.
-#4) Look at the generated pdf file of plots.
+# Load the R module on discover: module load R/3.6.3
 
 args = commandArgs(trailingOnly=TRUE)
 numargs = length(args)
-if (numargs != 1) {
-print ('Usage:  R CMD BATCH entdiag995_plumber2_drv.R <config_file.txt>', quote = FALSE )
-print ('<config_file.txt> should be a text file containing:', quote = FALSE )
-print (' Rpath <path to Rfiles> (from Ent_utils/user this should be ../Rfiles)', quote = FALSE)
-print ('  run <run_name>', quote = FALSE )
-print ('  info <title and output file name>', quote = FALSE )
-print ('  datadir <directory location of fileforce file (below)>', quote = FALSE)
-print ('  rundir <savedisk directory containing run output directory>', quote = FALSE )
-print ('  fileforce <name of met and veg forcings input file to run>', quote = FALSE )
+if (numargs < 3) {
+print ('Usage:  R CMD BATCH entdiag995_plumber2_drv.R <SAVEDISK> <runname> <fileforce> <printoption>', quote = FALSE )
+print ('  SAVEDISK <directory where your SAVEDISK is', quote = FALSE )
+print ('  runname <run name>', quote = FALSE )
+print ('  fileforce <full path and name of met and veg forcings input file to run>', quote = FALSE )
 print ('  printoption <1-print only fort.995; 2-print both fort.995 and fort.1082>', quote = FALSE )
 quit()
 }
 
+savedir = args[1]
+RUN = args[2]
+fileforce = args[3]
+if (numargs > 3) {
+ printoption=as.numeric(args[4])
+} else {
+ #default
+ printoption=1
+}
 
-configfile = args[1]
-if (DEBUG) { print(con=stdout(), paste(configfile))}
+info=RUN
+cat("savedir: ", savedir, "\n")
+cat("RUN: ", RUN, "\n")
+cat("fileforce: ", fileforce, "\n")
+cat("printoption: ", printoption, "\n")
+cat(info, "\n")
 
-#Read config file
-textin = read.table(configfile, header=FALSE, sep="")
-
-top=1
-Rpath = textin[match("Rpath", textin[,1]),2]
-RUN = textin[match("run", textin[,1]),2]
-info = textin[match("info", textin[,1]),2]
-datadir = textin[match("datadir", textin[,1]),2]
-savedir = textin[match("savedir", textin[,1]),2]
-fileforce = textin[match("fileforce", textin[,1]),2]
-printoption = as.numeric(textin[match("printoption", textin[,1]),2])
-cat( Rpath )
+Rpath = paste0(Sys.getenv("R_Ent"), "/")
+if (Rpath=="") {
+  cat("Please set environment variable R_Ent to the path to your Rfiles directory")
+  quit()
+}
+cat(Rpath, "\n")
 source(paste0(Rpath, "/entdiag995_plumber2fn.R"))
+
 
 if (DEBUG) { 
 print(con=stdout(), RUN)
 print(info)
-print(datadir)
 print(savedir)
 print(fileforce)
 }
 
+
 #Do plots
-pathdiag = paste(savedir, RUN, sep="")
+rundir = paste0(savedir, "/", RUN)
 if (DEBUG) { print(con=stdout(), pathdiag) }
-cat(paste0('filedrv:',datadir, "/", fileforce))
-plumber2_ent(filedrv=paste0(datadir, "/", fileforce), pathdiag=pathdiag, pathout=pathdiag, info=info, if.new=TRUE, option=printoption)
+cat('filedrv: ', fileforce, "\n")
+
+
+plumber2_ent(filedrv=fileforce, pathdiag=rundir, pathout=rundir, info=info, if.new=TRUE, option=printoption)
 
