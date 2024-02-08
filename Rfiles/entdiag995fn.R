@@ -10,7 +10,7 @@ names.fort.995.lsm = c("patchnum", "IPARdir", "IPARdif", "coszen", "pft", "n",
     "C_fol", "C_w", "C_froot", "C_root", "C_lab", "C_repro",
     "TRANS_SW", "Ci", "GPP", "Rauto", "Soilresp", "NPP", "CO2flux", 
     "GCANOPY", "IPP", "senescefrac", "Sacclim", "c_total", "c_growth", 
-    "litter", "betad", "timesec")
+    "litter", "betad", "timesec","timecum")
    
 names.fort.1082 = c("IPARdir","IPARdif","CosZen",# "cradLAI",
 #			"ALBEDO_VIS", "ALBEDO_NIR")

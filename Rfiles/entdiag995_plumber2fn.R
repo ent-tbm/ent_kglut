@@ -71,7 +71,7 @@ plumber2_ent = function(filedrv, pathdiag, pathout=NULL, info="PLUMBER2 sitename
   	names(fort.995) = names.fort.995.lsm
   	#names(fort.980) = names.fort.980
   	
-        d = fort.995[,"timesec"]/(24*3600)
+        d = fort.995[,"timecum"]/(24*3600)
 	
 	par(mfrow=c(3,2), omi=c(0,0,0.5,0.3), ask=FALSE )
 
