@@ -19,18 +19,24 @@ args = commandArgs(trailingOnly=TRUE)
 print(args)
 numargs = length(args)
 if (numargs < 2) {
-cat('Usage:  Rscript ../Rfiles/ModelE_plot_aij_gij.R <pathin/> <filename>', '\n' )
+cat('Usage:  Rscript ../Rfiles/ModelE_plot_aij_gij.R <pathin/> <filename> <optional info>', '\n' )
 cat('Generate maps of any ij diagnostics.', '\n')
 cat('pathin/ = path where diagnostics file is.', '\n')
 cat('filename = name of ModelE aij or gij diagnostics netcdf file.', '\n')
+cat('option info = single word info for pre-pending to PDF file name, e.g. runname.' , '\n')
 quit()
 }
 
 path = paste0(args[1], '/')
 fname = args[2]
+info = ''
+if (numargs > 2) {
+ info = paste0(args[3], '_')
+}
 
 print(path)
 print(fname)
+print(info)
 
 #---------------------
 library(stringr)
@@ -66,8 +72,7 @@ cat(varnames, '\n')
 var3 = var.get.nc(nc, varnames[3])  #skip arrays for lon, lat
 
 #Map all non-hemis variables of non-Ent-ra diagnostics.
-#pdf(file=paste(fname, "_nora.pdf", sep=""), height=7, width=10)
-pdf(file=paste0(fname,".", Sys.Date(), ".pdf"), height=7, width=10)
+pdf(file=paste0(info, fname,".", Sys.Date(), ".pdf"), height=7, width=10)
 #quartz(height=6, width=10)
 
 res=res.from.IM.JM(dim(var3)[1], dim(var3)[2])

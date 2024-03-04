@@ -8,14 +8,15 @@ args = commandArgs(trailingOnly=TRUE)
 print(args)
 numargs = length(args)
 if (numargs < 3) {
-cat('Usage:  Rscript $R_Ent/entdiag995_plot.R <pathin/> <run name> <site> < 1 | 2 | 3 > <a>', '\n' )
+cat('Usage:  Rscript $R_Ent/entdiag995_plot.R <pathin/> <run name> <site> < 1 | 2 | 3 > <a> <version 1 | 2>', '\n' )
 cat('Generate plots of standalone_LSM diagnostics.', '\n')
 cat('pathin/ = path where run output directory is, e.g. $SAVEDISK.', '\n')
 cat('run name = run name.', '\n')
 cat('site = Fluxnet or PLUMBER2 site name for data file with observations to plot with simulation.',  '\n')
 cat('       Currently supported:  MMSF \n')
 cat('optional N = 1-Ent_standalone (default), 2-giss_LSM_standalone, 3-plumber2', '\n')
-cat('optional a = plot ACTS albedo')
+cat('optional a = plot ACTS albedo', '\n')
+cat('optional version = 1-previous plot version without canopyalbedo(:), 2-newer version with canopyalbedo(:)', '\n')
 quit()
 }
 
@@ -26,19 +27,23 @@ print(runname)
 sitename = args[3]
 config = args[4]
 
+config = 1           #Default Ent_standalone run
 if (numargs > 3) {
  config = args[4]
 }
 
+if.acts = FALSE
 if (numargs > 4) {
- if (args[5]=='a') {
+ if (args[5]=='a') { 
    if.acts = TRUE
- } else {
-   cat('No such arg: ', args[4], "\n")
-   return()
  }
-} else {
-  if.acts=FALSE
+}
+
+if.ver2 = FALSE      #Default, previous for.995 without pp%albedo output.
+if (numargs > 5) {
+ if (args[6]=='2') {
+   if.ver2 = TRUE    #Output pp%albedo(:)
+ } 
 }
 
 Rpath = paste0(Sys.getenv("R_Ent"), "/")
@@ -68,19 +73,20 @@ fort.995=read.table(paste0(runpath,"fort.995"), header=TRUE) #FALSE ) #TRUE)
 #	fort.1082=read.table(paste(runpath, "fort.1082", sep=""),	header=FALSE)
 #	fort.1082 = fort.1082[,1:21]
 
+
 nyr = fort.995[nrow(fort.995),"timecum"]/86400/365
 
 #d = Time vector in days
 #d = 1+ (1:nrow(fort.995[,]) - 1)/24  #Fluxnet hourly for MMSF
 
-pdf(file=paste0(runname,".pdf"), width=6, height=8)
+pdf(file=paste0(runname,"_", Sys.Date(),".pdf"), width=6, height=8)
 par(mfrow=c(3,2), omi=c(0,0,0.5,0.5))#, ask=TRUE )
 
 fluxdmat = plot995r(day=NULL,fort.995[,2:ncol(fort.995)], 
    fluxNEE=rep(data[,c("NEE.umol.m.2.s.1")],nyr), 
    titleouter=paste(runname, Sys.Date()),
    line=0, type="l", #daily=24, 
-   if.dailyonly=FALSE)
+   if.dailyonly=FALSE, if.ver2=if.ver2)
 
 if (if.acts) {
   fort.1082 = read.table(paste0(runpath, "fort.1082"), header=FALSE)

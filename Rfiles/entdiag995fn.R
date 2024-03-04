@@ -22,7 +22,7 @@ names.fort.1082 = c("IPARdir","IPARdif","CosZen",# "cradLAI",
 #----------------------------------------------------------------
 plot995r = function(day=NULL,dat,fluxNEE=NULL, drv=NULL,fluxET=NULL, laiobs=NULL,
 	titleouter="",line=-1.5, type="p" #,daily=48
-	, if.dailyonly=FALSE, if.sumpage=FALSE) {
+	, if.dailyonly=FALSE, if.sumpage=FALSE, if.ver2=FALSE) {
 	#1/24/2024:  Added options to generate day time vector from timecum if present, and to plot fapar if present.
 	#	Got rid of unused and unnecessary daily time steps parameter.
 	
@@ -208,6 +208,14 @@ plot995r = function(day=NULL,dat,fluxNEE=NULL, drv=NULL,fluxET=NULL, laiobs=NULL
 		plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vname, xlim=c(350,360))
 	}
 
+        if (if.ver2) {
+                plot(day, dat[,"albVIS"], type="l", xlab="day", ylab="albedo VIS", main="canopy albedo VIS", ylim=c(0,0.6))
+                plot(day, dat[,"albNIR1"], type="l", xlab="day", ylab="albedo NIR1", main="canopy albedo NIR1", ylim=c(0,0.6))
+                plot(day, dat[,"albNIR2"], type="l", xlab="day", ylab="albedo NIR2", main="canopy albedo NIR2", ylim=c(0,0.6))
+                plot(day, dat[,"albNIR3"], type="l", xlab="day", ylab="albedo NIR3", main="canopy albedo NIR3", ylim=c(0,0.6))
+                plot(day, dat[,"albNIR4"], type="l", xlab="day", ylab="albedo NIR4", main="canopy albedo NIR4", ylim=c(0,0.6))
+                plot(day, dat[,"albNIR5"], type="l", xlab="day", ylab="albedo NIR5", main="canopy albedo NIR5", ylim=c(0,0.6))
+        }
 	return(fluxdmat)
 }
 
@@ -646,7 +654,8 @@ plotgort1082 = function(d, fort.1082, lai=NULL, xlim=NULL, ylim=NULL, alim=0.5, 
 			ylim=c(0,alim))			
 			mtext(outer=TRUE, titletext)
 		}
-		for (i in 4:ncol(temp)) {
+	        par(mfrow=c(3,2))
+       		for (i in 4:ncol(temp)) {
 			plot(d, temp[,i], xlab="day",ylab=names(temp)[i], pch=".",
 				xlim=c(130,135), ylim=c(0,0.55))			
 			mtext(outer=TRUE, titletext)
