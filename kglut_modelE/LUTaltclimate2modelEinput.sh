@@ -166,6 +166,9 @@ ex "${userout}aij2prectemp_${append_rng}.py" <<EOF
   30s/@@DEC/${DEC}/
   8s/@@PREC/${prec}/
   9s/@@TEMP/${temp}/
+  36s/@@DIMENSIONS/${dimensions}/
+  37s/@@LATDIM/${latdim}/
+  38s/@@LONDIM/${londim}/
   wq
 EOF
 
