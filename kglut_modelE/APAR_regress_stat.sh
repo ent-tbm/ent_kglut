@@ -1,4 +1,4 @@
-# Generates a lookup input files for modelE and its branches (LAI, LAImax, height, LC) 
+# Driver script for generating statistics for APAR/FAPAR by global and per PFT diagnostics
 # AUTHOR - James Lui
 # contact - james.lui@nasa.gov
 
@@ -35,8 +35,6 @@ cd "$path"
 
 # Loop over the input file
 
-dohgt=false
-
 while IFS=$'=' read -r -a args; do
   keyword=${args[0]}
   arg=${args[1]}
@@ -44,31 +42,15 @@ while IFS=$'=' read -r -a args; do
     indir=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "aij_jan" ]; then
     aij_jan=$arg
-  elif [ "$keyword" = "lut" ]; then
-    lut=$arg
-    if ! [ -f "$lut" ]; then
-      echo "${lut} not found, searching for newest file beginning with prefix"
-      lut=$(ls -t "${lut}*" | head -1)
-      echo "Using ${lut}"
-    fi
-    lut=$(echo ${lut//"/"/"\/"})
   elif [ "$keyword" = "resolution" ]; then
     resolution=$arg
   elif [ "$keyword" = "outdir" ]; then
     outdir=$(echo ${arg//"/"/"\/"})
     outdirn=$arg
-  elif [ "$keyword" = "netcdf_format" ]; then
-    netcdf_format=$arg
-  elif [ "$keyword" = "hgt" ]; then
-    arg=$(echo $arg | tr [:lower:] [:upper:])
-    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ]; then
-      hgt="hgt_"
-      dohgt=true
-    fi
-  elif [ "$keyword" = "metadata_dataversion" ]; then
-    metadata_dataversion=$(echo ${arg//"/"/"\/"})
-  elif [ "$keyword" = "metadata_datasourcelut" ]; then
-    metadata_datasourcelut=$(echo ${arg//"/"/"\/"})
+  elif [ "$keyword" = "metadata" ]; then
+    metadata=$(echo ${arg//"/"/"\/"})
+  elif [ "$keyword" = "canopy_model" ]; then
+    canopy_model=$(echo ${arg//"/"/"\/"})
   fi
 done < "${ppwd}/${1}"
 
@@ -132,19 +114,19 @@ SEP="SEP${years}.aij${runname}.nc"
 OCT="OCT${years}.aij${runname}.nc"
 NOV="NOV${years}.aij${runname}.nc"
 DEC="DEC${years}.aij${runname}.nc"
+ANN="ANN${years}.aij${runname}.nc"
 
 # output of aij2prectemp.py:
 prec="prec_${resolution}_${years}_${runname}_${append_rng}.nc"
 temp="temp_${resolution}_${years}_${runname}_${append_rng}.nc"
 
-# output of prectemp2biome2.sh:
-biome="V${dimname}_KGbiomes_${years}_${runname}_${append_rng}.nc"
+# output of prectemp2biome.sh
+biome="V${dimname}_EntKG_biomes_${append_rng}.nc"
 
-# output of lut2finalout.py:
-lai_out="V${dimname}_lai_${years}_${runname}_${append_rng}.nc"
-laimax_out="V${dimname}_laimax_${years}_${runname}_${append_rng}.nc"
-height_out="V${dimname}_height_${years}_${runname}_${append_rng}.nc"
-lc_out="V${dimname}_lc_${years}_${runname}_${append_rng}.nc"
+# output of regress_APAR_stat.py
+out_nc="Ent_PAR_${runname}_regression_${append_rng}.nc"
+out_apar="Ent_APAR_${runname}_plots_${append_rng}.pdf"
+out_fapar="Ent_FAPAR_${runname}_plots_${append_rng}.pdf"
 
 # run aij2prectemp.py
 cp "aij2prectemp.py" "${userout}aij2prectemp_${append_rng}.py"
@@ -195,69 +177,40 @@ Rscript "../Rfiles/KG_classify.R" "${userout}KG_classify_config_${append_rng}.tx
 mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
 #rm "KG_classify_config_${append_rng}.txt"
 
-# run lut2finalout.py
-cp "lut2finalout.py" "${userout}lut2finalout_${append_rng}.py"
+# run regress_APAR_stat.py
+cp "regress_APAR_stat.py" "${userout}regress_APAR_stat_${append_rng}.py"
 
-ex "${userout}lut2finalout_${append_rng}.py" <<EOF
-  9s/@@DIMENSIONS/${dimensions}/
-  10s/@@LATDIM/${latdim}/
-  11s/@@LONDIM/${londim}/
-  14s/@@NETCDF_FORMAT/${netcdf_format}/
-  16s/@@BIOME/${outdir}${biome}/
-  17s/@@LUT/${lut}/
-  19,22s/@@METADATA_DATAVERSION/${metadata_dataversion}/
-  26s/@@OUTDIR/${outdir}/
-  27s/@@LAI_OUT/${lai_out}/
-  28s/@@LAIMAX_OUT/${laimax_out}/
-  29s/@@HEIGHT_OUT/${height_out}/
-  30s/@@LC_OUT/${lc_out}/
-  83,201s/@@METADATA_DATASOURCELUT/${metadata_datasourcelut}/
+ex "${userout}regress_APAR_stat_${append_rng}.py" <<EOF
+  13s/@@INDIR/${indir}/
+  14s/@@BIOME/${outdir}${biome}/
+  16s/@@OUTDIR/${outdir}/
+  17s/@@OUT_NC/${out_nc}/
+  18s/@@OUT_APAR_PDF/${out_apar}/
+  19s/@@OUT_FAPAR_PDF/${out_fapar}/
+  20s/@@RUNNAME/${runname}/
+  21s/@@CANOPYMODEL/${canopy_model}/
+  22s/@@METADATA/${metadata}/
+  27s/@@JAN/${JAN}/
+  28s/@@FEB/${FEB}/
+  29s/@@MAR/${MAR}/
+  30s/@@APR/${APR}/
+  31s/@@MAY/${MAY}/
+  32s/@@JUN/${JUN}/
+  33s/@@JUL/${JUL}/
+  34s/@@AUG/${AUG}/
+  35s/@@SEP/${SEP}/
+  36s/@@OCT/${OCT}/
+  37s/@@NOV/${NOV}/
+  38s/@@DEC/${DEC}/
+  39s/@@ANN/${ANN}/
+  45s/@@DIMENSIONS/${dimensions}/
+  46s/@@LATDIM/${latdim}/
+  47s/@@LONDIM/${londim}/
   wq
 EOF
 
-if [ $dohgt ]; then
-  ex "${userout}lut2finalout_${append_rng}.py" <<EOF 
-    24s/@@HGT/${hgt}/
-    wq
-EOF
-else
-  ex "${userout}lut2finalout_${append_rng}.py" <<EOF
-    24s/@@HGT//
-    wq
-EOF
-fi
-
-python "${userout}lut2finalout_${append_rng}.py"
-#rm "lut2finalout_${append_rng}.py"
-
-# run Ent_map_lc_weighted.R
-cp "Ent_map_lcwtd_config.txt" "${userout}Ent_map_lcwtd_config_${append_rng}.txt"
-
-ex "${userout}Ent_map_lcwtd_config_${append_rng}.txt" <<EOF
-  1s/@@RESOLUTION/${resolution}/
-  2,3s/@@OUTDIR/${outdir}/
-  4s/@@LC/${lc_out}/
-  5s/@@HEIGHT/${height_out}/
-  6s/@@LAIMAX/${laimax_out}/
-  7s/@@LAI/${lai_out}/
-  wq
-EOF
-
-if [ $dohgt ]; then
-  ex "${userout}Ent_map_lcwtd_config_${append_rng}.txt" <<EOF
-    5s/@@HGT/hgt/
-    4,7s/@@NA/NA
-    wq
-EOF
-else
-  ex "${userout}Ent_map_lcwtd_config_${append_rng}.txt" <<EOF
-    4,7s/ @@NA//
-    wq
-EOF
-fi
-
-Rscript "../Rfiles/Ent_map_lc_weighted.R" "${userout}Ent_map_lcwtd_config_${append_rng}.txt" "TRUE"
-#rm "Ent_map_lcwtd_config_${append_rng}.txt"
+python "${userout}regress_APAR_stat_${append_rng}.py"
+#rm "${userout}regress_APAR_stat_${append_rng}.py"
 
 echo "Intermediate scripts used to generate outputs can be found here: ${userout}"
 echo "All output files:"
