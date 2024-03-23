@@ -94,6 +94,7 @@ else
 fi
 
 append_rng=$(date | md5sum | cut -c 1-7)
+#append_rng="DEBUGXX"
 userout="../user/output/"
 
 # aij generate filenames
@@ -127,6 +128,7 @@ biome="V${dimname}_EntKG_biomes_${append_rng}.nc"
 out_nc="Ent_PAR_${runname}_regression_${append_rng}.nc"
 out_apar="Ent_APAR_${runname}_plots_${append_rng}.pdf"
 out_fapar="Ent_FAPAR_${runname}_plots_${append_rng}.pdf"
+out_map="Ent_${runname}_maps_${append_rng}.pdf"
 
 # run aij2prectemp.py
 cp "aij2prectemp.py" "${userout}aij2prectemp_${append_rng}.py"
@@ -181,31 +183,32 @@ mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
 cp "regress_APAR_stat.py" "${userout}regress_APAR_stat_${append_rng}.py"
 
 ex "${userout}regress_APAR_stat_${append_rng}.py" <<EOF
-  13s/@@INDIR/${indir}/
-  14s/@@BIOME/${outdir}${biome}/
-  16s/@@OUTDIR/${outdir}/
-  17s/@@OUT_NC/${out_nc}/
-  18s/@@OUT_APAR_PDF/${out_apar}/
-  19s/@@OUT_FAPAR_PDF/${out_fapar}/
-  20s/@@RUNNAME/${runname}/
-  21s/@@CANOPYMODEL/${canopy_model}/
-  22s/@@METADATA/${metadata}/
-  27s/@@JAN/${JAN}/
-  28s/@@FEB/${FEB}/
-  29s/@@MAR/${MAR}/
-  30s/@@APR/${APR}/
-  31s/@@MAY/${MAY}/
-  32s/@@JUN/${JUN}/
-  33s/@@JUL/${JUL}/
-  34s/@@AUG/${AUG}/
-  35s/@@SEP/${SEP}/
-  36s/@@OCT/${OCT}/
-  37s/@@NOV/${NOV}/
-  38s/@@DEC/${DEC}/
-  39s/@@ANN/${ANN}/
-  45s/@@DIMENSIONS/${dimensions}/
-  46s/@@LATDIM/${latdim}/
-  47s/@@LONDIM/${londim}/
+  16s/@@INDIR/${indir}/
+  17s/@@BIOME/${outdir}${biome}/
+  19s/@@OUTDIR/${outdir}/
+  20s/@@OUT_NC/${out_nc}/
+  21s/@@OUT_APAR_PDF/${out_apar}/
+  22s/@@OUT_FAPAR_PDF/${out_fapar}/
+  23s/@@OUT_WW_PDF/${out_map}/
+  27s/@@RUNNAME/${runname}/
+  28s/@@CANOPYMODEL/${canopy_model}/
+  29s/@@METADATA/${metadata}/
+  34s/@@JAN/${JAN}/
+  35s/@@FEB/${FEB}/
+  36s/@@MAR/${MAR}/
+  37s/@@APR/${APR}/
+  38s/@@MAY/${MAY}/
+  39s/@@JUN/${JUN}/
+  40s/@@JUL/${JUL}/
+  41s/@@AUG/${AUG}/
+  42s/@@SEP/${SEP}/
+  43s/@@OCT/${OCT}/
+  44s/@@NOV/${NOV}/
+  45s/@@DEC/${DEC}/
+  46s/@@ANN/${ANN}/
+  52s/@@DIMENSIONS/${dimensions}/
+  53s/@@LATDIM/${latdim}/
+  54s/@@LONDIM/${londim}/
   wq
 EOF
 
