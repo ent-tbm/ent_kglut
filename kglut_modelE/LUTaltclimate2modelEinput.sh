@@ -119,19 +119,20 @@ userout="../user/output/"
 IFS='.' read -r -a aijname <<< "$aij_jan"
 years=${aijname[0]:3}
 runname=${aijname[1]:3}
+xij=${aijname[1]:0:3}
 
-JAN="JAN${years}.aij${runname}.nc"
-FEB="FEB${years}.aij${runname}.nc"
-MAR="MAR${years}.aij${runname}.nc"
-APR="APR${years}.aij${runname}.nc"
-MAY="MAY${years}.aij${runname}.nc"
-JUN="JUN${years}.aij${runname}.nc"
-JUL="JUL${years}.aij${runname}.nc"
-AUG="AUG${years}.aij${runname}.nc"
-SEP="SEP${years}.aij${runname}.nc"
-OCT="OCT${years}.aij${runname}.nc"
-NOV="NOV${years}.aij${runname}.nc"
-DEC="DEC${years}.aij${runname}.nc"
+JAN="JAN${years}.${xij}${runname}.nc"
+FEB="FEB${years}.${xij}${runname}.nc"
+MAR="MAR${years}.${xij}${runname}.nc"
+APR="APR${years}.${xij}${runname}.nc"
+MAY="MAY${years}.${xij}${runname}.nc"
+JUN="JUN${years}.${xij}${runname}.nc"
+JUL="JUL${years}.${xij}${runname}.nc"
+AUG="AUG${years}.${xij}${runname}.nc"
+SEP="SEP${years}.${xij}${runname}.nc"
+OCT="OCT${years}.${xij}${runname}.nc"
+NOV="NOV${years}.${xij}${runname}.nc"
+DEC="DEC${years}.${xij}${runname}.nc"
 
 # output of aij2prectemp.py:
 prec="prec_${resolution}_${years}_${runname}_${append_rng}.nc"

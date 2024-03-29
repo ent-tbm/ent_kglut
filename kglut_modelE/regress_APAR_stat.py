@@ -74,7 +74,7 @@ oceanmask = np.empty((dimlat, dimlon))
 # Store output statistics
 apar_avg = np.empty((17, 40, 13, 3))
 apar_std = np.empty((17, 40, 13, 3))
-apar_intg = np.empty((40, 13, 3)) # integrated
+apar_intg = np.empty((13)) # integrated
 apar_kgn = np.empty((40, 13, dimlat, dimlon))
 
 fapar_avg = np.empty((17, 40, 13, 3)) # PFT, KG, MONTH, HEMISPHERE
@@ -232,7 +232,7 @@ axyp = wxyp * 5.1e14 / dimlon / 2
 # sum biomass
 c_biomass_sum = np.zeros((dimlat, dimlon))
 for i in range(16):
-    c_biomass_sum += axyp * c_biomass[i] * vsfr / 1e12 # PgC
+    c_biomass_sum += c_biomass[i] * lc_pft[i] # kgC m-2 vsfr
 
 # ocean mask
 oceanmask = np.where(soilfr > 0., 0, 1)
@@ -334,28 +334,28 @@ with PdfPages(outdir+outWWpdf) as WWpdf:
     fig.suptitle("{} ({}) Maps Page 3".format(runname, canopy_model), fontsize = 30)
 
     plt.subplot(2,2,1)
-    plt.title("APAR per grid area")
+    plt.title("APAR per Grid Area")
     axi = m.imshow(apar[12] * vsfr, interpolation='none', norm=colors.Normalize(vmin=0, vmax=300), cmap='cividis')
     m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
     m.drawcoastlines()
     cbar = plt.colorbar(axi, ticks=range(0,350,50), label="W/m²")
 
     plt.subplot(2,2,2)
-    plt.title("APAR per vegetated area")
+    plt.title("APAR per Vegetated Area")
     axi = m.imshow(apar[12], interpolation='none', norm=colors.Normalize(vmin=0, vmax=300), cmap='cividis')
     m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
     m.drawcoastlines()
     cbar = plt.colorbar(axi, ticks=range(0,350,50), label="W/m²")
 
     plt.subplot(2,2,3)
-    plt.title("FAPAR per grid area")
+    plt.title("FAPAR per Grid Area")
     axi = m.imshow(fapar[12] * vsfr, interpolation='none', norm=colors.Normalize(vmin=0, vmax=1), cmap=panoply_cmap)
     m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
     m.drawcoastlines()
     cbar = plt.colorbar(axi, ticks=np.arange(0,1.1,0.1), label="fraction")
 
     plt.subplot(2,2,4)
-    plt.title("FAPAR per vegetated area")
+    plt.title("FAPAR per Vegetated Area")
     axi = m.imshow(fapar[12], interpolation='none', norm=colors.Normalize(vmin=0, vmax=1), cmap=panoply_cmap)
     m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
     m.drawcoastlines()
@@ -373,25 +373,32 @@ with PdfPages(outdir+outWWpdf) as WWpdf:
     fig.suptitle("{} ({}) Maps Page 4".format(runname, canopy_model), fontsize = 30)
 
     plt.subplot(2,2,1)
-    plt.title("Mean Simulated Biomass")
-    axi = m.imshow(c_biomass_sum, interpolation='none', norm=colors.Normalize(vmin=0, vmax=3), cmap='Greens')
+    plt.title("Mean Simulated Biomass per Grid Area\nTotal Global Biomass: {:.2f} PgC".format(np.ma.sum(c_biomass_sum * vsfr * axyp) / 1e12))
+    axi = m.imshow(c_biomass_sum * vsfr, interpolation='none', norm=colors.Normalize(vmin=0, vmax=25), cmap='Greens')
     m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
     m.drawcoastlines()
-    cbar = plt.colorbar(axi, label="PgC")
+    cbar = plt.colorbar(axi, ticks=range(0,30,5), label="kgC m-2")
+
+    #plt.subplot(2,2,2)
+    #plt.title("Annual Gross Primary Productivity")
+    #axi = m.imshow(gpp[12] * axyp * vsfr * 365 / 1e15, interpolation='none', norm=colors.Normalize(vmin=0, vmax=0.25), cmap='Greens')
+    #m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
+    #m.drawcoastlines()
+    #cbar = plt.colorbar(axi, label="PgC")
 
     plt.subplot(2,2,2)
+    plt.title("Mean Simulated Biomass per Vegetated Area")
+    axi = m.imshow(c_biomass_sum, interpolation='none', norm=colors.Normalize(vmin=0, vmax=25), cmap='Greens')
+    m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
+    m.drawcoastlines()
+    cbar = plt.colorbar(axi, ticks=range(0,30,5), label="kgC m-2")
+
+    plt.subplot(2,2,3)
     plt.title("Mass-Specific Power")
-    axi = m.imshow(apar[12] * axyp * vsfr / c_biomass_sum / 1e15, interpolation='none', norm=colors.LogNorm(vmin=1e-3, vmax=1e-1), cmap='plasma')
+    axi = m.imshow(apar[12] / c_biomass_sum / 1000, interpolation='none', norm=colors.LogNorm(vmin=1e-3, vmax=1e-1), cmap='plasma')
     m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
     m.drawcoastlines()
     cbar = plt.colorbar(axi, ticks=[1e-3, 1e-2, 1e-1], label="W/gC")
-
-    plt.subplot(2,2,3)
-    plt.title("Annual Gross Primary Productivity")
-    axi = m.imshow(gpp[12] * axyp * vsfr * 365 / 1e15, interpolation='none', norm=colors.Normalize(vmin=0, vmax=0.25), cmap='Greens')
-    m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
-    m.drawcoastlines()
-    cbar = plt.colorbar(axi, label="PgC")
 
     plt.subplot(2,2,4) # [ (gC / m2 / day) * (365 day / year) ] / [ (W / m2) * (86400 second / day) * (365 day / year) ]
     plt.title("Light Use Efficiency") # gC / MJ
@@ -478,7 +485,7 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
     dataset.createVariable("fapar_global", 'f4', dimensions=('kgn', 'month', 'lat', 'lon'), fill_value=fillvalue, zlib=True)
     dataset.createVariable("fapar_pft", 'f4', dimensions=('lcn', 'kgn', 'month', 'lat', 'lon'), fill_value=fillvalue, zlib=True)
 
-    dataset.createVariable("apar_global_integrated", 'f4', dimensions=('kgn', 'month', 'hemisphere'), fill_value=fillvalue, zlib=True)
+    dataset.createVariable("apar_global_integrated", 'f4', dimensions=('month'), fill_value=fillvalue, zlib=True)
     dataset.createVariable("msp_avg", 'f4', dimensions=('kgn', 'month', 'hemisphere'), fill_value=fillvalue, zlib=True)
     dataset.createVariable("msp_std", 'f4', dimensions=('kgn', 'month', 'hemisphere'), fill_value=fillvalue, zlib=True)
 
@@ -501,7 +508,7 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
     dataset['apar_pft_avg'].setncattr("long_name", "APAR Mean by Plant Functional Type, Koeppen-Geiger Biome, and Month")
     dataset['apar_pft_std'].setncattr("long_name", "APAR Standard Deviation by Plant Functional Type, Koeppen-Geiger Biome, and Month")
 
-    dataset['apar_global_integrated'].setncattr("long_name", "APAR integrated over vegetated surface area by Koeppen-Geiger Biome and Month")
+    dataset['apar_global_integrated'].setncattr("long_name", "APAR integrated over vegetated surface area by Month")
     dataset['msp_avg'].setncattr("long_name", "Mean Mass-Specific Power by Koeppen-Geiger Biome and Month")
     dataset['msp_std'].setncattr("long_name", "Standard Deviation Mass-Specific Power by Koeppen-Geiger Biome and Month")
 
@@ -539,8 +546,11 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
     ran = range(1,13)
     for PFT in range(17): # lcn
         if (PFT == 16):
-            wxyp_lc = np.ma.MaskedArray(wxyp * soilfr, mask=np.ma.where(soilfr > 0., False, True))
+            soil_mask = np.ma.where(soilfr > 0., False, True)
+            wxyp_lc = np.ma.MaskedArray(wxyp * vsfr, mask=soil_mask)
             print("PFT: global")
+            for MON in range(13): # month
+                apar_intg[MON] = np.ma.MaskedArray(apar[MON,:,:] * vsfr * axyp * month_day[MON] / 1e9, mask=soil_mask).sum()
         else:
             wxyp_lc = wxyp * lc_pft[PFT,:,:] * soilfr
             print("PFT: {}".format(lcn_names[PFT].decode('utf-8').strip()))
@@ -554,26 +564,22 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
                     fapar_mnth = fapar[MON,:,:]
                     par_mask = np.full((dimlat, dimlon), False)
 
-                    apar_mnth_intg = np.ma.MaskedArray(apar_mnth * vsfr * axyp * month_day[MON] / 1e9, mask=KG_mask)
-                    msp_mnth_intg = apar_mnth * vsfr * axyp / c_biomass_sum / 1e15
+                    msp_mnth_intg = apar_mnth / c_biomass_sum
                     msp_mnth_intg = np.ma.MaskedArray(np.ma.masked_invalid(msp_mnth_intg), mask=KG_mask)
 
                     # north
-                    apar_intg[KG,MON,0] = apar_mnth_intg[dimlat//2:].sum()
                     msp_avg[KG,MON,0] = np.ma.average(msp_mnth_intg[dimlat//2:], weights=wxyp_lc[dimlat//2:])
                     try:
                         msp_std[KG,MON,0] = sqrt(np.ma.average((msp_mnth_intg[dimlat//2:]-msp_avg[KG,MON,0])**2, weights=wxyp_lc[dimlat//2:]))
                     except ValueError:
                         pass
                     # south
-                    apar_intg[KG,MON,1] = apar_mnth_intg[:dimlat//2].sum()
                     msp_avg[KG,MON,1] = np.ma.average(msp_mnth_intg[:dimlat//2], weights=wxyp_lc[:dimlat//2])
                     try:
                         msp_std[KG,MON,1] = sqrt(np.ma.average((msp_mnth_intg[:dimlat//2]-msp_avg[KG,MON,1])**2, weights=wxyp_lc[:dimlat//2]))
                     except ValueError:
                         pass
                     # global
-                    apar_intg[KG,MON,2] = apar_mnth_intg.sum()
                     msp_avg[KG,MON,2] = np.ma.average(msp_mnth_intg, weights=wxyp_lc)
                     try:
                         msp_std[KG,MON,2] = sqrt(np.ma.average((msp_mnth_intg-msp_avg[KG,MON,2])**2, weights=wxyp_lc))
@@ -675,7 +681,7 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
             dataset['apar_global_std'][:,:,:] = apar_std[PFT,:,:,:]
             dataset['fapar_global_std'][:,:,:] = fapar_std[PFT,:,:,:]
             dataset['par_global_samples'][:,:] = par_num[PFT,:,:]
-            dataset['apar_global_integrated'][:,:,:] = apar_intg
+            dataset['apar_global_integrated'][:] = apar_intg
             dataset['msp_avg'][:,:,:] = msp_avg
             dataset['msp_std'][:,:,:] = msp_std
         else:
@@ -686,22 +692,6 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
             dataset['apar_pft_std'][PFT,:,:,:] = apar_std[PFT,:,:,:]
             dataset['fapar_pft_std'][PFT,:,:,:] = fapar_std[PFT,:,:,:]
             dataset['par_pft_samples'][PFT,:,:] = par_num[PFT,:,:]
-
-    fig = plt.figure(figsize=(30, 20))
-    fig.suptitle("Monthly Integrated APAR {} ({})".format(runname, canopy_model), fontsize = 30)
-    for KG in range(40):
-        plt.subplot(8, 5, KG+1)
-        plt.title(biome_desc[KG].decode('utf-8').strip())
-        plt.ylabel("Integrated APAR (GJ/month)")
-        plt.xlabel("Month")
-        plt.plot(ran, apar_intg[KG,:-1,2], color='red', label="Global n={}".format(par_num[PFT,KG,2]))
-        plt.plot(ran, apar_intg[KG,:-1,0], color='green', label="Northern n={}".format(par_num[PFT,KG,0]))
-        plt.plot(ran, apar_intg[KG,:-1,1], color='blue', label="Southern n={}".format(par_num[PFT,KG,1]))
-        plt.ylim(bottom=0)
-        plt.legend(framealpha=0.1)
-    plt.tight_layout(rect=[0, 0.03, 1, 0.96])
-    APARpdf.savefig()
-    plt.close()
 
     fig = plt.figure(figsize=(30, 20))
     fig.suptitle("Mass Specific Power {} ({})".format(runname, canopy_model), fontsize = 30)
