@@ -940,10 +940,10 @@ Ent_diags = c("vf", "Anet", "Atot", "Rd", "GCANOPY", "TRANS_SW", "LAI", "Resp_fo
 "GPP", "R_auto", "C_total", "C_lab", "C_fol", "C_sw", "C_hw", "C_froot", "C_croot", "C_soil",
 "Resp_soil", "phenofactor", "betad", "height", "n", "fdry_pft_eff", "C_litter", 
 "C_soil_SURFMET", "C_soil_SURFSTR", "C_soil_SOILMET", "C_soil_SOILSTR", "C_soil_CWD", "C_soil_SURFMIC", "C_soil_SOILMIC", "C_soil_SLOW", "C_soil_PASSIVE",
-"APAR", "IPAR")
+"APAR", "IPAR", "fAPAR", "timesteps_day")
 
 Ent_diags_LUT = data.frame(entdiagname=Ent_diags, units=c("cover fraction", "kgC m-2 s-1", "kgC m-2 s-1", "kgC m-2 s-1", "m s-1", "fraction", "m^2 m-2", "kgC m-2 s-1", "kgC m-2 s-1", "kgC m-2 s-1", "kgC m-2 s-1", "kgC m-2 s-1", "kgC m-2 s-1", "kgC m-2 s-1", "kgC m-2 s-1", "kgC m-2 s-1", "kgC m-2 gnd", "kgC m-2 gnd", "kgC m-2 gnd", "kgC m-2 gnd", "kgC m-2 gnd", "kgC m-2 gnd", "kgC m-2 gnd","kgC m-2 gnd", "kgC m-2 s-1", "index", "fraction", "m", "m-2", "fraction", "kgC m-2 s-1",
-"kgC m-2", "kgC m-2","kgC m-2","kgC m-2","kgC m-2","kgC m-2","kgC m-2","kgC m-2","kgC m-2", "umol m-2 s-1", "umol m-2 s-1") )
+"kgC m-2", "kgC m-2","kgC m-2","kgC m-2","kgC m-2","kgC m-2","kgC m-2","kgC m-2","kgC m-2", "umol m-2 s-1", "umol m-2 s-1", "fraction", "integer") )
 
 
 EntPFTchar3 = c(paste("00",1:9,sep=""), paste("0",10:16,sep=""))

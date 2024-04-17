@@ -1,5 +1,6 @@
 #entdiag995fn.R
 
+
 names.fort.980 = c("I0", "I1", "J0", "J1", "N_DEPTH", "TairC", "TcanopyC", "Qf", "P_mbar", "Ca", "Ch", "U", "IPARdif", 
 "IPARdir", "CosZen", "Smp1", "Smp2", "Smp3", "Smp4", "Smp5", "Smp6", "Sm1", "Sm2", "Sm3", "Sm4", "Sm5", "Sm6", "St1", "St2", "St3", "St4", "St5", "St6", "fice1", "fice2", "fice3", "fice4", "fice5", "fice6", "LAI1", "LAI2", "LAI3", "LAI4", "LAI5", "LAI6", "LAI7", "LAI8", "LAI9", "LAI10", "LAI11", "LAI12", "LAI13", "LAI14", "LAI15", "LAI16", "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8", "h9", "h10", "h11", "h12", "h13", "h14", "h15", "h16")
 
@@ -595,7 +596,7 @@ plotacts1080 = function(d, fort.1080, xlim=NULL, ylim=NULL, titletext="Ent ACTS"
 		
 		#Rad diagnostics
 		for (i in 24:ncol(temp)) {
-			plot(d,temp[,i],xlim=xlim,xlab="day",ylab=names(temp)[i], pch=16, cex=0.2, type=type)
+			plot(d,temp[,i],xlim=xlim,xlab="day",ylab=names(temp)[i], pch=".", cex=0.2) #pch=16, cex=0.2, type=type)
 			mtext(outer=TRUE, titletext, line=-1)
 		}		
 				
@@ -663,6 +664,32 @@ plotgort1082 = function(d, fort.1082, lai=NULL, xlim=NULL, ylim=NULL, alim=0.5, 
 
 		return(temp)
 }
+
+#---------------------------------------------------------------
+
+plotclump1078 = function(day, fort.1078.clump) {
+   #Plot clumping factors from "grep clump fort.1078 > fort.1078.clump" and columns c("names", "clumpd","clumpi")
+
+    par(mfrow=c(3,2))
+    dat = fort.1078.clump
+    vname = "clumpd"
+    vname2 = "clumpi"
+    vnames = paste0("black-",vname, ", red-",vname2)
+    plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vnames)
+    lines (day, dat[,vname2], type="l", lty=2, col=2 )
+    plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vnames, xlim=c(0,10))
+    lines (day, dat[,vname2], type="l", lty=2, col=2, xlim=c(0,10) )
+    plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vnames, xlim=c(100,110))
+    lines (day, dat[,vname2], type="l", lty=2, col=2, xlim=c(100,110) )
+    plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vnames, xlim=c(180,190))
+    lines (day, dat[,vname2], type="l", lty=2, col=2, xlim=c(180,190) )
+    plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vnames, xlim=c(250,260))
+    lines (day, dat[,vname2], type="l", lty=2, col=2, xlim=c(250,260) )
+    plot(day, dat[,vname], type="l", xlab="day", ylab=vname, main=vnames, xlim=c(350,360))
+    lines (day, dat[,vname2], type="l", lty=2, col=2, xlim=c(350,360) )
+
+}
+
 #---------------------------------------------------------------
 plot997gort = function(file, fort.997, text="") {
 	#file = "../../ModelE_runs/rnk_Edevel2nk_hyy_ENT_FLUXNET_gort/Out_121114wz/fort.997"

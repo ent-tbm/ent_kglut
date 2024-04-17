@@ -15,7 +15,7 @@ cat('run name = run name.', '\n')
 cat('site = Fluxnet or PLUMBER2 site name for data file with observations to plot with simulation.',  '\n')
 cat('       Currently supported:  MMSF \n')
 cat('optional N = 1-Ent_standalone (default), 2-giss_LSM_standalone, 3-plumber2', '\n')
-cat('optional a = plot ACTS albedo', '\n')
+cat('optional opts = a-plot ACTS albedo, b-a and also plot clump factors', '\n')
 cat('optional version = 1-previous plot version without canopyalbedo(:), 2-newer version with canopyalbedo(:)', '\n')
 quit()
 }
@@ -33,9 +33,13 @@ if (numargs > 3) {
 }
 
 if.acts = FALSE
+if.clump = FALSE
 if (numargs > 4) {
  if (args[5]=='a') { 
    if.acts = TRUE
+ } else if (args[5]=='b') {
+   if.acts = TRUE
+   if.clump = TRUE
  }
 }
 
@@ -89,11 +93,20 @@ fluxdmat = plot995r(day=NULL,fort.995[,2:ncol(fort.995)],
    if.dailyonly=FALSE, if.ver2=if.ver2)
 
 if (if.acts) {
+  cat('Plotting ACTS \n')
   fort.1082 = read.table(paste0(runpath, "fort.1082"), header=FALSE)
   fort.1080 = read.table(paste0(runpath, "fort.1080"), header=FALSE)
   d = 1 + (fort.995[,"timecum"] - fort.995[1,"timecum"])/86400
   temp=plotgort1082(d, fort.1082, lai=fort.995[,"lai"], alim=0.6, titletext=runname)
   plotacts1080(d, fort.1080, alim=0.6, titletext=runname)
+
+  if (if.clump) {
+  cat('Plotting clumping factors \n')
+  system( paste0("grep clump ", runpath,  "fort.1078  > fort.1078.clump"))
+  fort.1078.clump = read.table(paste0(runpath, "fort.1078.clump"), header=FALSE)
+  names(fort.1078.clump) = c("names", "clumpd", "clumpi")
+  plotclump1078(d, fort.1078.clump)
+  }
 }
 
 dev.off()

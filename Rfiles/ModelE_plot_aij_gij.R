@@ -129,7 +129,7 @@ if (numargs > 2) { #Specify number of ra diagnostics
   }
 } else { #Default
   ra1 = match("ra001001" ,varnames)
-  nra=42 
+  nra=42  #42-E2.1_branch, 44-E2.1_lakes_slsm
 }
 if (nra > 0) {
   if (nra<10 ) {
