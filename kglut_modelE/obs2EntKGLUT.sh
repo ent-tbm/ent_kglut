@@ -240,3 +240,7 @@ EOF
 python "${userout}csv2lut_${append_rng}.py"
 echo "Output file: ${outdir}${lut_out}"
 #rm "csv2lut_${append_rng}.py"
+
+echo "Intermediate scripts used to generate outputs can be found here: ${userout}"
+echo "All output files:"
+ls ${outdir}*${append_rng}*

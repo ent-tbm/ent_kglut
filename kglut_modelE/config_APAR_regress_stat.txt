@@ -1,0 +1,6 @@
+aij_dir=/discover/nobackup/projects/giss/prod_runs/jlui1_E151F40_21t1C/selected_nc_files/
+aij_jan=JAN0050-0059.aijjlui1_E151F40_21t1C.nc
+resolution=2X2H
+outdir=../user/output/
+canopy_model=Spitters
+metadata=https://www.giss.nasa.gov/tools/modelE/
