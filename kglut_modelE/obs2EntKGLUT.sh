@@ -55,6 +55,11 @@ while IFS=$'=' read -r -a args; do
   elif [ "$keyword" = "metadata_dataversion" ]; then
     metadata_dataversion=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "outdir" ]; then
+  # relative dir check
+    if [[ ${arg:0:1} = '.' || ${arg:0:1} != '/' ]]; then
+      arg="${ppwd}/${arg}"
+    fi
+    arg="${arg}/"
     outdir=$(echo ${arg//"/"/"\/"})
     outdirn=$arg
   elif [ "$keyword" = "netcdf_format" ]; then
@@ -113,7 +118,7 @@ userout="../user/output/"
 # generate filenames 
 
 # output of prectemp2biome.sh
-biome="V${dimname}_EntKG_biomes_${append_rng}.nc"
+biome="V${dimname}_KGbiomes_${years}_${runname}_${append_rng}.nc"
 
 # output of regress_biome2laihite.py
 lai_csv_file_raw="EntKG_regressionLAI_monthly_raw_${append_rng}.csv"

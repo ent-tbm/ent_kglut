@@ -39,6 +39,11 @@ while IFS=$'=' read -r -a args; do
   keyword=${args[0]}
   arg=${args[1]}
   if [ "$keyword" = "aij_dir" ]; then
+  # relative dir check
+    if [[ ${arg:0:1} = '.' || ${arg:0:1} != '/' ]]; then
+      arg="${ppwd}/${arg}"
+    fi
+    arg="${arg}/"
     indir=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "aij_jan" ]; then
     aij_jan=$arg
@@ -123,13 +128,16 @@ prec="prec_${resolution}_${years}_${runname}_${append_rng}.nc"
 temp="temp_${resolution}_${years}_${runname}_${append_rng}.nc"
 
 # output of prectemp2biome.sh
-biome="V${dimname}_EntKG_biomes_${append_rng}.nc"
+biome="V${dimname}_KGbiomes_${years}_${runname}_${append_rng}.nc"
+biomeplot="EntKG${resolution}_Rplots_${years}_${runname}_${append_rng}.pdf"
 
 # output of regress_APAR_stat.py
-out_nc="Ent_PAR_${runname}_regression_${append_rng}.nc"
-out_apar="Ent_APAR_${runname}_plots_${append_rng}.pdf"
-out_fapar="Ent_FAPAR_${runname}_plots_${append_rng}.pdf"
-out_map="Ent_${runname}_maps_${append_rng}.pdf"
+out_nc="Ent_PAR_${years}_${runname}_regression_${append_rng}.nc"
+out_apar="Ent_APAR_${years}_${runname}_plots_${append_rng}.pdf"
+out_fapar="Ent_FAPAR_${years}_${runname}_plots_${append_rng}.pdf"
+out_map="Ent_${years}_${runname}_maps_${append_rng}.pdf"
+out_msplue="Ent_MSP_LUE_${years}_${runname}_plots_${append_rng}.pdf"
+out_txt="Ent_${years}_${runname}_globalsum_${append_rng}.txt"
 
 # run aij2prectemp.py
 cp "aij2prectemp.py" "${userout}aij2prectemp_${append_rng}.py"

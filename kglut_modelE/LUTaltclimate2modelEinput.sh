@@ -41,6 +41,11 @@ while IFS=$'=' read -r -a args; do
   keyword=${args[0]}
   arg=${args[1]}
   if [ "$keyword" = "aij_dir" ]; then
+  # relative dir check
+    if [[ ${arg:0:1} = '.' || ${arg:0:1} != '/' ]]; then
+      arg="${ppwd}/${arg}"
+    fi
+    arg="${arg}/"
     indir=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "aij_jan" ]; then
     aij_jan=$arg
@@ -55,6 +60,10 @@ while IFS=$'=' read -r -a args; do
   elif [ "$keyword" = "resolution" ]; then
     resolution=$arg
   elif [ "$keyword" = "outdir" ]; then
+    if [[ ${arg:0:1} = '.' || ${arg:0:1} != '/' ]]; then
+      arg="${ppwd}/${arg}"
+    fi
+    arg="${arg}/"
     outdir=$(echo ${arg//"/"/"\/"})
     outdirn=$arg
   elif [ "$keyword" = "netcdf_format" ]; then
