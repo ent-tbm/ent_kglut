@@ -186,38 +186,42 @@ EOF
 Rscript "../Rfiles/KG_classify.R" "${userout}KG_classify_config_${append_rng}.txt"
 
 mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
+mv "${outdirn}EntKG${resolution}_Rplots_${append_rng}.pdf" "${outdirn}${biomeplot}"
 #rm "KG_classify_config_${append_rng}.txt"
 
 # run regress_APAR_stat.py
 cp "regress_APAR_stat.py" "${userout}regress_APAR_stat_${append_rng}.py"
 
 ex "${userout}regress_APAR_stat_${append_rng}.py" <<EOF
-  16s/@@INDIR/${indir}/
-  17s/@@BIOME/${outdir}${biome}/
-  19s/@@OUTDIR/${outdir}/
-  20s/@@OUT_NC/${out_nc}/
-  21s/@@OUT_APAR_PDF/${out_apar}/
-  22s/@@OUT_FAPAR_PDF/${out_fapar}/
-  23s/@@OUT_WW_PDF/${out_map}/
-  27s/@@RUNNAME/${runname}/
-  28s/@@CANOPYMODEL/${canopy_model}/
-  29s/@@METADATA/${metadata}/
-  34s/@@JAN/${JAN}/
-  35s/@@FEB/${FEB}/
-  36s/@@MAR/${MAR}/
-  37s/@@APR/${APR}/
-  38s/@@MAY/${MAY}/
-  39s/@@JUN/${JUN}/
-  40s/@@JUL/${JUL}/
-  41s/@@AUG/${AUG}/
-  42s/@@SEP/${SEP}/
-  43s/@@OCT/${OCT}/
-  44s/@@NOV/${NOV}/
-  45s/@@DEC/${DEC}/
-  46s/@@ANN/${ANN}/
-  52s/@@DIMENSIONS/${dimensions}/
-  53s/@@LATDIM/${latdim}/
-  54s/@@LONDIM/${londim}/
+  17s/@@INDIR/${indir}/
+  18s/@@BIOME/${outdir}${biome}/
+  20s/@@OUTDIR/${outdir}/
+  21s/@@OUT_NC/${out_nc}/
+  22s/@@OUT_APAR_PDF/${out_apar}/
+  23s/@@OUT_FAPAR_PDF/${out_fapar}/
+  24s/@@OUT_WW_PDF/${out_map}/
+  25s/@@OUT_MSPLUE_PDF/${out_msplue}/
+  26s/@@OUT_SUMMARY_TXT/${out_txt}/
+  28s/@@YEAR/${years}/
+  29s/@@RUNNAME/${runname}/
+  30s/@@CANOPYMODEL/${canopy_model}/
+  31s/@@METADATA/${metadata}/
+  36s/@@JAN/${JAN}/
+  37s/@@FEB/${FEB}/
+  38s/@@MAR/${MAR}/
+  39s/@@APR/${APR}/
+  40s/@@MAY/${MAY}/
+  41s/@@JUN/${JUN}/
+  42s/@@JUL/${JUL}/
+  43s/@@AUG/${AUG}/
+  44s/@@SEP/${SEP}/
+  45s/@@OCT/${OCT}/
+  46s/@@NOV/${NOV}/
+  47s/@@DEC/${DEC}/
+  48s/@@ANN/${ANN}/
+  54s/@@DIMENSIONS/${dimensions}/
+  55s/@@LATDIM/${latdim}/
+  56s/@@LONDIM/${londim}/
   wq
 EOF
 
