@@ -56,6 +56,19 @@ while IFS=$'=' read -r -a args; do
     metadata=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "canopy_model" ]; then
     canopy_model=$(echo ${arg//"/"/"\/"})
+  elif [ "$keyword" = "biomass_override" ]; then
+    biomass=$(echo ${arg//"/"/"\/"})
+  elif [ "$keyword" = "biomass_var" ]; then
+    biomass_var=$arg
+  elif [ "$keyword" = "no_crops" ]; then
+    arg=$(echo $arg | tr [:lower:] [:upper:])
+    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
+      no_crops="True"
+    else
+      no_crops="False"
+    fi
+  elif [ "$keyword" = "lc_threshold" ]; then
+    lc_threshold=$arg
   fi
 done < "${ppwd}/${1}"
 
@@ -99,7 +112,8 @@ else
 fi
 
 append_rng=$(date | md5sum | cut -c 1-7)
-#append_rng="DEBUGXX"
+#append_rng="DEBUGZZ"
+append_rng="SPAWN"
 userout="../user/output/"
 
 # aij generate filenames
@@ -222,6 +236,10 @@ ex "${userout}regress_APAR_stat_${append_rng}.py" <<EOF
   54s/@@DIMENSIONS/${dimensions}/
   55s/@@LATDIM/${latdim}/
   56s/@@LONDIM/${londim}/
+  58s/@@BIOMASS/${biomass}/
+  59s/@@BIOMASS_VAR/${biomass_var}/
+  62s/@@CROPS/${no_crops}/
+  64s/@@LC_THRESHOLD/${lc_threshold}/
   wq
 EOF
 

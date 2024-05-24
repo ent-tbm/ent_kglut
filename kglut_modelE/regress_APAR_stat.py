@@ -55,6 +55,14 @@ dimlat, dimlon = @@DIMENSIONS
 lat = @@LATDIM
 lon = @@LONDIM
 
+biomass_override = "@@BIOMASS" # accepts 3D biomass file lctype,lat,lon
+biomass_var = "@@BIOMASS_VAR"
+override = False
+
+no_crops = @@CROPS
+
+lc_threshold = @@LC_THRESHOLD
+
 SWtoPAR = 4.05
 
 # Store values from input files
@@ -71,12 +79,14 @@ transp = np.empty((13, dimlat, dimlon))
 tsurf = np.empty((13, dimlat, dimlon))
 prec = np.empty((13, dimlat, dimlon))
 incsw_grnd = np.empty((13, dimlat, dimlon))
+srvissurf = np.empty((13, dimlat, dimlon))
 
 apar_pft = np.empty((13, 18, dimlat, dimlon)) # ra041
 fapar_pft = np.empty((13, 18, dimlat, dimlon)) # ra043
 lc_pft = np.empty((18, dimlat, dimlon)) # ra001
 c_biomass = np.empty((18, dimlat, dimlon)) # ra017 - ra024
-npp_pft = np.empty((13, 18, dimlat, dimlon)) #ra015 - ra016
+population_pft = np.empty((18, dimlat, dimlon)) # ra029
+npp_pft = np.empty((13, 18, dimlat, dimlon)) # ra015 - ra016
 
 oceanmask = np.empty((dimlat, dimlon))
 
@@ -211,6 +221,14 @@ def getweight(start_lat, end_lat):
     weight = np.cos(end_lat) - np.cos(start_lat)
     return weight
 
+# get min, mean, max of array
+def get_MMM(arr, wxyp):
+    arrm = np.ma.masked_invalid(arr)
+    minval = np.ma.min(arrm)
+    meanval = np.ma.average(arrm, weights=wxyp)
+    maxval = np.ma.max(arrm)
+    return minval, meanval, maxval
+
 print("Fetching data... Warning could be slow! Please be patient")
 for i in range(13):
     with nc.Dataset(indir+aij[i]) as dataset:
@@ -222,6 +240,7 @@ for i in range(13):
         tsurf[i] = dataset['tsurf'][:] # C
         prec[i] = dataset['prec'][:] # mm day-1
         incsw_grnd[i] = dataset['incsw_grnd'][:]
+        srvissurf[i] = dataset['srvissurf'][:]
         evap[i] = dataset['evap_land'][:]  # mm / day soilfr
         transp[i] = dataset['drycan_evap'][:] + dataset['wetcan_evap'][:] # mm / day vf
         rauto[i] = dataset['rauto'][:] # gC m-2 d-1 vf
@@ -236,6 +255,16 @@ for i in range(13):
             if (i == 12):
                 lc_pft[j] = dataset["ra001{:03d}".format(j+1)][:]
                 c_biomass[j] = dataset["ra017{:03d}".format(j+1)][:] - dataset["ra024{:03d}".format(j+1)][:]
+                population_pft[j] = dataset["ra029{:03d}".format(j+1)][:]
+
+try: # biomass override
+    with nc.Dataset(biomass_override) as dataset:
+        print("Overriding biomass with {}".format(biomass_override))
+        for j in range(16):
+            c_biomass[j] = dataset[biomass_var][j,:,:]
+        override = True
+except Exception:
+    pass
 
 # filter dataset
 apar = np.where(apar >= 0., apar, 0) # W m-2
@@ -251,11 +280,15 @@ soilresp = np.where(soilresp >= 0., soilresp, 0) # gC m-2 day-1 vf
 
 apar_pft = np.where(apar_pft >= 0., apar_pft, 0) # W m-2
 fapar_pft = np.where(fapar_pft >= 0., fapar_pft, 0) # frac
-lc_pft = np.where(lc_pft >= 0., lc_pft, 0) # frac
+lc_pft = np.where(lc_pft >= lc_threshold, lc_pft, 0) # frac
+population_pft = np.where(population_pft >= 0, population_pft, 0) # m-2
 npp_pft = np.where(npp_pft >=0., npp_pft, 0) # gC m-2 d-1 vf
 
+if (no_crops): # remove RA
+    lc_pft[14:15] = 0.
+
 # dominant LC
-domlc = np.full((dimlat, dimlon), 999)
+domlc = np.full((dimlat, dimlon), 16)
 domlcval = np.zeros((dimlat, dimlon))
 for i in range(16):
     isdominant = np.where(lc_pft[i] > domlcval, True, False)
@@ -286,30 +319,38 @@ biomes = np.where(soilfr > 0., biomes, -999)
 
 with open(outdir+outTXTsummary, mode='w') as f:
 
-    f.write("Global Biomass: {:.2f} PgC\n".format(np.ma.sum(c_biomass_sum * vsfr * axyp) / 1e12))
-    f.write("Global APAR: {:.2f} ZJ yr-1\n".format(np.ma.sum(apar[12] * vsfr * axyp * 86400 * 365 / 1e21)))
-    f.write("Global Evapotranspiration: {:.2f} km3 yr-1\n".format(np.ma.sum((evap * soilfr + transp * vsfr) / 1000 * axyp * 365 / 1e9)))
-    f.write("Global Gross Primary Productivity: {:.2f} PgC yr-1\n".format(np.ma.sum(gpp * vsfr * axyp * 365 / 1e15)))
-    f.write("Global Net Primary Productivity: {:.2f} PgC yr-1\n".format(np.ma.sum((gpp - rauto) * vsfr * axyp * 365 / 1e15)))
-    f.write("Global Net Ecosystem Exchange: {:.2f} PgC yr-1\n".format(np.ma.sum((gpp - rauto - soilresp) * vsfr * axyp * 365 / 1e15)))
-    f.write("Global Terrestrial Ecosystem Respiration: {:.2f} PgC yr-1\n".format(np.ma.sum((rauto + soilresp) * vsfr * axyp * 365 / 1e15)))
-    f.write("Carbon Use Efficiency: {:.2f}\n".format(np.ma.sum(rauto + soilresp) / np.ma.sum(gpp)))
-    f.write("Water Use Efficiency: {:.2f} gC kgH20-1\n".format(np.ma.sum(gpp * vsfr) / np.ma.sum(evap * soilfr + transp * vsfr)))
-    f.write("Light Use Efficiency: {:.2f} gC MJ-1 ({:.2f} %)\n".format(np.ma.sum(gpp) / np.ma.sum(apar * 86400 / 1e6), np.ma.sum(gpp / 12) / np.ma.sum(apar[12] * 86400 * SWtoPAR / 1e6) * 100))
+    f.write("Global Biomass: {:.2f} PgC\n\n".format(np.ma.sum(c_biomass_sum * vsfr * axyp) / 1e12))
 
-#print("\033[1mGlobal Biomass: \033[0m{:.2f} PgC".format(np.ma.sum(c_biomass_sum * vsfr * axyp) / 1e12))
-#print("\033[1mGlobal APAR: \033[0m{:.2f} ZJ yr-1".format(np.ma.sum(apar[12] * vsfr * axyp * 86400 * 365 / 1e21)))
-#print("\033[1mGlobal Evapotranspiration: \033[0m{:.2f} km3 yr-1".format(np.ma.sum((evap * soilfr + transp * vsfr) / 1000 * axyp * 365 / 1e9)))
-#print("\033[1mGlobal Gross Primary Productivity: \033[0m{:.2f} PgC yr-1".format(np.ma.sum(gpp * vsfr * axyp * 365 / 1e15)))
-#print("\033[1mGlobal Net Primary Productivity: \033[0m{:.2f} PgC yr-1".format(np.ma.sum((gpp - rauto) * vsfr * axyp * 365 / 1e15)))
-#print("\033[1mGlobal Net Ecosystem Exchange: \033[0m{:.2f} PgC yr-1".format(np.ma.sum((gpp - rauto - soilresp) * vsfr * axyp * 365 / 1e15)))
-#print("\033[1mGlobal Terrestrial Ecosystem Respiration: \033[0m{:.2f} PgC yr-1".format(np.ma.sum((rauto + soilresp) * vsfr * axyp * 365 / 1e15)))
-#print("\033[1mCarbon Use Efficiency: \033[0m{:.2f}".format(np.ma.sum(rauto + soilresp) / np.ma.sum(gpp)))
-#print("\033[1mWater Use Efficiency: \033[0m{:.2f} gC kgH20-1".format(np.ma.sum(gpp * vsfr) / np.ma.sum(evap * soilfr + transp * vsfr)))
-#print("\033[1mLight Use Efficiency: \033[0m{:.2f} gC MJ-1 ({:.2f} %)\n".format(np.ma.sum(gpp) / np.ma.sum(apar * 86400 / 1e6), np.ma.sum(gpp / 12) / np.ma.sum(apar[12] * 86400 * SWtoPAR / 1e6) * 100))
+    for i in range(13):
+        f.write("----------------- {} -----------------\n".format(month_names[(i+12)%13].decode('utf-8').strip()))
+        f.write("Global Downward Radiation: {:.2f} ZJ\n".format(np.ma.sum(incsw_grnd[(i+12)%13] * soilfr * axyp * 86400 * month_day[(i+12)%13] / 1e21)))
+        f.write("Global PAR: {:.2f} ZJ\n".format(np.ma.sum(srvissurf[(i+12)%13] * vsfr * axyp * 86400 * month_day[(i+12)%13] / 1e21)))
+        f.write("Global APAR: {:.2f} ZJ\n".format(np.ma.sum(apar[(i+12)%13] * vsfr * axyp * 86400 * month_day[(i+12)%13] / 1e21)))
+        f.write("Global Evapotranspiration: {:.2f} km3\n".format(np.ma.sum(transp[(i+12)%13] * vsfr / 1000 * axyp * month_day[(i+12)%13] / 1e9)))
+        f.write("Global Gross Primary Productivity: {:.2f} PgC\n".format(np.ma.sum(gpp[(i+12)%13] * vsfr * axyp * month_day[(i+12)%13] / 1e15)))
+        f.write("Global Net Primary Productivity: {:.2f} PgC\n".format(np.ma.sum((gpp[(i+12)%13] - rauto[(i+12)%13]) * vsfr * axyp * month_day[(i+12)%13] / 1e15)))
+        f.write("Global Net Ecosystem Exchange: {:.2f} PgC\n".format(np.ma.sum(-(gpp[(i+12)%13] - rauto[(i+12)%13] - soilresp[(i+12)%13]) * vsfr * axyp * month_day[(i+12)%13] / 1e15)))
+        f.write("Global Terrestrial Ecosystem Respiration: {:.2f} PgC\n".format(np.ma.sum((rauto[(i+12)%13] + soilresp[(i+12)%13]) * vsfr * axyp * month_day[(i+12)%13] / 1e15)))
+        f.write("Global Carbon Use Efficiency: {:.3f}\n".format(np.ma.sum(rauto[(i+12)%13] + soilresp[(i+12)%13]) / np.ma.sum(gpp[(i+12)%13])))
+        f.write("Global Water Use Efficiency: {:.2f} gC kgH20-1\n".format(np.ma.sum(gpp[(i+12)%13]) / np.ma.sum(transp[(i+12)%13])))
+        f.write("Global Light Use Efficiency: {:.4f} gC MJ-1 ({:.2f} %)\n".format(np.ma.sum(gpp[(i+12)%13]) / np.ma.sum(apar * 86400 / 1e6), np.ma.sum(gpp[(i+12)%13] / 12) / np.ma.sum(apar[(i+12)%13] * 86400 * SWtoPAR / 1e6) * 100))
+        f.write("\n")
+
+print("\033[1m----------------- Annual Summary -----------------")
+print("\033[1mGlobal Biomass: \033[0m{:.2f} PgC".format(np.ma.sum(c_biomass_sum * vsfr * axyp) / 1e12))
+print("\033[1mGlobal Downward Radiation: \033[0m{:.2f} ZJ yr-1".format(np.ma.sum(incsw_grnd[12] * soilfr * axyp * 86400 * 365 / 1e21)))
+print("\033[1mGlobal PAR: \033[0m{:.2f} ZJ yr-1".format(np.ma.sum(srvissurf[12] * vsfr * axyp * 86400 * 365 / 1e21)))
+print("\033[1mGlobal APAR: \033[0m{:.2f} ZJ yr-1".format(np.ma.sum(apar[12] * vsfr * axyp * 86400 * 365 / 1e21)))
+print("\033[1mGlobal Evapotranspiration: \033[0m{:.2f} km3 yr-1".format(np.ma.sum(transp[12] * vsfr / 1000 * axyp * 365 / 1e9)))
+print("\033[1mGlobal Gross Primary Productivity: \033[0m{:.2f} PgC yr-1".format(np.ma.sum(gpp[12] * vsfr * axyp * 365 / 1e15)))
+print("\033[1mGlobal Net Primary Productivity: \033[0m{:.2f} PgC yr-1".format(np.ma.sum((gpp[12] - rauto[12]) * vsfr * axyp * 365 / 1e15)))
+print("\033[1mGlobal Net Ecosystem Exchange: \033[0m{:.2f} PgC yr-1".format(np.ma.sum(-(gpp[12] - rauto[12] - soilresp[12]) * vsfr * axyp * 365 / 1e15)))
+print("\033[1mGlobal Terrestrial Ecosystem Respiration: \033[0m{:.2f} PgC yr-1".format(np.ma.sum((rauto[12] + soilresp[12]) * vsfr * axyp * 365 / 1e15)))
+print("\033[1mGlobal Carbon Use Efficiency: \033[0m{:.3f}".format(np.ma.sum(rauto[12] + soilresp[12]) / np.ma.sum(gpp[12])))
+print("\033[1mGlobal Water Use Efficiency: \033[0m{:.2f} gC kgH20-1".format(np.ma.sum(gpp[12]) / np.ma.sum(transp[12])))
+print("\033[1mGlobal Light Use Efficiency: \033[0m{:.4f} gC MJ-1 ({:.2f} %)\n".format(np.ma.sum(gpp[12]) / np.ma.sum(apar * 86400 / 1e6), np.ma.sum(gpp[12] / 12) / np.ma.sum(apar[12] * 86400 * SWtoPAR / 1e6) * 100))
 
 # plot maps
-
 with PdfPages(outdir+outWWpdf) as WWpdf:
     print("Plotting Maps")
     pagenum=1
@@ -330,21 +371,21 @@ with PdfPages(outdir+outWWpdf) as WWpdf:
     cbar.ax.invert_yaxis()
 
     plt.subplot(2,2,2)
-    plt.title("Mean Annual Surface Air Temperature")
+    plt.title("Mean Annual Surface Air Temperature\nMin: {:.2f} Mean: {:.2f} Max: {:.2f}".format(*get_MMM(tsurf[12], wxyp)))
     axi = m.imshow(tsurf[12], interpolation='none', norm=colors.Normalize(vmin=-40, vmax=40), cmap=panoply_cmap)
     #m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
     m.drawcoastlines()
     cbar = plt.colorbar(axi, ticks=range(-40,50,10), label="°C")
 
     plt.subplot(2,2,3)
-    plt.title("Annual Precipitation")
+    plt.title("Annual Precipitation\nMin: {:.2f} Mean: {:.2f} Max: {:.2f}".format(*get_MMM(prec[12]*365, wxyp)))
     axi = m.imshow(prec[12]*365, interpolation='none', norm=colors.LogNorm(vmin=10, vmax=5000), cmap='Blues')
     #m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
     m.drawcoastlines()
     cbar = plt.colorbar(axi, ticks=[10, 100, 1000], label="mm/year")
 
     plt.subplot(2,2,4)
-    plt.title("Incident Shortwave Radiation")
+    plt.title("Incident Shortwave Radiation\nMin: {:.2f} Mean: {:.2f} Max: {:.2f}".format(*get_MMM(incsw_grnd[12], wxyp)))
     axi = m.imshow(incsw_grnd[12], interpolation='none', norm=colors.Normalize(vmin=0, vmax=300), cmap='magma')
     #m.imshow(oceanmask, interpolation='none', cmap=oceanmask_cmap)
     m.drawcoastlines()
@@ -501,23 +542,22 @@ with PdfPages(outdir+outWWpdf) as WWpdf:
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
     plt.close()
-
+    
     ########################################################################
-
+    
     # make PFT legend
     PFTlegend = [ Line2D([], [], color='black', marker=mStyles[PFT], label=lcn_names_py[PFT], linestyle='', markersize=15) for PFT in range(16)]
     # dummy plot for color bar
     axi = m.imshow([[np.nan, np.nan], [np.nan, np.nan]], norm=colors.Normalize(vmin=6.5, vmax=40.5), cmap=KG_cmap_r)
-
+    
     pagenum+=1
-    #Scatter plots
+    #Scatter plot
     #Power GJ m-2 yr-1 vs. mass density
-    #fAPAR vs. mass density
-    fig = plt.figure(figsize=(40, 20))
-    fig.suptitle("{} ({}) ({}) Scatter Plots Page {}".format(runname, year, canopy_model, pagenum), fontsize = 40)
+    fig = plt.figure(figsize=(20, 20))
+    fig.suptitle("{} ({}) ({}) Scatter Plot Page {}".format(runname, year, canopy_model, pagenum), fontsize = 40)
 
     print("Plotting APAR scatter")
-    plt.subplot(1,2,1)
+    plt.subplot(1,1,1)
     plt.title("Annual Power vs. Mass Density", fontsize = 30)
     plt.ylabel("Power per Vegetated Area (GJ/m²/year)", fontsize = 25)
     plt.xlabel("Mass Density per Grid Area (kgC/m²)", fontsize = 25)
@@ -534,8 +574,20 @@ with PdfPages(outdir+outWWpdf) as WWpdf:
     cbar.ax.tick_params(labelsize=20)
     plt.legend(handles=PFTlegend, fontsize=20)
 
+    plt.tight_layout(rect=[0, 0.03, 1, 0.96])
+    WWpdf.savefig()
+    plt.close()
+
+    ########################################################################
+
+    pagenum+=1
+    #Scatter plot
+    #fAPAR vs. mass density
+    fig = plt.figure(figsize=(20, 20))
+    fig.suptitle("{} ({}) ({}) Scatter Plot Page {}".format(runname, year, canopy_model, pagenum), fontsize = 40)
+
     print("Plotting FAPAR scatter")
-    plt.subplot(1,2,2)
+    plt.subplot(1,1,1)
     plt.title("FAPAR vs. Mass Density", fontsize = 30)
     plt.ylabel("Fraction of APAR (fraction)", fontsize = 25)
     plt.xlabel("Mass Density per Grid Area (kgC/m²)", fontsize = 25)
@@ -555,18 +607,17 @@ with PdfPages(outdir+outWWpdf) as WWpdf:
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
     plt.close()
-
+    
     ########################################################################
 
     pagenum+=1
-    #Scatter plots
+    #Scatter plot
     #MSP vs. mass density
-    #Power GJ m-2 yr-1 vs. Annual NPP gC m-2 yr-1
-    fig = plt.figure(figsize=(40, 20))
-    fig.suptitle("{} ({}) ({}) Scatter Plots Page {}".format(runname, year, canopy_model, pagenum), fontsize = 40)
+    fig = plt.figure(figsize=(20, 20))
+    fig.suptitle("{} ({}) ({}) Scatter Plot Page {}".format(runname, year, canopy_model, pagenum), fontsize = 40)
 
     print("Plotting MSP scatter")
-    plt.subplot(1,2,1)
+    plt.subplot(1,1,1)
     plt.title("Mass Specific Power vs. Mass Density", fontsize = 30)
     plt.ylabel("Mass Specific Power (W/gC)", fontsize = 25)
     plt.xlabel("Mass Density per Grid Area (kgC/m²)", fontsize = 25)
@@ -582,10 +633,67 @@ with PdfPages(outdir+outWWpdf) as WWpdf:
             plt.scatter(np.ma.MaskedArray(c_biomass[PFT] * lc_pft[PFT], mask=KG_mask).flatten(), np.ma.MaskedArray(apar_pft[12,PFT] / c_biomass[PFT] / 1000, mask=KG_mask).flatten(), marker=mStyles[PFT], color=KGcolors[KG], s=(lc_pft[PFT].flatten() * 8)**2)
     cbar = plt.colorbar(axi, ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]))
     cbar.ax.tick_params(labelsize=20)
+    plt.gca().add_artist(plt.legend(handles=PFTlegend, fontsize=20))
+    # linear regression of ln(y) = a*ln(x) + b
+    polyfitx = np.ma.masked_invalid(np.log(c_biomass) + np.log(lc_pft))
+    polyfity = np.ma.masked_invalid(np.log(apar_pft[12]) - np.log(c_biomass) - np.log(1000))
+    polyfitw = np.where(np.logical_or(polyfitx.mask, polyfity.mask), 0., lc_pft)
+    linearfit = np.polynomial.polynomial.Polynomial.fit(
+            polyfitx.filled(0.).flatten(),
+            polyfity.filled(0.).flatten(),
+            1,
+            w=polyfitw.flatten()).convert().coef
+    print(linearfit)
+
+    xr = np.array([0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30, 100])
+    fitted, = plt.plot(xr, np.exp(linearfit[0] + linearfit[1] * np.log(xr)), label="y = e^({:.3f} + {:.3f}ln(x)))".format(*linearfit), linewidth=4, alpha=0.5)
+    plt.legend(handles=[fitted], loc=3)
+
+    plt.tight_layout(rect=[0, 0.03, 1, 0.96])
+    WWpdf.savefig()
+    plt.close()
+     
+    ########################################################################
+    
+    pagenum+=1
+    #Scatter plot
+    #MSP vs. individual mass
+    fig = plt.figure(figsize=(20, 20))
+    fig.suptitle("{} ({}) ({}) Scatter Plot Page {}".format(runname, year, canopy_model, pagenum), fontsize = 40)
+
+    print("Plotting MSP scatter (number)")
+    plt.subplot(1,1,1)
+    plt.title("Mass Specific Power vs. Individual Mass", fontsize = 30)
+    plt.ylabel("Mass Specific Power (W/gC)", fontsize = 25)
+    plt.xlabel("Individual Mass (gC)", fontsize = 25)
+    plt.yticks(fontsize = 20)
+    plt.xticks(fontsize = 20)
+    plt.xlim(1e-2, 1e7)
+    plt.ylim(0.0004, 5)
+    plt.xscale('log')
+    plt.yscale('log')
+    for KG in range(40):
+        KG_mask = np.where(biomes != KG+1, True, False)
+        for PFT in range(16):
+            plt.scatter(np.ma.MaskedArray(c_biomass[PFT] * lc_pft[PFT] / population_pft[PFT] * 1000, mask=KG_mask).flatten(), np.ma.MaskedArray(apar_pft[12,PFT] / c_biomass[PFT] / 1000, mask=KG_mask).flatten(), marker=mStyles[PFT], color=KGcolors[KG], s=(lc_pft[PFT].flatten() * 8)**2)
+    cbar = plt.colorbar(axi, ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]))
+    cbar.ax.tick_params(labelsize=20)
     plt.legend(handles=PFTlegend, fontsize=20)
 
+    plt.tight_layout(rect=[0, 0.03, 1, 0.96])
+    WWpdf.savefig()
+    plt.close()
+    
+    ########################################################################
+
+    pagenum+=1
+    #Scatter plot
+    #Power GJ m-2 yr-1 vs. Annual NPP gC m-2 yr-1
+    fig = plt.figure(figsize=(20, 20))
+    fig.suptitle("{} ({}) ({}) Scatter Plot Page {}".format(runname, year, canopy_model, pagenum), fontsize = 40)
+
     print("Plotting NPP scatter")
-    plt.subplot(1,2,2)
+    plt.subplot(1,1,1)
     plt.title("Annual Power vs. Net Primary Productivity", fontsize = 30)
     plt.ylabel("Power per Vegetated Area (GJ/m²/year)", fontsize = 25)
     plt.xlabel("Net Primary Productivity per Vegetated Area (gC/m²/year)", fontsize = 25)
@@ -635,11 +743,11 @@ with PdfPages(outdir+outWWpdf) as WWpdf:
 
     pagenum+=1
     # Scatter plot, global and by biome MSP vs. Biomass W/gC vs. gC
-    fig = plt.figure(figsize=(40, 20))
-    fig.suptitle("{} ({}) ({}) Scatter Plots Page {}".format(runname, year, canopy_model, pagenum), fontsize = 40)
+    fig = plt.figure(figsize=(20, 20))
+    fig.suptitle("{} ({}) ({}) Scatter Plot Page {}".format(runname, year, canopy_model, pagenum), fontsize = 40)
 
     print("Plotting Hoehler")
-    plt.subplot(1,2,1)
+    plt.subplot(1,1,1)
     plt.title("Mass Specific Power vs. Biome Biomass", fontsize = 30)
     plt.ylabel("Mass Specific Power (W/gC)", fontsize = 25)
     plt.xlabel("Total Biome Biomass (PgC)", fontsize = 25)
@@ -933,7 +1041,7 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
             fig.suptitle("{} FAPAR {} ({})".format(lcn_names_py[PFT], runname, canopy_model), fontsize = 30)
         for KG in range(40):
             plt.subplot(8, 5, KG+1)
-            plt.title("{}: {}".format(biome_names_py[KG], biome_desc[KG].decode('utf-8').strip()))
+            plt.title("{}: {}\nAnnual Mean: {:.2f}±{:.2f}".format(biome_names_py[KG], biome_desc[KG].decode('utf-8').strip(), fapar_avg[PFT,KG,-1,2], fapar_std[PFT,KG,-1,2]))
             plt.ylabel("FAPAR (frac)")
             plt.xlabel("Month")
             plt.xlim(1, 12)
@@ -1082,4 +1190,75 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
 
     plt.tight_layout(rect=[0, 0.005, 1, 0.995])
     APARpdf.savefig()
+    plt.close()
+
+    # FAPAR by Biomes
+    fig = plt.figure(figsize=(30, 150))
+    fig.suptitle("FAPAR by Biome {} ({})".format(runname, canopy_model), fontsize = 30, y=0.997)
+    for KG in range(40):
+        legend=False
+        plt.subplot(40,3,KG*3+1, ) # Global
+        plt.title("{}: {} Global".format(biome_names_py[KG], biome_desc[KG].decode('utf-8').strip()))
+        plt.ylabel("FAPAR (W/m²)")
+        plt.xlim(0.8, 12.2)
+        plt.xlabel("Month")
+        plt.ylim(0, 1)
+        for PFT in range(17):
+            if (par_num[PFT,KG,2] == 0):
+                continue
+            if (PFT == 16):
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,2], color='black', linewidth=3, label='All PFTs', alpha=0.5)
+                plt.fill_between(ran, fapar_avg[PFT,KG,:-1,2]+fapar_std[PFT,KG,:-1,2], fapar_avg[PFT,KG,:-1,2]-fapar_std[PFT,KG,:-1,2], color='black', alpha=0.1)
+            else:
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,2], color=entcolors[PFT], label="{} n={}, wt={:.1f}".format(lcn_names_py[PFT], par_num[PFT,KG,2], lc_total[PFT,KG,2]), marker=mStyles[PFT], alpha=min(1, sqrt(100*lc_total[PFT,KG,2]/(dimlat*dimlon))))
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,2]+fapar_std[PFT,KG,:-1,2], color=entcolors[PFT], linestyle='dashed', linewidth=0.5, marker=mStyles[PFT], markersize=3, alpha=min(1, sqrt(50*lc_total[PFT,KG,2]/(dimlat*dimlon))))
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,2]-fapar_std[PFT,KG,:-1,2], color=entcolors[PFT], linestyle='dashed', linewidth=0.5, marker=mStyles[PFT], markersize=3, alpha=min(1, sqrt(50*lc_total[PFT,KG,2]/(dimlat*dimlon))))
+                legend=True
+        if (legend):
+            plt.legend(framealpha=0.1, loc='best', fontsize = 5)
+
+        legend=False
+        plt.subplot(40,3,KG*3+2) # Northern
+        plt.title("{}: {} Northern".format(biome_names_py[KG], biome_desc[KG].decode('utf-8').strip()))
+        plt.ylabel("FAPAR (W/m²)")
+        plt.xlim(0.8, 12.2)
+        plt.xlabel("Month")
+        plt.ylim(0, 1)
+        for PFT in range(17):
+            if (par_num[PFT,KG,0] == 0):
+                continue
+            if (PFT == 16):
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,0], color='black', linewidth=3, label='All PFTs', alpha=0.5)
+                plt.fill_between(ran, fapar_avg[PFT,KG,:-1,0]+fapar_std[PFT,KG,:-1,0], fapar_avg[PFT,KG,:-1,0]-fapar_std[PFT,KG,:-1,0], color='black', alpha=0.1)
+            else:
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,0], color=entcolors[PFT], label="{} n={}, wt={:.1f}".format(lcn_names_py[PFT], par_num[PFT,KG,0], lc_total[PFT,KG,0]), marker=mStyles[PFT], alpha=min(1, sqrt(100*lc_total[PFT,KG,0]/(dimlat*dimlon))))
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,0]+fapar_std[PFT,KG,:-1,0], color=entcolors[PFT], linestyle='dashed', linewidth=0.5, marker=mStyles[PFT], markersize=3, alpha=min(1, sqrt(50*lc_total[PFT,KG,0]/(dimlat*dimlon))))
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,0]-fapar_std[PFT,KG,:-1,0], color=entcolors[PFT], linestyle='dashed', linewidth=0.5, marker=mStyles[PFT], markersize=3, alpha=min(1, sqrt(50*lc_total[PFT,KG,0]/(dimlat*dimlon))))
+                legend=True
+        if (legend):
+            plt.legend(framealpha=0.1, loc='best', fontsize = 5)
+
+        legend=False
+        plt.subplot(40,3,KG*3+3) # Southern
+        plt.title("{}: {} Southern".format(biome_names_py[KG], biome_desc[KG].decode('utf-8').strip()))
+        plt.ylabel("FAPAR (W/m²)")
+        plt.xlim(0.8, 12.2)
+        plt.xlabel("Month")
+        plt.ylim(0, 1)
+        for PFT in range(17):
+            if (par_num[PFT,KG,1] == 0):
+                continue
+            if (PFT == 16):
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,1], color='black', linewidth=3, label='All PFTs', alpha=0.5)
+                plt.fill_between(ran, fapar_avg[PFT,KG,:-1,1]+fapar_std[PFT,KG,:-1,1], fapar_avg[PFT,KG,:-1,1]-fapar_std[PFT,KG,:-1,1], color='black', alpha=0.1)
+            else:
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,1], color=entcolors[PFT], label="{} n={}, wt={:.1f}".format(lcn_names_py[PFT], par_num[PFT,KG,1], lc_total[PFT,KG,1]), marker=mStyles[PFT], alpha=min(1, sqrt(100*lc_total[PFT,KG,1]/(dimlat*dimlon))))
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,1]+fapar_std[PFT,KG,:-1,1], color=entcolors[PFT], linestyle='dashed', linewidth=0.5, marker=mStyles[PFT], markersize=3, alpha=min(1, sqrt(50*lc_total[PFT,KG,1]/(dimlat*dimlon))))
+                plt.plot(ran, fapar_avg[PFT,KG,:-1,1]-fapar_std[PFT,KG,:-1,1], color=entcolors[PFT], linestyle='dashed', linewidth=0.5, marker=mStyles[PFT], markersize=3, alpha=min(1, sqrt(50*lc_total[PFT,KG,1]/(dimlat*dimlon))))
+                legend=True
+        if (legend):
+            plt.legend(framealpha=0.1, loc='best', fontsize = 5)
+
+    plt.tight_layout(rect=[0, 0.005, 1, 0.995])
+    FAPARpdf.savefig()
     plt.close()
