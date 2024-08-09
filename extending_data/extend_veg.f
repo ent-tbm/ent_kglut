@@ -34,8 +34,9 @@
       include 'netcdf.inc'
 
 C     This is the name of the data file we will read. 
-      character*(*) FILE_NAME
-      parameter (FILE_NAME='veg.nc')
+      !character*(*) FILE_NAME
+      !parameter (FILE_NAME='veg.nc')
+      character*400 :: FILE_NAME
 
       real*4 data_in(NX, NY, N_COVERTYPES)
 
@@ -44,6 +45,19 @@ C     This will be the netCDF ID for the file and data variable.
 
 C     Loop indexes, and error handling.
       integer x, y, retval, n, iter, s, sx
+
+C     Number of arguments at command line
+      integer :: NARGS
+
+C     Get file to read and write from command line
+      NARGS = iargc()
+      if (NARGS.lt.1) then
+         WRITE(*,*) 'Usage: extend_veg filein'
+         write(*,*) 'filein: VEG netcdf file name, max 400 char'
+         write(*,*) 'Result: Outputs extended version of VEG file'
+         RETURN
+      endif
+      call getarg(1,FILE_NAME)
 
 C     Open the file. NF_NOWRITE tells netCDF we want read-only access to
 C     the file.
