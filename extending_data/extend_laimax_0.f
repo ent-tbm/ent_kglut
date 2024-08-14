@@ -25,25 +25,73 @@
      &     /)
 
       integer NX, NY
-      parameter (NX = 144, NY = 90)
+      !parameter (NX = 144, NY = 90)
 
       contains
+
+      integer FUNCTION NCNVRT(ARG)
+      implicit none
+      CHARACTER*500 :: ARG
+      integer :: I
+      I=0
+ 10   I=I+1
+      IF(ARG(I:I).EQ.' ') GO TO 10
+      IF(ARG(I:I).EQ.'-'.OR.ARG(I:I).EQ.'+') I=I+1
+      NCNVRT=-999
+ 20   IF(ARG(I:I).LT.'0'.OR.ARG(I:I).GT.'9') RETURN
+      I=I+1
+      IF(ARG(I:I).NE.' ') GO TO 20
+      READ(ARG,*) NCNVRT
+      IF(NCNVRT.LT.0) NCNVRT=-1
+      !RETURN
+      END function NCNVRT
+
 
       subroutine extend_veg
       implicit none
       include 'netcdf.inc'
 
 C     This is the name of the data file we will read. 
-      character*(*) FILE_NAME
-      parameter (FILE_NAME='laimax.nc')
+      !character*(*) FILE_NAME
+      !parameter (FILE_NAME='laimax.nc')
+      character*400 :: FILE_NAME
 
-      real*4 data_in(NX, NY, N_COVERTYPES)
+      !real*4 data_in(NX, NY, N_COVERTYPES)
+      real*4, ALLOCATABLE :: data_in(:, :, :) !dim=(NX, NY, N_COVERTYPES)
 
 C     This will be the netCDF ID for the file and data variable.
       integer ncid, varid
 
 C     Loop indexes, and error handling.
       integer x, y, retval, n, iter, s, sx, k
+
+C     Number of arguments at command line
+      integer :: NARGS
+      character(500) :: dimarg
+
+C     Get file to read and write from command line
+      NARGS = iargc()
+      if (NARGS.lt.3) then
+         WRITE(*,*) 'Usage: extend_veg filein IM JM'
+         write(*,*) '  filein: LAIMAX netcdf file name, max 400 char'
+         write(*,*) '  IM: longitudinal grid cells '
+     &    // '(e.g. 144 for 2.5 degrees, 720 for 0.5 degrees)'
+         write(*,*) '  JM: latitudinal grid cells '
+     &    // '(e.g. 90 for 2 degrees, 360 for 0.5 degrees)'
+         write(*,*) 'Result: Outputs version of LAIMAX file'
+     &    // ' with values extended across coastlines.'
+         write(*,*) 'WARNING: Overwrites input file with ext content!'
+         RETURN
+      endif
+      call getarg(1,FILE_NAME)
+      call getarg(2, dimarg)
+      NX = NCNVRT(dimarg)
+      call getarg(3, dimarg)
+      NY = NCNVRT(dimarg)
+      write(*,*) 'Inputs: ',trim(FILE_NAME)
+      write(*,*)  NX, NY
+
+      allocate(data_in(NX, NY, N_COVERTYPES))
 
 C     Open the file. NF_NOWRITE tells netCDF we want read-only access to
 C     the file.
@@ -113,7 +161,10 @@ C     Close the file, freeing all resources.
       retval = nf_close(ncid)
       if (retval .ne. nf_noerr) call handle_err(retval)
 
-      print *,'*** SUCCESS reading example file ', FILE_NAME, '!'
+      print *,'*** Read  ', trim(FILE_NAME)
+      print *,'*** Wrote ', trim(FILE_NAME)
+
+      deallocate(data_in)
       end subroutine extend_veg
 
 

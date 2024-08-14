@@ -48,7 +48,6 @@
       !RETURN
       END function NCNVRT
 
-
       subroutine extend_veg
       implicit none
       include 'netcdf.inc'
@@ -77,10 +76,11 @@ C     Get file to read and write from command line
          WRITE(*,*) 'Usage: extend_veg filein IM JM'
          write(*,*) '  filein: VEG netcdf file name, max 400 char'
          write(*,*) '  IM: longitudinal grid cells '
-         write(*,*) '   (e.g. 144 for 2.5 degrees, 720 for 0.5 degrees)'
+     &     //'(e.g. 144 for 2.5 degrees, 720 for 0.5 degrees)'
          write(*,*) '  JM: latitudinal grid cells '
-         write(*,*) '   (e.g. 90 for 2 degrees, 360 for 0.5 degrees)'
-         write(*,*) 'Result: Outputs extended version of VEG file'
+     &     // '(e.g. 90 for 2 degrees, 360 for 0.5 degrees)'
+         write(*,*) 'Result: Outputs version of VEG file'
+     &    // ' with values extended across coastlines.'
          write(*,*) 'WARNING: Overwrites input file with ext content!'
          RETURN
       endif
