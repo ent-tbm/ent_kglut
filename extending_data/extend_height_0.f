@@ -210,7 +210,6 @@ C     Check the data.
         if (retval .ne. nf_noerr) call handle_err(retval)
       enddo
 
-
       deallocate(data_in)
       end subroutine extend_veg
 
