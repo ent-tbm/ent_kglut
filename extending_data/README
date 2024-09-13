@@ -16,7 +16,15 @@ The data is assumed to be provided in the files: veg.nc, laimax.nc, height.nc, l
 The data is extended to the same latitude first and then to the neighbouring latitudes until the entire world is covered.
 
 To compile each of the files, use something like:
-Suggested on discover as of 5/31/2023:
+5/31/2023: Suggested on discover:
 set NETCDFHOME=/usr/local/other/netcdf4/4.7.2/gcc-9.2/
 gfortran extend_veg_0.f -I $NETCDFHOME/include -L$NETCDFHOME/lib -lnetcdf -lnetcdff 
+
+8/9/2024: Suggested on discover:
+module purge
+module load comp/intel/2021.4.0 mpi/impi/2021.4.0 netcdf-4.5.0_impi_intel-19.1.0.166
+ifort extend_<var>.f -I $NETCDFHOME/include -L$NETCDFHOME/lib -lnetcdf -lnetcdff -o extend_<var>
+To run:
+./extend_<var> <any command line inputs>
+
 
