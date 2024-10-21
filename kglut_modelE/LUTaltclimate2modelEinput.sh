@@ -33,6 +33,8 @@ ppwd=$(pwd)
 path=$(cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P)
 cd "$path"
 
+append_rng=$(date | md5sum | cut -c 1-7)-$(date '+%Y-%m-%d')
+
 # Loop over the input file
 
 dohgt=false
@@ -78,6 +80,8 @@ while IFS=$'=' read -r -a args; do
     metadata_dataversion=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "metadata_datasourcelut" ]; then
     metadata_datasourcelut=$(echo ${arg//"/"/"\/"})
+  elif [ "$keyword" = "suffix" ]; then
+    append_rng="$arg-$(date '+%Y-%m-%d')"
   fi
 done < "${ppwd}/${1}"
 
@@ -120,7 +124,6 @@ else
   exit 4
 fi
 
-append_rng=$(date | md5sum | cut -c 1-7)
 userout="../user/output/"
 
 # aij generate filenames
