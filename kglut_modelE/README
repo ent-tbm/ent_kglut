@@ -20,8 +20,8 @@ A. Generate a lookup table of Koeppen-Geiger biome classes and corresponding mix
         config: Default config file "config_obs2EntKGLUT.txt" specifies the default input observations in the data directory.
         calls: prectemp2biome.sh, regress_biome2laihite.py, trim_Ent_KG_LUT.R, csvLAIdominanthemi.py, csvremoveSTD, csv2lut.py.
    A frozen LUT is provided at:
-	/discover/nobackup/projects/giss_ana/pub/Ent_TBM/EntGVSD/entgvsd_v1/entgvsd_v1.0/KoeppenGeiger/
-	https://portal.nccs.nasa.gov/datashare/GISS/Ent_TBM/EntGVSD/entgvsd_v1/entgvsd_v1.0/KoeppenGeiger/	
+	/discover/nobackup/projects/giss_ana/pub/Ent_TBM/EntGVSD/entgvsd_v1/entgvsd_v1.0/2HX2/KoeppenGeiger/
+	https://portal.nccs.nasa.gov/datashare/GISS/Ent_TBM/EntGVSD/entgvsd_v1/entgvsd_v1.0/2HX2/KoeppenGeiger/	
 
 B. Option:  Take alternative climate to generate alternative Ent TBM vegetation boundary conditions maps.
    LUTaltclimate2modelEinput.sh: Takes alternative climate (monthly temperature and precip) from ModelE aij files, and applies the lookup table to generate alternative ModelE map input files of vegetation boundary conditions.  
