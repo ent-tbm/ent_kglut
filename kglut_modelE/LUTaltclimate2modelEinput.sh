@@ -45,7 +45,7 @@ while IFS=$'=' read -r -a args; do
   if [ "$keyword" = "aij_dir" ]; then
   # relative dir check
     if [[ ${arg:0:1} = '.' || ${arg:0:1} != '/' ]]; then
-      arg="${ppwd}/${arg}"
+      arg="${path}/${arg}"
     fi
     arg="${arg}/"
     indir=$(echo ${arg//"/"/"\/"})
@@ -63,7 +63,7 @@ while IFS=$'=' read -r -a args; do
     resolution=$arg
   elif [ "$keyword" = "outdir" ]; then
     if [[ ${arg:0:1} = '.' || ${arg:0:1} != '/' ]]; then
-      arg="${ppwd}/${arg}"
+      arg="${path}/${arg}"
     fi
     arg="${arg}/"
     outdir=$(echo ${arg//"/"/"\/"})
@@ -85,13 +85,15 @@ while IFS=$'=' read -r -a args; do
   fi
 done < "${ppwd}/${1}"
 
+mkdir -p $outdirn
+
 # resolution
 # change to all caps
 resolution=$(echo $resolution | tr [:lower:] [:upper:])
 
 if [ "$resolution" = "4X5" ]; then
   dimensions="(46, 72)"
-  latdim="np.arange(-88.0, 92.0, 4.0)"
+  latdim="np.arange(-90.0, 94.0, 4.0)"
   londim="np.arange(-177.5, 182.5, 5.0)"
   dimname="72x46"
 elif [ "$resolution" = "2X2H" ]; then
@@ -188,6 +190,11 @@ EOF
 python "${userout}aij2prectemp_${append_rng}.py"
 #rm "aij2prectemp_${append_rng}.py"
 
+if [ $? -ne 0 ]; then
+  echo "Error raised in step, halting."
+  exit 1
+fi
+
 # use KG_classify instead ~~run prectemp2biome.sh~~
 #echo -e "${prec}\t${temp}\t${outdirn}${biome}" > "ptb_${append_rng}.txt"
 #./prectemp2biome.sh "ptb_${append_rng}.txt"
@@ -195,7 +202,7 @@ cp "KG_classify_config.txt" "${userout}KG_classify_config_${append_rng}.txt"
 
 ex "${userout}KG_classify_config_${append_rng}.txt" <<EOF
   1s/@@RESOLUTION/${resolution}/
-  2s/@@INDIR/${path//"/"/"\/"}/
+  2s/@@INDIR/\//
   3s/@@OUTDIR/${outdir}/
   4s/@@ID/${append_rng}/
   5s/@@TEMP/${outdir}${temp}/
@@ -204,6 +211,11 @@ ex "${userout}KG_classify_config_${append_rng}.txt" <<EOF
 EOF
 
 Rscript "../Rfiles/KG_classify.R" "${userout}KG_classify_config_${append_rng}.txt"
+
+if [ $? -ne 0 ]; then
+  echo "Error raised in step, halting."
+  exit 1
+fi
 
 mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
 #rm "KG_classify_config_${append_rng}.txt"
@@ -243,6 +255,11 @@ fi
 python "${userout}lut2finalout_${append_rng}.py"
 #rm "lut2finalout_${append_rng}.py"
 
+if [ $? -ne 0 ]; then
+  echo "Error raised in step, halting."
+  exit 1
+fi
+
 # run Ent_map_lc_weighted.R
 cp "Ent_map_lcwtd_config.txt" "${userout}Ent_map_lcwtd_config_${append_rng}.txt"
 
@@ -271,6 +288,11 @@ fi
 
 Rscript "../Rfiles/Ent_map_lc_weighted.R" "${userout}Ent_map_lcwtd_config_${append_rng}.txt" "TRUE"
 #rm "Ent_map_lcwtd_config_${append_rng}.txt"
+
+if [ $? -ne 0 ]; then
+  echo "Error raised in step, halting."
+  exit 1
+fi
 
 echo "Intermediate scripts used to generate outputs can be found here: ${userout}"
 echo "All output files:"
