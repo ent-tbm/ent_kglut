@@ -8,12 +8,16 @@ args = commandArgs(trailingOnly=TRUE)
 print(args)
 numargs = length(args)
 if (numargs < 3) {
-cat('Usage:  Rscript $R_Ent/entdiag995_plot.R <pathin/> <run name> <site> < 1 | 2 | 3 > <a> <version 1 | 2>', '\n' )
+cat('Usage:  Rscript $R_Ent/entdiag995_plot.R <pathin/> <run name> <site> <sitefilecsv> < 1 | 2 | 3 > <a> <version 1 | 2>', '\n' )
 cat('Generate plots of standalone_LSM diagnostics.', '\n')
 cat('pathin/ = path where run output directory is, e.g. $SAVEDISK.', '\n')
 cat('run name = run name.', '\n')
 cat('site = Fluxnet or PLUMBER2 site name for data file with observations to plot with simulation.',  '\n')
-cat('       Currently supported:  MMSF \n')
+cat('       Currently supported:  MMSF | Vaira \n')
+cat('sitefilecsv = path and csv file of site Fluxnet data in directory with site name', '\n')
+cat('       Default available site data files: \n')
+cat('        /discover/nobackup/nkiang/DATA/Entdata/Sitedata/MMSF/dataMMSF_enteval.csv \n')
+cat('        /discover/nobackup/nkiang/DATA/Entdata/Sitedata/Vaira/Vaira2002_version2006_gapfilled_Fluxnet.dat \n')
 cat('optional N = 1-Ent_standalone (default), 2-giss_LSM_standalone, 3-plumber2', '\n')
 cat('optional opts = a-plot ACTS albedo, b-a and also plot clump factors', '\n')
 cat('optional version = 1-previous plot version without canopyalbedo(:), 2-newer version with canopyalbedo(:)', '\n')
@@ -25,27 +29,28 @@ print(path)
 runname = args[2]
 print(runname)
 sitename = args[3]
-config = args[4]
+sitefilecsv = args[4]
+config = args[5]
 
 config = 1           #Default Ent_standalone run
-if (numargs > 3) {
- config = args[4]
+if (numargs > 4) {
+ config = args[5]
 }
 
 if.acts = FALSE
 if.clump = FALSE
-if (numargs > 4) {
- if (args[5]=='a') { 
+if (numargs > 5) {
+ if (args[6]=='a') { 
    if.acts = TRUE
- } else if (args[5]=='b') {
+ } else if (args[6]=='b') {
    if.acts = TRUE
    if.clump = TRUE
  }
 }
 
 if.ver2 = FALSE      #Default, previous for.995 without pp%albedo output.
-if (numargs > 5) {
- if (args[6]=='2') {
+if (numargs > 6) {
+ if (args[7]=='2') {
    if.ver2 = TRUE    #Output pp%albedo(:)
  } 
 }
@@ -61,9 +66,11 @@ source(paste0(Rpath, "entdiag995fn.R"))
 
 runpath = paste0(path, runname, "/")
 site = sitename
+#sitefilepath = "/discover/nobackup/nkiang/DATA/Entdata/Sitedata/"
+datafile = sitefilecsv
 #--------------------
 
-datafile = paste0("/discover/nobackup/nkiang/DATA/Entdata/Sitedata/", site, "/", paste0("data",site,"_enteval.csv"))
+#datafile = paste0("/discover/nobackup/nkiang/DATA/Entdata/Sitedata/", site, "/", paste0("data",site,"_enteval.csv"))
 cat('data file: ', datafile, "\n")
 data = read.table(datafile, sep=",",header = TRUE)
 
