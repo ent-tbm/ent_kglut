@@ -152,7 +152,7 @@ plot995r = function(day=NULL,dat,fluxNEE=NULL, drv=NULL,fluxET=NULL, laiobs=NULL
 	fluxnames = c("GPP","Rauto","Soilresp","NPP")
 	fluxdmat = as.data.frame(fluxdmat)
 	names(fluxdmat) = fluxnames
-	fluxd = tapply(dat[,"CO2flux"]*(60*60*24)/0.012, jday, FUN="mean")
+	fluxd = tapply(dat[,"CO2flux"]*(60*60*24)/0.012, jday, FUN="na.mean")
 	fluxdmeas = as.vector(tapply(fluxNEE*60*60*24*1e-6,jday,FUN="na.mean"))
 	ylim=c(min(na.omit(c(fluxd,fluxdmeas))), max(na.omit(c(fluxd,fluxdmeas))))
 	plot(unique(jday), fluxdmeas, col=2,xlab="day",ylab="mol/m2/day", ylim=ylim, type="l") #"l")

@@ -26,13 +26,13 @@ quit()
 }
 
 path = paste0(args[1], '/')
-print(path)
+#cat(path, '\n')
 runname = args[2]
-print(runname)
+#cat(runname,'\n')
 sitename = args[3]
 sitefilecsv = args[4]
 NEEname = args[5]
-config = args[6]
+#config = args[6]
 
 config = 1           #Default Ent_standalone run
 if (numargs > 5) {
@@ -52,7 +52,7 @@ if (numargs > 6) {
 
 if.ver2 = FALSE      #Default, previous for.995 without pp%albedo output.
 if (numargs > 7) {
- if (args[7]=='2') {
+ if (args[8]=='2') {
    if.ver2 = TRUE    #Output pp%albedo(:)
  } 
 }
@@ -75,7 +75,7 @@ datafile = sitefilecsv
 #datafile = paste0("/discover/nobackup/nkiang/DATA/Entdata/Sitedata/", site, "/", paste0("data",site,"_enteval.csv"))
 cat('data file: ', datafile, "\n")
 data = read.table(datafile, sep=",",header = TRUE)
-
+print(names(data))
 
 cat('run directory: ', runpath, "\n")
 fort.995=read.table(paste0(runpath,"fort.995"), header=TRUE) #FALSE ) #TRUE)
