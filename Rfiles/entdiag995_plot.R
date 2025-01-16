@@ -8,7 +8,7 @@ args = commandArgs(trailingOnly=TRUE)
 print(args)
 numargs = length(args)
 if (numargs < 3) {
-cat('Usage:  Rscript $R_Ent/entdiag995_plot.R <pathin/> <run name> <site> <sitefilecsv> < 1 | 2 | 3 > <a> <version 1 | 2>', '\n' )
+cat('Usage:  Rscript $R_Ent/entdiag995_plot.R <pathin/> <run name> <site> <sitefilecsv> <NEEname> < 1 | 2 | 3 > <a> <version 1 | 2>', '\n' )
 cat('Generate plots of standalone_LSM diagnostics.', '\n')
 cat('pathin/ = path where run output directory is, e.g. $SAVEDISK.', '\n')
 cat('run name = run name.', '\n')
@@ -18,6 +18,7 @@ cat('sitefilecsv = path and csv file of site Fluxnet data in directory with site
 cat('       Default available site data files: \n')
 cat('        /discover/nobackup/nkiang/DATA/Entdata/Sitedata/MMSF/dataMMSF_enteval.csv \n')
 cat('        /discover/nobackup/nkiang/DATA/Entdata/Sitedata/Vaira/Vaira2002_version2006_gapfilled_Fluxnet.dat \n')
+cat('NEEname = column name for NEE in the sitefilecsv. \n')
 cat('optional N = 1-Ent_standalone (default), 2-giss_LSM_standalone, 3-plumber2', '\n')
 cat('optional opts = a-plot ACTS albedo, b-a and also plot clump factors', '\n')
 cat('optional version = 1-previous plot version without canopyalbedo(:), 2-newer version with canopyalbedo(:)', '\n')
@@ -30,26 +31,27 @@ runname = args[2]
 print(runname)
 sitename = args[3]
 sitefilecsv = args[4]
-config = args[5]
+NEEname = args[5]
+config = args[6]
 
 config = 1           #Default Ent_standalone run
-if (numargs > 4) {
- config = args[5]
+if (numargs > 5) {
+ config = args[6]
 }
 
 if.acts = FALSE
 if.clump = FALSE
-if (numargs > 5) {
- if (args[6]=='a') { 
+if (numargs > 6) {
+ if (args[7]=='a') { 
    if.acts = TRUE
- } else if (args[6]=='b') {
+ } else if (args[7]=='b') {
    if.acts = TRUE
    if.clump = TRUE
  }
 }
 
 if.ver2 = FALSE      #Default, previous for.995 without pp%albedo output.
-if (numargs > 6) {
+if (numargs > 7) {
  if (args[7]=='2') {
    if.ver2 = TRUE    #Output pp%albedo(:)
  } 
@@ -94,7 +96,8 @@ pdf(file=paste0(runname,"_", Sys.Date(),".pdf"), width=6, height=8)
 par(mfrow=c(3,2), omi=c(0,0,0.5,0.5))#, ask=TRUE )
 
 fluxdmat = plot995r(day=NULL,fort.995[,2:ncol(fort.995)], 
-   fluxNEE=rep(data[,c("NEE.umol.m.2.s.1")],nyr), 
+   #fluxNEE=rep(data[,c("NEE.umol.m.2.s.1")],nyr), 
+   fluxNEE=rep(data[,c(NEEname)],nyr), 
    titleouter=paste(runname, Sys.Date()),
    line=0, type="l", #daily=24, 
    if.dailyonly=FALSE, if.ver2=if.ver2)
