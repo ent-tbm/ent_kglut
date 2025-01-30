@@ -21,7 +21,7 @@ names.fort.1082 = c("IPARdir","IPARdif","CosZen",# "cradLAI",
 			"ALBEDODIF1", "ALBEDODIF2","ALBEDODIF3","ALBEDODIF4","ALBEDODIF5","ALBEDODIF6")
 			 
 #----------------------------------------------------------------
-plot995r = function(day=NULL,dat,fluxNEE=NULL, drv=NULL,fluxET=NULL, laiobs=NULL,
+plot995r = function(day=NULL,dat,fluxNEE=NULL, skip=0, drv=NULL,fluxET=NULL, laiobs=NULL,
 	titleouter="",line=-1.5, type="p" #,daily=48
 	, if.dailyonly=FALSE, if.sumpage=FALSE, if.ver2=FALSE) {
 	#1/24/2024:  Added options to generate day time vector from timecum if present, and to plot fapar if present.
