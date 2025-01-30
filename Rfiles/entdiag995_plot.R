@@ -79,7 +79,7 @@ datafile = sitefilecsv
 
 #datafile = paste0("/discover/nobackup/nkiang/DATA/Entdata/Sitedata/", site, "/", paste0("data",site,"_enteval.csv"))
 cat('data file: ', datafile, "\n")
-data = read.table(datafile, sep=",",header = TRUE)
+data = read.table(datafile, sep=",",header = TRUE, skip=skip)
 print(names(data))
 
 cat('run directory: ', runpath, "\n")
