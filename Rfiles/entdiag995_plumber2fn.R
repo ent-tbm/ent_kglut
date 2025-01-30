@@ -98,9 +98,9 @@ plumber2_ent = function(filedrv, pathdiag, pathout=NULL, info="PLUMBER2 sitename
       #temp=plotgort1082(d, fort.1082, lai=fort.995[,"lai"], titletext="rd_ent_fbb_mmsf_acts_ca")
       #plotacts1080(d, fort.1080, titletext="MMSF ACTS")
       temp=plotgort1082(d, fort.1082, lai=fort.995[,"lai"], alim=0.6, titletext=info)
+      dev.off()
     }
 
-    dev.off()
   } else {
     print("option 2 fort.982 or other TBD next")	
   }
