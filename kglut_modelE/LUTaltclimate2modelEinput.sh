@@ -287,6 +287,13 @@ EOF
 fi
 
 Rscript "../Rfiles/Ent_map_lc_weighted.R" "${userout}Ent_map_lcwtd_config_${append_rng}.txt" "TRUE"
+
+if [ $? -ne 0 ]; then
+  echo "Error raised in step, halting."
+  exit 1
+fi
+
+Rscript "../Rfiles/Ent_maps.R" "${userout}Ent_map_lcwtd_config_${append_rng}.txt" "TRUE"
 #rm "Ent_map_lcwtd_config_${append_rng}.txt"
 
 if [ $? -ne 0 ]; then
@@ -294,6 +301,6 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "Intermediate scripts used to generate outputs can be found here: ${userout}"
+echo "Intermediate scripts used to generate outputs can be found here: ${path}${userout}"
 echo "All output files:"
 ls ${outdir}*${append_rng}*
