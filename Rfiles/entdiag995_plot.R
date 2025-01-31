@@ -8,7 +8,7 @@ args = commandArgs(trailingOnly=TRUE)
 print(args)
 numargs = length(args)
 if (numargs < 3) {
-cat('Usage:  Rscript $R_Ent/entdiag995_plot.R <pathin/> <run name> <site> <sitefilecsv> <NEEname> <skip> < 1 | 2 | 3 > <a> <version 1 | 2>', '\n' )
+cat('Usage:  Rscript $R_Ent/entdiag995_plot.R <pathin/> <run name> <site> <sitefilecsv> <NEEname> [spinup] [skip] [ 1 | 2 | 3 ] [a] [version 1 | 2]', '\n' )
 cat('Generate plots of standalone_LSM diagnostics.', '\n')
 cat('pathin/ = path where run output directory is, e.g. $SAVEDISK.', '\n')
 cat('run name = run name.', '\n')
@@ -19,7 +19,8 @@ cat('       Default available site data files: \n')
 cat('        /discover/nobackup/nkiang/DATA/Entdata/Sitedata/MMSF/dataMMSF_enteval.csv \n')
 cat('        /discover/nobackup/nkiang/DATA/Entdata/Sitedata/Vaira/Vaira2002_version2006_gapfilled_Fluxnet.dat \n')
 cat('NEEname = column name for NEE in the sitefilecsv. \n')
-cat('skip = number of misc. rows to skip above the header in the sitefilecsv. \n')
+cat('optional spinup = if the run is a spinup run, transient = if not \n')
+cat('optional skip = number of misc. rows to skip above the header in the sitefilecsv. \n')
 cat('optional N = 1-Ent_standalone (default), 2-giss_LSM_standalone, 3-plumber2', '\n')
 cat('optional opts = a-plot ACTS albedo, b-a and also plot clump factors', '\n')
 cat('optional version = 1-previous plot version without canopyalbedo(:), 2-newer version with canopyalbedo(:)', '\n')
@@ -33,31 +34,38 @@ runname = args[2]
 sitename = args[3]
 sitefilecsv = args[4]
 NEEname = args[5]
-skip=args[6]
+
+if.spinup = TRUE      #Default is spinup run
+if (numargs > 5) {
+  if( args[6]=='transient') {
+    if.spinup = FALSE
+  }
+}
 
 skip = 0           #Default no rows to skip.
-if (numargs > 5) {
- skip = args[6]
-}
-config = 1           #Default Ent_standalone run
 if (numargs > 6) {
- config = args[7]
+ skip = args[7]
+}
+
+config = 1           #Default Ent_standalone run
+if (numargs > 7) {
+ config = args[8]
 }
 
 if.acts = FALSE
 if.clump = FALSE
-if (numargs > 7) {
- if (args[7]=='a') { 
+if (numargs > 8) {
+ if (args[9]=='a') { 
    if.acts = TRUE
- } else if (args[8]=='b') {
+ } else if (args[9]=='b') {
    if.acts = TRUE
    if.clump = TRUE
  }
 }
 
 if.ver2 = FALSE      #Default, previous for.995 without pp%albedo output.
-if (numargs > 8) {
- if (args[9]=='2') {
+if (numargs > 9) {
+ if (args[10]=='2') {
    if.ver2 = TRUE    #Output pp%albedo(:)
  } 
 }
@@ -92,7 +100,10 @@ fort.995=read.table(paste0(runpath,"fort.995"), header=TRUE) #FALSE ) #TRUE)
 #	fort.1082 = fort.1082[,1:21]
 
 
-nyr = fort.995[nrow(fort.995),"timecum"]/86400/365
+nyr = 1
+if (if.spinup) {
+  nyr = fort.995[nrow(fort.995),"timecum"]/86400/365
+}
 
 #d = Time vector in days
 #d = 1+ (1:nrow(fort.995[,]) - 1)/24  #Fluxnet hourly for MMSF
