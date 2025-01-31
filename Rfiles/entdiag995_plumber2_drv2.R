@@ -79,5 +79,5 @@ print(fileforce)
 pathdiag = paste(savedir, RUN, sep="")
 if (DEBUG) { print(con=stdout(), pathdiag) }
 cat(paste0('filedrv:',datadir, "/", fileforce))
-plumber2_ent(filedrv=paste0(datadir, "/", fileforce), pathdiag=pathdiag, pathout=pathdiag, info=info, if.new=TRUE, option=printoption)
+plumber2_ent(filedrv=paste0(datadir, "/", fileforce), pathdiag=pathdiag, pathout='./', info=info, if.new=TRUE, option=printoption)
 

@@ -77,5 +77,5 @@ if (DEBUG) { print(con=stdout(), pathdiag) }
 cat('filedrv: ', fileforce, "\n")
 
 
-plumber2_ent(filedrv=fileforce, pathdiag=rundir, pathout=rundir, info=info, if.new=TRUE, option=printoption)
+plumber2_ent(filedrv=fileforce, pathdiag=rundir, pathout='./', info=info, if.new=TRUE, option=printoption)
 

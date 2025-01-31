@@ -57,7 +57,7 @@ plumber2_ent = function(filedrv, pathdiag, pathout=NULL, info="PLUMBER2 sitename
   
   #Open plot
   #if (if.new) {  quartz(width=6, height=8)  }
-  pdf(file=paste(pathout, "/", info, ".pdf",sep=""), width=6, height=8)
+  pdf(file=paste(pathout, "/", info, "_", Sys.Date(), ".pdf",sep=""), width=6, height=8)
   
   par(mfrow=c(3,2), omi=c(0,0,0.5,0.3), ask=FALSE ) 
   plot(tyrp, swdown, xlab="year", ylab="SWdown (W/m2)", pch=16, cex=0.1); title(paste("observed SWdown"))
@@ -98,7 +98,7 @@ plumber2_ent = function(filedrv, pathdiag, pathout=NULL, info="PLUMBER2 sitename
       #temp=plotgort1082(d, fort.1082, lai=fort.995[,"lai"], titletext="rd_ent_fbb_mmsf_acts_ca")
       #plotacts1080(d, fort.1080, titletext="MMSF ACTS")
       temp=plotgort1082(d, fort.1082, lai=fort.995[,"lai"], alim=0.6, titletext=info)
-      dev.off()
+      #dev.off()
     }
 
   } else {
