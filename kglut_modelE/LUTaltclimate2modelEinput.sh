@@ -192,7 +192,7 @@ python "${userout}aij2prectemp_${append_rng}.py"
 
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
-  exit 1
+  exit 10
 fi
 
 # use KG_classify instead ~~run prectemp2biome.sh~~
@@ -214,7 +214,7 @@ Rscript "../Rfiles/KG_classify.R" "${userout}KG_classify_config_${append_rng}.tx
 
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
-  exit 1
+  exit 10
 fi
 
 mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
@@ -257,7 +257,7 @@ python "${userout}lut2finalout_${append_rng}.py"
 
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
-  exit 1
+  exit 10
 fi
 
 # run Ent_map_lc_weighted.R
@@ -290,7 +290,7 @@ Rscript "../Rfiles/Ent_map_lc_weighted.R" "${userout}Ent_map_lcwtd_config_${appe
 
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
-  exit 1
+  exit 10
 fi
 
 Rscript "../Rfiles/Ent_maps.R" "${userout}Ent_map_lcwtd_config_${append_rng}.txt" "TRUE"
@@ -298,7 +298,7 @@ Rscript "../Rfiles/Ent_maps.R" "${userout}Ent_map_lcwtd_config_${append_rng}.txt
 
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
-  exit 1
+  exit 10
 fi
 
 echo "Intermediate scripts used to generate outputs can be found here: ${path}${userout}"

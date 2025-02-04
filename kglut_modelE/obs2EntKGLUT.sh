@@ -148,7 +148,7 @@ cp "KG_classify_config.txt" "${userout}KG_classify_config_${append_rng}.txt"
 
 ex "${userout}KG_classify_config_${append_rng}.txt" <<EOF
   1s/@@RESOLUTION/${resolution}/
-  2s/@@INDIR/${path//"/"/"\/"}/
+  2s/@@INDIR/\//
   3s/@@OUTDIR/${outdir}/
   4s/@@ID/${append_rng}/
   5s/@@TEMP/${temp}/
@@ -160,7 +160,7 @@ Rscript "../Rfiles/KG_classify.R" "${userout}KG_classify_config_${append_rng}.tx
 
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
-  exit 1
+  exit 10
 fi
 
 mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
@@ -192,7 +192,7 @@ python "${userout}regress_biome2laihite_${append_rng}.py"
 
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
-  exit 1
+  exit 10
 fi
 
 # run csvLAIdominanthemi.py
@@ -211,7 +211,7 @@ python "${userout}csvLAIdominanthemi_${append_rng}.py"
 
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
-  exit 1
+  exit 10
 fi
 
 # run csvremoveSTD.py
@@ -245,7 +245,7 @@ Rscript "${userout}trim_Ent_KG_LUT_${append_rng}.R"
 
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
-  exit 1
+  exit 10
 fi
 
 # run csv2lut.py
@@ -273,7 +273,7 @@ echo "Output file: ${outdir}${lut_out}"
 
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
-  exit 1
+  exit 10
 fi
 
 echo "Intermediate scripts used to generate outputs can be found here: ${userout}"

@@ -58,46 +58,46 @@ ignoreHemiVariations = 4 # Use for tropical biomes, regression will not take sam
 hasBothHemi = 5 # If biomes exist on both hemispheres
 
 biome_coords = { # I90 J144 isSouthernHemi takeSample ignoreHemiVariations hasBothHemi (depends on your source files)
-    1 : [47, 45, False, True, False, True],
-    2 : [50, 68, False, True, False, True],
-    3 : [46, 25, False, True, False, True],
-    4 : [50, 71, False, True, False, True],
-    5 : [66, 114, False, True, False, True],
-    6 : [57, 73, False, True, False, True],
-    7 : [65, 27, False, True, False, True],
-    8 : [52, 80, False, True, False, True],
-    9 : [64, 70, False, True, False, False],
-    10: [67, 70, False, True, False, True],
-    11: [22, 44, True, False, False, False],
-    12: None,
-    13: [57, 112, True, True, False, True],
-    14: [59, 113, False, True, False, True],
-    15: [34, 46, True, True, False, False],
-    16: None,
-    17: [61, 39, False, True, False, True],
-    18: [71, 72, False, True, False, True],
-    19: [72, 21, False, True, False, True],
-    20: None,
-    21: [65, 89, False, False, False, False],
-    22: [65, 90, False, True, False, False],
-    23: [65, 101, False, True, False, False],
-    24: None,
-    25: [67, 122, False, True, False, False],
-    26: [69, 125, False, True, False, False],
-    27: [73, 123, False, True, False, False],
-    28: [78, 127, False, True, False, False],
-    29: [67, 36, False, True, False, False],
-    30: [72, 93, False, True, False, False],
-    31: [77, 113, False, True, False, False],
-    32: [81, 117, False, True, False, False],
-    33: [83, 55, False, True, False, False],
-    34: [81, 34, False, True, False, True],
-    35: None,
-    36: None,
-    37: None,
-    38: None,
-    39: None,
-    40: None,
+    1 : [47, 45, False, True, False, True],     #Af
+    2 : [50, 68, False, True, False, True],     #As
+    3 : [46, 25, False, True, False, True],     #Am
+    4 : [50, 71, False, True, False, True],     #Aw
+    5 : [66, 114, False, True, False, True],    #BWk
+    6 : [57, 73, False, True, False, True],     #BWh
+    7 : [65, 27, False, True, False, True],     #BSk
+    8 : [52, 80, False, True, False, True],     #BSh
+    9 : [64, 70, False, True, False, False],    #Csa
+    10: [67, 70, False, True, False, True],     #Csb
+    11: [22, 44, True, False, False, False],    #Csc
+    12: None,                                   #Csd
+    13: [57, 112, True, True, False, True],     #Cwa
+    14: [59, 113, False, True, False, True],    #Cwb
+    15: [34, 46, True, True, False, False],     #Cwc
+    16: None,                                   #Cwd
+    17: [61, 39, False, True, False, True],     #Cfa
+    18: [71, 72, False, True, False, True],     #Cfb
+    19: [72, 21, False, True, False, True],     #Cfc
+    20: None,                                   #Cfd
+    21: [65, 89, False, False, False, False],   #Dsa
+    22: [65, 90, False, True, False, False],    #Dsb
+    23: [65, 101, False, True, False, False],   #Dsc
+    24: None,                                   #Dsd
+    25: [67, 122, False, True, False, False],   #Dwa
+    26: [69, 125, False, True, False, False],   #Dwb
+    27: [73, 123, False, True, False, False],   #Dwc
+    28: [78, 127, False, True, False, False],   #Dwd
+    29: [67, 36, False, True, False, False],    #Dfa
+    30: [72, 93, False, True, False, False],    #Dfb
+    31: [77, 113, False, True, False, False],   #Dfc
+    32: [81, 117, False, True, False, False],   #Dfd
+    33: [83, 55, False, True, False, False],    #EF
+    34: [81, 34, False, True, False, True],     #ET
+    35: None,                                   #UA
+    36: None,                                   #UAu
+    37: None,                                   #UB
+    38: None,                                   #UE
+    39: None,                                   #Ufu
+    40: None,                                   #Uuu
     }
 
 pftIgnore = 2
