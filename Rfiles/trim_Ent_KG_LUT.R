@@ -19,7 +19,7 @@ if (Rpath=="") {
 #install.packages("glue", lib=Rlib.loc, repos="https://mirrors.nics.utk.edu/cran/")
 #install.packages("base", lib=Rlib.loc, repos="https://mirrors.nics.utk.edu/cran/")
 Rlib.loc = "/discover/nobackup/projects/giss_ana/users/nkiang/aDATA/Rfiles/Rlibraries/"
-library("glue", lib.loc=Rlib.loc) #Needed for trim
+#library("glue", lib.loc=Rlib.loc) #Needed for trim
 library("base", lib.loc=Rlib.loc) #Needed for Sys.Date
 
 #----------- Edit file names ---------------

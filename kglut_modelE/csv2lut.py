@@ -6,6 +6,16 @@ import numpy as np
 import netCDF4 as nc
 import re
 from datetime import datetime
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+import matplotlib.colors as colors
+
+
+
+
+
+
+
 
 
 outdimensions = @@DIMENSIONS
@@ -189,3 +199,72 @@ with nc.Dataset(outdir+LUT_out, mode='w', format=outNETCDF_format) as dataset:
   dataset['height'][:] = HITEent
   dataset['laimax'][:] = LAImax
   dataset['lai'][:] = LAI
+
+print("Creating plots")
+
+entcolors = [(0.0, 0.3, 0.0), (0.05, 0.35, 0.05), (0.0, 0.4, 0.4), (0.05, 0.45, 0.45), (0.0, 0.6, 0.0), (0.05, 0.65, 0.05), (0.4, 0.5, 0.3), (0.5, 0.1, 0.1), (0.0, 0.6, 0.6), (0.95, 0.85, 0.65), (0.0, 0.8, 0.1), (0.7, 0.8, 0.0), (1.0, 1.0, 0.0), (0.1, 0.8, 0.8), (0.8, 0.7, 0.1), (0.8, 0.0, 0.0), (0.9, 1.0, 1.0), (0.5, 0.45, 0.5)]
+ent_cmap = colors.LinearSegmentedColormap.from_list('ent', entcolors, 18)
+
+mStyles = ["o","v","^","<",">","1","2","3","4","s","p","P","*","H","X","D"]
+
+# LAI month by PFT
+ran = range(1,13)
+with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
+  for PFT in range(16):
+    fig = plt.figure(figsize=(30, 20))
+    fig.suptitle("{} LAI monthly regression".format(lcn_names[PFT].decode('utf-8').strip()), fontsize = 30)
+    for KG in range(40):
+      plt.subplot(8, 5, KG+1)
+      plt.title("{}: {}".format(biome_names[KG].decode('utf-8').strip(), biome_desc[KG].decode('utf-8').strip()))
+      plt.ylabel("LAI (m²/m²)")
+      plt.xlabel("Month")
+      plt.xlim(1, 12)
+      plt.ylim(0, 6)
+      plt.plot(ran, np.full((12), LAImax[PFT,KG]), color='black', label="LAImax", linestyle='dashed', alpha=0.5)
+      plt.plot(ran, LAI[0,PFT,KG,:], color='green', label="Northern")
+      plt.plot(ran, LAI[1,PFT,KG,:], color='blue', label="Southern")
+      #plt.ylim(bottom=0) # have to set it after plotting if letting top limit free
+      plt.legend(framealpha=0.1)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.96])
+    LAIpdf.savefig()
+    plt.close()
+
+# LAI month by biome
+  fig = plt.figure(figsize=(30, 150))
+  fig.suptitle("LAImax by Biome", fontsize = 30, y=0.997)
+  for KG in range(40):
+    legend=False
+    plt.subplot(40,2,KG*2+1) # Northern
+    plt.title("{}: {} Northern".format(biome_names[KG].decode('utf-8').strip(), biome_desc[KG].decode('utf-8').strip()))
+    plt.ylabel("LAI (m²/m²)")
+    plt.xlim(0.8, 12.2)
+    plt.xlabel("Month")
+    plt.ylim(0, 6)
+    for PFT in range(16):
+      if (LAImax[PFT,KG] == 0):
+        continue
+      else:
+        plt.plot(ran, LAI[0,PFT,KG,:], color=entcolors[PFT], label=lcn_names[PFT].decode('utf-8').strip(), marker=mStyles[PFT])
+        legend=True
+    if (legend):
+      plt.legend(framealpha=0.1, loc='best', fontsize = 7)
+
+    legend=False
+    plt.subplot(40,2,KG*2+2) # Southern
+    plt.title("{}: {} Southern".format(biome_names[KG].decode('utf-8').strip(), biome_desc[KG].decode('utf-8').strip()))
+    plt.ylabel("LAI (m²/m²)")
+    plt.xlim(0.8, 12.2)
+    plt.xlabel("Month")
+    plt.ylim(0, 6)
+    for PFT in range(16):
+      if (LAImax[PFT,KG] == 0):
+        continue
+      else:
+        plt.plot(ran, LAI[1,PFT,KG,:], color=entcolors[PFT], label=lcn_names[PFT].decode('utf-8').strip(), marker=mStyles[PFT])
+        legend=True
+    if (legend):
+      plt.legend(framealpha=0.1, loc='best', fontsize = 7)
+
+  plt.tight_layout(rect=[0, 0.005, 1, 0.995])
+  LAIpdf.savefig()
+  plt.close()

@@ -252,18 +252,18 @@ fi
 cp "csv2lut.py" "${userout}csv2lut_${append_rng}.py"
 
 ex "${userout}csv2lut_${append_rng}.py" <<EOF
-  11s/@@DIMENSIONS/$dimensions/
-  12s/@@LATDIM/$latdim/
-  13s/@@LONDIM/$londim/
-  18s/@@LAI_CSV_FILE/${outdir}${lai_csv_file}/
-  19s/@@LAIMAX_CSV_FILE/${outdir}${laimax_csv_file}/
-  20s/@@HEIGHT_CSV_FILE/${outdir}${height_csv_file}/
-  21s/@@LC_CSV_FILE/${outdir}${lc_csv_file}/
-  110,130s/@@METADATA_DATAVERSION/$metadata_dataversion/
-  110,130s/@@METADATA_DATASOURCELUT/$metadata_datasourcelut/
-  16s/@@NETCDF_FORMAT/$netcdf_format/
-  23s/@@OUTDIR/$outdir/
-  24s/@@LUT_OUT/$lut_out/
+  21s/@@DIMENSIONS/$dimensions/
+  22s/@@LATDIM/$latdim/
+  23s/@@LONDIM/$londim/
+  28s/@@LAI_CSV_FILE/${outdir}${lai_csv_file}/
+  29s/@@LAIMAX_CSV_FILE/${outdir}${laimax_csv_file}/
+  30s/@@HEIGHT_CSV_FILE/${outdir}${height_csv_file}/
+  31s/@@LC_CSV_FILE/${outdir}${lc_csv_file}/
+  120,140s/@@METADATA_DATAVERSION/$metadata_dataversion/
+  120,140s/@@METADATA_DATASOURCELUT/$metadata_datasourcelut/
+  26s/@@NETCDF_FORMAT/$netcdf_format/
+  33s/@@OUTDIR/$outdir/
+  34s/@@LUT_OUT/$lut_out/
   wq
 EOF
 
