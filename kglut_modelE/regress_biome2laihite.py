@@ -11,7 +11,7 @@ biomeIn_file = "@@BIOME" # biomeIn are the biomes corresponding to the source LA
 LAI_file = "@@LAI" # 12 month LAI values for the PFT cover types
 LAImax_file = "@@LAIMAX" # LAI max values for the PFT cover types
 HITEent_file = "@@HEIGHT" # this specific file has hgt_ added to the front of every pft name, remove the hack below if not present
-HITEhack = "hgt_"
+HITEhack = "@@HGT"
 LC_file = "@@LC" # cover fractions to use as weights for regression - some contamination of data can occur for values of LAI if another pft is dominant
 
 LAI_datasource = "MODIS Average of 2001-2005, v4, March 2014"
@@ -32,21 +32,25 @@ lat_in = @@LATDIM
 lon_in = @@LONDIM
 
 outdir = "@@OUTDIR"
+
+################ IGNORE IF YOU DO NOT NEED NETCDF OUTPUT ##################
+
+# This section handles making an output based on raw values. Not recommended to use.
+
 writeNETCDF = False
 # define lat long coords/dimensions here, specify for biome_file and output files
-# IGNORE IF YOU DO NOT NEED NETCDF OUTPUT
-
 outdimensions = (90, 144)
 lat = np.arange(-89.0, 91, 2.0)
 lon = np.arange(-178.75, 180.25, 2.50)
 time = np.arange(1, 13)
 
-# IGNORE IF YOU DO NOT NEED NETCDF OUTPUT
 biome_file = "/discover/nobackup/jlui1/Koeppen/Koeppen-Geiger/eoceneKG.nc" # biome are the biomes corresponding to the desired output
 LAI_out = "V144x90_jcl_LAI_monthly_eocene_uncurated.nc"
 LAImax_out = "V144x90_jcl_LAImax_eocene_uncurated.nc"
 HITEent_out = "V144x90_jcl_HITEent_eocene_uncurated.nc"
 LC_out = "V144x90_jcl_LC_eocene_uncurated.nc"
+
+################ IGNORE IF YOU DO NOT NEED NETCDF OUTPUT ##################
 
 default_biome = 31 
 fillvalue = -1e+30
@@ -57,7 +61,49 @@ takeSample = 3 # Take a sample (weighted average over grid cells) instead of a s
 ignoreHemiVariations = 4 # Use for tropical biomes, regression will not take sample seperately and will not shift for seasonality
 hasBothHemi = 5 # If biomes exist on both hemispheres
 
-biome_coords = { # I90 J144 isSouthernHemi takeSample ignoreHemiVariations hasBothHemi (depends on your source files)
+biome_coords = { # I90 J144 isSouthernHemi takeSample ignoreHemiVariations hasBothHemi (generic decision table)
+    1 : [0, 0, False, True, False, True],       #Af
+    2 : [0, 0, False, True, False, True],       #As
+    3 : [0, 0, False, True, False, True],       #Am
+    4 : [0, 0, False, True, False, True],       #Aw
+    5 : [0, 0, False, True, False, True],       #BWk
+    6 : [0, 0, False, True, False, True],       #BWh
+    7 : [0, 0, False, True, False, True],       #BSk
+    8 : [0, 0, False, True, False, True],       #BSh
+    9 : [0, 0, False, True, False, True],       #Csa
+    10: [0, 0, False, True, False, True],       #Csb
+    11: [0, 0, False, True, False, True],       #Csc
+    12: None,                                   #Csd # biome does not exist
+    13: [0, 0, False, True, False, True],       #Cwa
+    14: [0, 0, False, True, False, True],       #Cwb
+    15: [0, 0, False, True, False, True],       #Cwc
+    16: None,                                   #Cwd # biome does not exist
+    17: [0, 0, False, True, False, True],       #Cfa
+    18: [0, 0, False, True, False, True],       #Cfb
+    19: [0, 0, False, True, False, True],       #Cfc
+    20: None,                                   #Cfd # biome does not exist
+    21: [0, 0, False, True, False, True],       #Dsa
+    22: [0, 0, False, True, False, True],       #Dsb
+    23: [0, 0, False, True, False, True],       #Dsc
+    24: [0, 0, False, True, False, True],       #Dsd
+    25: [0, 0, False, True, False, True],       #Dwa
+    26: [0, 0, False, True, False, True],       #Dwb
+    27: [0, 0, False, True, False, True],       #Dwc
+    28: [0, 0, False, True, False, True],       #Dwd
+    29: [0, 0, False, True, False, True],       #Dfa
+    30: [0, 0, False, True, False, True],       #Dfb
+    31: [0, 0, False, True, False, True],       #Dfc
+    32: [0, 0, False, True, False, True],       #Dfd
+    33: [0, 0, False, True, False, True],       #EF
+    34: [0, 0, False, True, False, True],       #ET
+    35: None,                                   #UA
+    36: None,                                   #UAu
+    37: None,                                   #UB
+    38: None,                                   #UE
+    39: None,                                   #Ufu
+    40: None,                                   #Uuu
+    }
+biome_coords_144x90 = { # I90 J144 isSouthernHemi takeSample ignoreHemiVariations hasBothHemi (decision table based on 144x90 dataset)
     1 : [47, 45, False, True, False, True],     #Af
     2 : [50, 68, False, True, False, True],     #As
     3 : [46, 25, False, True, False, True],     #Am
@@ -68,7 +114,7 @@ biome_coords = { # I90 J144 isSouthernHemi takeSample ignoreHemiVariations hasBo
     8 : [52, 80, False, True, False, True],     #BSh
     9 : [64, 70, False, True, False, False],    #Csa
     10: [67, 70, False, True, False, True],     #Csb
-    11: [22, 44, True, False, False, False],    #Csc
+    11: [22, 44, True, False, False, False],    #Csc # few grid cells exist in 144x90 dataset
     12: None,                                   #Csd
     13: [57, 112, True, True, False, True],     #Cwa
     14: [59, 113, False, True, False, True],    #Cwb
@@ -78,10 +124,10 @@ biome_coords = { # I90 J144 isSouthernHemi takeSample ignoreHemiVariations hasBo
     18: [71, 72, False, True, False, True],     #Cfb
     19: [72, 21, False, True, False, True],     #Cfc
     20: None,                                   #Cfd
-    21: [65, 89, False, False, False, False],   #Dsa
+    21: [65, 89, False, False, False, False],   #Dsa # few grid cells exist in 144x90 dataset
     22: [65, 90, False, True, False, False],    #Dsb
     23: [65, 101, False, True, False, False],   #Dsc
-    24: None,                                   #Dsd
+    24: None,                                   #Dsd # not present in 144x90 dataset
     25: [67, 122, False, True, False, False],   #Dwa
     26: [69, 125, False, True, False, False],   #Dwb
     27: [73, 123, False, True, False, False],   #Dwc

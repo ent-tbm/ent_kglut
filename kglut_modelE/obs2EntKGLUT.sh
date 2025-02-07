@@ -56,6 +56,13 @@ while IFS=$'=' read -r -a args; do
     resolution=$arg
   elif [ "$keyword" = "metadata_dataversion" ]; then
     metadata_dataversion=$(echo ${arg//"/"/"\/"})
+  elif [ "$keyword" = "hgt" ]; then
+    arg=$(echo $arg | tr [:lower:] [:upper:])
+    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ]; then
+      hgt="hgt_"
+    else
+      hgt=""
+    fi
   elif [ "$keyword" = "outdir" ]; then
   # relative dir check
     if [[ ${arg:0:1} = '.' || ${arg:0:1} != '/' ]]; then
@@ -75,6 +82,7 @@ while IFS=$'=' read -r -a args; do
   elif [ "$keyword" = "suffix" ]; then
     append_rng="$arg-$(date '+%Y-%m-%d')"
   fi
+
 done < "${ppwd}/${1}"
 
 mkdir -p $outdirn
@@ -174,6 +182,7 @@ ex "${userout}regress_biome2laihite_${append_rng}.py" <<EOF
   11s/@@LAI/$lai/
   12s/@@LAIMAX/$laimax/
   13s/@@HEIGHT/$height/
+  14s/@@HGT/$hgt/
   15s/@@LC/$lc/
   30s/@@DIMENSIONS/$dimensions/
   31s/@@LATDIM/$latdim/

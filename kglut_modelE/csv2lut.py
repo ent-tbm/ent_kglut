@@ -241,7 +241,7 @@ with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
     plt.xlabel("Month")
     plt.ylim(0, 6)
     for PFT in range(16):
-      if (LAImax[PFT,KG] == 0):
+      if (LC[PFT,KG] == 0):
         continue
       else:
         plt.plot(ran, LAI[0,PFT,KG,:], color=entcolors[PFT], label=lcn_names[PFT].decode('utf-8').strip(), marker=mStyles[PFT])
@@ -257,7 +257,7 @@ with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
     plt.xlabel("Month")
     plt.ylim(0, 6)
     for PFT in range(16):
-      if (LAImax[PFT,KG] == 0):
+      if (LC[PFT,KG] == 0):
         continue
       else:
         plt.plot(ran, LAI[1,PFT,KG,:], color=entcolors[PFT], label=lcn_names[PFT].decode('utf-8').strip(), marker=mStyles[PFT])
