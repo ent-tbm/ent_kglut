@@ -178,21 +178,21 @@ mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
 cp "regress_biome2laihite.py" "${userout}regress_biome2laihite_${append_rng}.py"
 
 ex "${userout}regress_biome2laihite_${append_rng}.py" <<EOF
-  10s/@@BIOME/${outdir}${biome}/
-  11s/@@LAI/$lai/
-  12s/@@LAIMAX/$laimax/
-  13s/@@HEIGHT/$height/
-  14s/@@HGT/$hgt/
-  15s/@@LC/$lc/
-  30s/@@DIMENSIONS/$dimensions/
-  31s/@@LATDIM/$latdim/
-  32s/@@LONDIM/$londim/
-  34s/@@OUTDIR/$outdir/
-  24s/@@LAI_CSV_FILE_RAW/$lai_csv_file_raw/
-  25s/@@LAIMAX_CSV_FILE_RAW/$laimax_csv_file_raw/
-  26s/@@HEIGHT_CSV_FILE_RAW/$height_csv_file_raw/
-  27s/@@LC_CSV_FILE_RAW/$lc_csv_file_raw/
-  28s/@@SAMPLES_CSV_FILE/$samples_csv_file/
+  20s/@@BIOME/${outdir}${biome}/
+  21s/@@LAI/$lai/
+  22s/@@LAIMAX/$laimax/
+  23s/@@HEIGHT/$height/
+  24s/@@HGT/$hgt/
+  25s/@@LC/$lc/
+  40s/@@DIMENSIONS/$dimensions/
+  41s/@@LATDIM/$latdim/
+  42s/@@LONDIM/$londim/
+  44s/@@OUTDIR/$outdir/
+  34s/@@LAI_CSV_FILE_RAW/$lai_csv_file_raw/
+  35s/@@LAIMAX_CSV_FILE_RAW/$laimax_csv_file_raw/
+  36s/@@HEIGHT_CSV_FILE_RAW/$height_csv_file_raw/
+  37s/@@LC_CSV_FILE_RAW/$lc_csv_file_raw/
+  38s/@@SAMPLES_CSV_FILE/$samples_csv_file/
   wq
 EOF
 

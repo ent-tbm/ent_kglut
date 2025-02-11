@@ -212,7 +212,7 @@ ran = range(1,13)
 with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
   for PFT in range(16):
     fig = plt.figure(figsize=(30, 20))
-    fig.suptitle("{} LAI monthly regression".format(lcn_names[PFT].decode('utf-8').strip()), fontsize = 30)
+    fig.suptitle("{} LAI monthly regression - lookup table".format(lcn_names[PFT].decode('utf-8').strip()), fontsize = 30)
     for KG in range(40):
       plt.subplot(8, 5, KG+1)
       plt.title("{}: {}".format(biome_names[KG].decode('utf-8').strip(), biome_desc[KG].decode('utf-8').strip()))
@@ -231,7 +231,7 @@ with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
 
 # LAI month by biome
   fig = plt.figure(figsize=(30, 150))
-  fig.suptitle("LAImax by Biome", fontsize = 30, y=0.997)
+  fig.suptitle("LAImax by Biome - lookup table", fontsize = 30, y=0.997)
   for KG in range(40):
     legend=False
     plt.subplot(40,2,KG*2+1) # Northern
