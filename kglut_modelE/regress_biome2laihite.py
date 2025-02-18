@@ -235,6 +235,7 @@ stdHITEent = np.zeros((18, 40))
 stdLC = np.zeros((40, 18))
 
 samples = np.zeros((2, 18, 40), dtype=int)
+samplesWeight = np.zeros((2, 18, 40))
 sampleCode = np.full((2, 18, 40), 'X')
 
 print("Fetching biome files")
@@ -271,71 +272,76 @@ with nc.Dataset(LAI_file) as dataset:
             if biomecoords[ignoreHemiVariations]: # take global sample (use for tropical regions)
               weights = np.multiply(np.where(biomesIn == KG, wxyp, 0), LCdata)
               if np.sum(weights) == 0:
-                samplesN = "0,X"
-                samplesS = "0,X"
+                samplesN = "0,0,X"
+                samplesS = "0,0,X"
                 continue
               LAI[pft-1][KG-1][i], stdLAI[pft-1][KG-1][i] = weighted_average_std(data[i][:][:], weights)
               LAIs[pft-1][KG-1][i] = LAI[pft-1][KG-1][i] # duplicate the data
               stdLAIs[pft-1][KG-1][i] = stdLAI[pft-1][KG-1][i]
 
               samples[:,pft-1,KG-1] = np.count_nonzero(weights)
+              samplesWeight[:,pft-1,KG-1] = np.sum(weights)
               sampleCode[:,pft-1,KG-1] = 'B'
-              samplesN = "{},B".format(np.count_nonzero(weights))
+              samplesN = "{},{},B".format(samples[0,pft-1,KG-1], samplesWeight[0,pft-1,KG-1])
               samplesS = samplesN
             else: # take samples seperately from N and S hemispheres
               northernSlice = data[i][dimlat//2:][:]
               weights = np.multiply(np.where(biomesIn[dimlat//2:][:] == KG, wxyp[dimlat//2:][:], 0), LCdata[dimlat//2:][:])
               if np.sum(weights) == 0:
-                samplesN = "0,X"
+                samplesN = "0,0,X"
               else:
                 LAI[pft-1][KG-1][i], stdLAI[pft-1][KG-1][i] = weighted_average_std(northernSlice, weights)
                 samples[0,pft-1,KG-1] = np.count_nonzero(weights)
+                samplesWeight[0,pft-1,KG-1] = np.sum(weights)
                 sampleCode[0,pft-1,KG-1] = 'N'
-                samplesN = "{},N".format(np.count_nonzero(weights))
+                samplesN = "{},{},N".format(samples[0,pft-1,KG-1], samplesWeight[0,pft-1,KG-1])
 
               southernSlice = data[i][:dimlat//2][:]
               weights = np.multiply(np.where(biomesIn[:dimlat//2][:] == KG, wxyp[:dimlat//2][:], 0), LCdata[:dimlat//2][:])
               if np.sum(weights) == 0:
-                samplesS = "0,X"
+                samplesS = "0,0,X"
               else:
                 LAIs[pft-1][KG-1][i], stdLAIs[pft-1][KG-1][i] = weighted_average_std(southernSlice, weights)
                 samples[1,pft-1,KG-1] = np.count_nonzero(weights)
                 sampleCode[1,pft-1,KG-1] = 'S'
-                samplesS = "{},S".format(np.count_nonzero(weights))
+                samplesWeight[1,pft-1,KG-1] = np.sum(weights)
+                samplesS = "{},{},S".format(samples[1,pft-1,KG-1], samplesWeight[1,pft-1,KG-1])
 
           else:
             if biomecoords[isSouthernHemi]: # take sample single hemispheric only, roll 6 months for other hemi
               southernSlice = data[i][:dimlat//2][:]
               weights = np.multiply(np.where(biomesIn[:dimlat//2][:] == KG, wxyp[:dimlat//2][:], 0), LCdata[:dimlat//2][:])
               if np.sum(weights) == 0:
-                samplesN = "0,X"
-                samplesS = "0,X"
+                samplesN = "0,0,X"
+                samplesS = "0,0,X"
                 continue
               LAIs[pft-1][KG-1][i], stdLAIs[pft-1][KG-1][i] = weighted_average_std(southernSlice, weights)
               LAI[pft-1][KG-1][(i+6)%12] = LAIs[pft-1][KG-1][i]
               stdLAI[pft-1][KG-1][(i+6)%12] = stdLAIs[pft-1][KG-1][i]
               samples[:,pft-1,KG-1] = np.count_nonzero(weights)
+              samplesWeight[:,pft-1,KG-1] = np.sum(weights)
               sampleCode[1,pft-1,KG-1] = 'S'
-              samplesS = "{},S".format(np.count_nonzero(weights))
+              samplesS = "{},{},S".format(samples[1,pft-1,KG-1], samplesWeight[1,pft-1,KG-1])
               sampleCode[0,pft-1,KG-1] = 'R'
               samplesN = "{},R".format(samplesS[:-2])
             else:
               northernSlice = data[i][dimlat//2:][:]
               weights = np.multiply(np.where(biomesIn[dimlat//2:][:] == KG, wxyp[dimlat//2:][:], 0), LCdata[dimlat//2:][:])
               if np.sum(weights) == 0:
-                samplesN = "0,X"
-                samplesS = "0,X"
+                samplesN = "0,0,X"
+                samplesS = "0,0,X"
                 continue
               LAI[pft-1][KG-1][i], stdLAI[pft-1][KG-1][i] = weighted_average_std(northernSlice, weights)
               LAIs[pft-1][KG-1][(i+6)%12] = LAI[pft-1][KG-1][i]
               stdLAIs[pft-1][KG-1][(i+6)%12] = stdLAI[pft-1][KG-1][i]
               samples[:,pft-1,KG-1] = np.count_nonzero(weights)
+              samplesWeight[:,pft-1,KG-1] = np.sum(weights)
               sampleCode[0,pft-1,KG-1] = 'N'
-              samplesN = "{},N".format(np.count_nonzero(weights))
+              samplesN = "{},{},N".format(samples[0,pft-1,KG-1], samplesWeight[0,pft-1,KG-1])
               sampleCode[1,pft-1,KG-1] = 'R'
               samplesS = "{},R".format(samplesN[:-2])
-        fsamples.write("PFT{}/KG{}/Nsample,{}\n".format(pft, KG, samplesN))
-        fsamples.write("PFT{}/KG{}/Ssample,{}\n".format(pft, KG, samplesS))
+        fsamples.write("PFT{}/KG{}/Nsamples,{}\n".format(pft, KG, samplesN))
+        fsamples.write("PFT{}/KG{}/Ssamples,{}\n".format(pft, KG, samplesS))
 
       else: # take sample from 1 gridcell (when there's only 1 or 2 cells that are of a certain biome)
         if biomecoords[isSouthernHemi]:
@@ -344,16 +350,16 @@ with nc.Dataset(LAI_file) as dataset:
           samples[:,pft-1,KG-1] = 1
           sampleCode[1,pft-1,KG-1] = 'S'
           sampleCode[0,pft-1,KG-1] = 'R'
-          fsamples.write("PFT{}/KG{}/Nsamples,{}\n".format(pft, KG, "1,S"))
-          fsamples.write("PFT{}/KG{}/Ssamples,{}\n".format(pft, KG, "1,R"))
+          fsamples.write("PFT{}/KG{}/Nsamples,1,{},R\n".format(pft, KG, LCdata[biomecoords[0]-1, biomecoords[1]-1]))
+          fsamples.write("PFT{}/KG{}/Ssamples,1,{},S\n".format(pft, KG, LCdata[biomecoords[0]-1, biomecoords[1]-1]))
         else:
           LAI[pft-1][KG-1][:] = data[np.arange(0, 12), np.full(12, biomecoords[0]-1), np.full(12, biomecoords[1]-1)]
           LAIs[pft-1][KG-1][:] = np.roll(LAI[pft-1][KG-1][:], 6)
           samples[:,pft-1,KG-1] = 1
           sampleCode[0,pft-1,KG-1] = 'N'
           sampleCode[1,pft-1,KG-1] = 'R'
-          fsamples.write("PFT{}/KG{}/Nsamples,{}\n".format(pft, KG, "1,N"))
-          fsamples.write("PFT{}/KG{}/Ssamples,{}\n".format(pft, KG, "1,R"))
+          fsamples.write("PFT{}/KG{}/Nsamples,1,{},N\n".format(pft, KG, LCdata[biomecoords[0]-1, biomecoords[1]-1]))
+          fsamples.write("PFT{}/KG{}/Ssamples,1,{},R\n".format(pft, KG, LCdata[biomecoords[0]-1, biomecoords[1]-1]))
         #print(pft, KG, LAI[pft-1][KG-1])
       
       #f.write("KG {} north: {}\n".format(KG, np.array2string(LAI[pft-1][KG-1][:]).replace('\n', '')))
@@ -544,6 +550,7 @@ with PdfPages("{}{}{}".format(outdir, regressionlai, "_LAIplot.pdf")) as LAIpdf:
     fig = plt.figure(figsize=(30, 20))
     fig.suptitle("{} LAI monthly regression - raw data".format(lcn_names[PFT]), fontsize = 30)
     for KG in range(40):
+      legend=False
       plt.subplot(8, 5, KG+1)
       plt.title("{}: {}".format(biome_names[KG], biome_desc[KG].decode('utf-8').strip()))
       plt.ylabel("LAI (m²/m²)")
@@ -553,17 +560,22 @@ with PdfPages("{}{}{}".format(outdir, regressionlai, "_LAIplot.pdf")) as LAIpdf:
       if (sampleCode[0,PFT,KG] != 'X') or (sampleCode[1,PFT,KG] != 'X'):
         plt.plot(ran, np.full((12), LAImax[PFT,KG]), color='black', label="LAImax", linestyle='dashed', alpha=0.5)
         plt.fill_between(ran, np.full((12), LAImax[PFT,KG]+stdLAImax[PFT,KG]), np.full((12), LAImax[PFT,KG]-stdLAImax[PFT,KG]), color='black', alpha=0.05)
+        legend=True
       if (sampleCode[0,PFT,KG] == 'N'):
         plt.plot(ran, LAI[PFT,KG,:], color='green', label="Northern, n={}".format(samples[0,PFT,KG]))
         plt.fill_between(ran, LAI[PFT,KG,:]+stdLAI[PFT,KG,:], LAI[PFT,KG,:]-stdLAI[PFT,KG,:], color='green', alpha=0.1)
+        legend=True
       elif (sampleCode[0,PFT,KG] == 'B'):
         plt.plot(ran, LAI[PFT,KG,:], color='red', label="Global, n={}".format(samples[0,PFT,KG]))
         plt.fill_between(ran, LAI[PFT,KG,:]+stdLAI[PFT,KG,:], LAI[PFT,KG,:]-stdLAI[PFT,KG,:], color='red', alpha=0.1)
+        legend=True
       if (sampleCode[1,PFT,KG] == 'S'):
         plt.plot(ran, LAIs[PFT,KG,:], color='blue', label="Southern, n={}".format(samples[1,PFT,KG]))
         plt.fill_between(ran, LAIs[PFT,KG,:]+stdLAIs[PFT,KG,:], LAIs[PFT,KG,:]-stdLAIs[PFT,KG,:], color='blue', alpha=0.1)
+        legend=True
       #plt.ylim(bottom=0) # have to set it after plotting if letting top limit free
-      plt.legend(framealpha=0.1)
+      if (legend):
+        plt.legend(framealpha=0.1)
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     LAIpdf.savefig()
     plt.close()

@@ -44,7 +44,7 @@ This file also outputs a samples file, which will detail how many gridcells were
 
 The dictionary "pfts" lists all the PFTs with a boolean to skip regressing it.
 
-The input lat/lon must be the same for all input files. They describe the coordinates corresponding to the arrays in the input files. Copy-paste it in or use numpy's arange function to generate it. Change the dimensions to that of the files. The same definition is also done with the output generated netCDF files. There is also the option to set a fill value and a default biome if it is not defined for some gridcells. 
+The input lat/lon must be the same for all input files. They describe the coordinates corresponding to the arrays in the input files. Copy-paste it in or use numpy's arange function to generate it. Change the dimensions to that of the files. The same definition is also done with the output generated netCDF files. By default these scripts assume the latitude array is south-to-north, and the longtitude array is west-to-east (starting at the antimeridian). There is also the option to set a fill value and a default biome if it is not defined for some gridcells. 
 
 Because the height file here uses hgt_<PFTNAME> as its variable name, it’s added as a workaround to fetch those variables. 
 

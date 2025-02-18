@@ -79,6 +79,13 @@ while IFS=$'=' read -r -a args; do
     lai_threshold_replace=$arg
   elif [ "$keyword" = "metadata_datasourcelut" ]; then
     metadata_datasourcelut=$(echo ${arg//"/"/"\/"})
+  elif [ "$keyword" = "overwrite_laimax" ]; then
+    arg=$(echo $arg | tr [:lower:] [:upper:])
+    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ]; then
+      overwrite_laimax="True"
+    else
+      overwrite_laimax="False"
+    fi
   elif [ "$keyword" = "suffix" ]; then
     append_rng="$arg-$(date '+%Y-%m-%d')"
   fi
@@ -208,10 +215,11 @@ fi
 cp "csvLAIdominanthemi.py" "${userout}csvLAIdominanthemi_${append_rng}.py"
 
 ex "${userout}csvLAIdominanthemi_${append_rng}.py" <<EOF
-  7s/@@LAI_CSV_FILE_RAW/${outdir}${lai_csv_file_raw}/
-  12s/@@LAI_THRESHOLD_REPLACE/$lai_threshold_replace/
-  9s/@@OUTDIR/$outdir/
-  10s/@@LAI_CSV_FILE/$lai_csv_file/
+  8s/@@LAI_CSV_FILE_RAW/${outdir}${lai_csv_file_raw}/
+  9s/@@SAMPLES_CSV_FILE/${outdir}${samples_csv_file}/
+  14s/@@LAI_THRESHOLD_REPLACE/$lai_threshold_replace/
+  11s/@@OUTDIR/$outdir/
+  12s/@@LAI_CSV_FILE/$lai_csv_file/
   wq
 EOF
 
@@ -261,6 +269,7 @@ fi
 cp "csv2lut.py" "${userout}csv2lut_${append_rng}.py"
 
 ex "${userout}csv2lut_${append_rng}.py" <<EOF
+  19s/@@OVERWRITE_LAIMAX/$overwrite_laimax/
   21s/@@DIMENSIONS/$dimensions/
   22s/@@LATDIM/$latdim/
   23s/@@LONDIM/$londim/
@@ -268,8 +277,8 @@ ex "${userout}csv2lut_${append_rng}.py" <<EOF
   29s/@@LAIMAX_CSV_FILE/${outdir}${laimax_csv_file}/
   30s/@@HEIGHT_CSV_FILE/${outdir}${height_csv_file}/
   31s/@@LC_CSV_FILE/${outdir}${lc_csv_file}/
-  120,140s/@@METADATA_DATAVERSION/$metadata_dataversion/
-  120,140s/@@METADATA_DATASOURCELUT/$metadata_datasourcelut/
+  120,150s/@@METADATA_DATAVERSION/$metadata_dataversion/
+  120,150s/@@METADATA_DATASOURCELUT/$metadata_datasourcelut/
   26s/@@NETCDF_FORMAT/$netcdf_format/
   33s/@@OUTDIR/$outdir/
   34s/@@LUT_OUT/$lut_out/

@@ -58,11 +58,13 @@ outdir: output directory, all files generated will be placed into this directory
 
 netcdf_format: format of the final lookup table (see netCDF API documentation for python -> https://unidata.github.io/netcdf4-python/#creatingopeningclosing-a-netcdf-file). NETCDF3-CLASSIC is a safe option
 
-hgt: Option YES or NO to specify whether the height dataset should have the hgt_ prefix.
+hgt: Option YES or NO to specify whether the height dataset should have the hgt_ prefix. Datasets for modelE input generally have the hgt_ prepended to each PFT name.
+
+overwrite_laimax: Option YES or NO to specify whether or not the LAImax field should be replaced by maximum LAI from LAI values or remain unchanged from LAImax file.
 
 lctrimfrac: threshold for land cover values to be trimmed from the final LC lookupt table. Default should be 0.08.
 
-lai_threshold_replace: threshold for monthly LAI to be replaced by the dominant hemisphere (% difference). Some regressed values for LAI may have totally different range of values by hemisphere. This script aims to resolve that by having all LAI values for each hemisphere be in the same range with opposite seasonality. Default should be 0.1.
+lai_threshold_replace: threshold for monthly LAI to be replaced by the dominant hemisphere (% difference). Some regressed values for LAI may have totally different range of values by hemisphere (or none at all for some colder biomes). This script aims to resolve that by having all LAI values for each hemisphere be in the same range with opposite seasonality. A value of 0 means the higher LAI values will always be used. A value of 1 means there is no replacement whatsoever. Alternatively, the LAI values for both hemispheres can be averaged, accounting for seasonality and relative abundance of each cover and biome. This option is set when the value is set to any negative number.
 
 metadata_datasourceLUT: (also optional, but not really) metadata specifying all data sources and versions. Should specify how the lookup table was generated (Values for cover fraction are weighed by grid surface area. Values for LAI, LAImax, and height are weighed by grid surface area and cover fraction.) as well as where they came from and the version of the files.
 

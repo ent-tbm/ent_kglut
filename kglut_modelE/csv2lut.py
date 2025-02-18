@@ -16,7 +16,7 @@ import matplotlib.colors as colors
 
 
 
-
+overwriteLAImax = @@OVERWRITE_LAIMAX
 
 outdimensions = @@DIMENSIONS
 lat = @@LATDIM
@@ -86,6 +86,12 @@ with open(laimax_file) as flaimax, open(height_file) as fheight, open(lc_file) a
     except ValueError as e: # OH AND EVEN WORSE, [4:-5] and [3:-4][1:-1] DOESN'T FIX IT! IT JUST MAKES AN EMPTY STRING
       #print(e)
       break
+
+if(overwriteLAImax):
+  for PFT in range(16):
+    for KG in range(40):
+      LAImax[PFT,KG] = np.max(LAI[:,PFT,KG,:])
+
 biome_desc = np.array([
   "Equatorial rainforest, fully humid                         ",
   "Equatorial monsoon                                         ",
@@ -220,6 +226,8 @@ with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
       plt.xlabel("Month")
       plt.xlim(1, 12)
       plt.ylim(0, 6)
+      if (LC[PFT,KG] == 0):
+        continue
       plt.plot(ran, np.full((12), LAImax[PFT,KG]), color='black', label="LAImax", linestyle='dashed', alpha=0.5)
       plt.plot(ran, LAI[0,PFT,KG,:], color='green', label="Northern")
       plt.plot(ran, LAI[1,PFT,KG,:], color='blue', label="Southern")
