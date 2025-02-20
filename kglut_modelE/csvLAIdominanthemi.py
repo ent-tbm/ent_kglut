@@ -39,6 +39,8 @@ with open(LAI_in, 'r') as flin, open(outdir+LAI_out, 'w') as flout, open(samples
       sweight = float(sweightline.split(',')[-2])
 
       if (nweight + sweight) == 0:
+        flout.write(nline)
+        flout.write(sline)
         continue
 
       rarray = np.zeros(12)
