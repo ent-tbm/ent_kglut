@@ -1396,7 +1396,7 @@ Ent_calc_lc_weighted_map_GISS = function(filelc, filevar, pathout=".",
 	#Print map
 	temp = strsplit(filevar, "/")[[1]]
 	temp = strsplit(temp[length(temp)], "[.]")[[1]]
-	fileoutpre = temp[1]
+	fileoutpre = paste(temp[-length(temp)], collapse=".")
 	print(fileoutpre)
 	
 	if (if.pdf) {
@@ -1528,7 +1528,31 @@ Ent_domlc_plot = function(lctype, numpft=17, res="HXH", legend.cex=0.6, Entcolor
 	#par(omi=c(0,0,0,1)) #(bottom, left, top, right)
 	par(omi=c(0,0,0,0), oma=c(0,0,0,4)) #(bottom, left, top, right) 	#Use for single
 
-	plot.grid.categorical(lctype, res=res,color=rgbhex)
+  # remove rgb colors that are cut off
+  lowcolor = 1
+  highcolor = length(rgbhex)
+
+  for (i in 0:length(rgbhex)-1) {
+    if (length(lctype[lctype==i]) > 0) {
+      #print(paste(i, length(lctype[lctype==i])))
+      break
+    }
+    else {
+      lowcolor = i+2
+    }
+  }
+
+  for (i in 0:length(rgbhex)-1) {
+    if (length(lctype[lctype==length(rgbhex)-1-i]) > 0) {
+      #print(paste(i, length(lctype[lctype==length(rgbhex)-1-i])))
+      break
+    } 
+    else {
+      highcolor = length(rgbhex)-1-i
+    }
+  }
+  #print(paste(lowcolor, highcolor))
+	plot.grid.categorical(lctype, res=res,color=rgbhex[lowcolor:highcolor])
 	par(xpd=NA)
 	#legend.gradient(cbind(x = c(200,210,210,200), y = c(80,80,-80,-80)), 
     #             cols = rgbhex, title = "", limits = c(0,ncov))
