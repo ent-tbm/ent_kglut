@@ -1,9 +1,10 @@
 #KoeppenGeiger.R
-#Author:  Nancy Y. Kiang
+#Author:  Nancy.Y.Kiang@nasa.gov
 #Cite:   "Based on, with slight modifications to:
-#         Rubel, F. and Kottek, M., 2010. Observed and projected climate shifts 1901-2100 depicted by world maps of the Koppen-Geiger climate classification. Meteorologische Zeitschrift, 19(2): 135-141.
-#         Kottek, M., Grieser, J., Beck, C., Rudolf, B. and Rubel, F., 2006. World map of the Koppen-Geiger climate classification updated. Meteorologische Zeitschrift, 15(3): 259-263."
-#Acknowledge: Classifcation R code by Nancy Y. Kiang
+#         Rubel, F. and Kottek, M., 2010. Observed and projected climate shifts 1901-2100 depicted by world maps of the Koppen-Geiger climate classification. Meteorologische Zeitschrift, 19(2): 135-141.  doi:10.1127/0941-2948/2010/0430
+#         Kottek, M., Grieser, J., Beck, C., Rudolf, B. and Rubel, F., 2006. World map of the Koppen-Geiger climate classification updated. Meteorologische Zeitschrift, 15(3): 259-263. doi:10.1127/0941-2948/2006/0130"
+#Modification to Kottek et al. (2006): Instead of a half-year summer, we used 4-month seasons for tropical climates As and Aw (northern hemisphere, summer = June-September, winter = November-February).  This also identifies the rain shadow areas in East Africa, Sri Lanka, and maybe a little too much of northeastern Brazil. Locations in the code where this modification is done are documented in-line where they occur.
+#Acknowledge: Classification R code by Nancy Y. Kiang.
 
 Rpath = paste0(Sys.getenv("R_Ent"), "/")
 if (Rpath=="") {
@@ -273,7 +274,7 @@ winter = function(hemi) {
 
 summeryr.4 = function(hemi) {
 	#1/3-year season
-	#Modification fo Kottek & Rubel (2006), using 4-month seasons for As and Aw (northern hemisphere, summer = June-September, winter = November-February).  This also identifies the rain shadow areas in East Africa, Sri Lanka, and maybe a little too much of northeastern Brazil.
+	#Modification to Kottek & Rubel (2006), using 4-month seasons for As and Aw (northern hemisphere, summer = June-September, winter = November-February).  This also identifies the rain shadow areas in East Africa, Sri Lanka, and maybe a little too much of northeastern Brazil.
 	if (hemi=='N') {
 		return(c(F,F,F,F,F,T,T,T,T,F,F,F)) #-----JJAS---
 	} else if (hemi=='S') {
@@ -282,7 +283,7 @@ summeryr.4 = function(hemi) {
 }
 winteryr.4 = function(hemi) {
 	#1/3-years season
-        #Modification fo Kottek & Rubel (2006), using 4-month seasons for As and Aw (northern hemisphere, summer = June-September, winter = November-February).  This also identifies the rain shadow areas in East Africa, Sri Lanka, and maybe a little too much of northeastern Brazil.
+        #Modification to Kottek & Rubel (2006), using 4-month seasons for As and Aw (northern hemisphere, summer = June-September, winter = November-February).  This also identifies the rain shadow areas in East Africa, Sri Lanka, and maybe a little too much of northeastern Brazil.
 	if (hemi=='N') {
 		return(c(T,T,F,F,F,F,F,F,F,F,T,T)) #JF--------ND
 	} else if (hemi=='S') {
