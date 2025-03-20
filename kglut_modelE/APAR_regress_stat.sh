@@ -35,6 +35,12 @@ cd "$path"
 
 append_rng=$(date | md5sum | cut -c 1-7)-$(date '+%Y-%m-%d')
 
+msp_ar="False"
+biomass_live="False"
+biomass_agb="False"
+no_clab="False"
+no_crops="False"
+
 # Loop over the input file
 
 while IFS=$'=' read -r -a args; do
@@ -66,12 +72,30 @@ while IFS=$'=' read -r -a args; do
     biomass=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "biomass_var" ]; then
     biomass_var=$arg
+  elif [ "$keyword" = "msp_ar" ]; then
+    arg=$(echo $arg | tr [:lower:] [:upper:])
+    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
+      msp_ar="True"
+    fi
+  elif [ "$keyword" = "biomass_live" ]; then
+    arg=$(echo $arg | tr [:lower:] [:upper:])
+    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
+      biomass_live="True"
+    fi
+  elif [ "$keyword" = "biomass_agb" ]; then
+    arg=$(echo $arg | tr [:lower:] [:upper:])
+    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
+      biomass_agb="True"
+    fi
+  elif [ "$keyword" = "no_clab" ]; then
+    arg=$(echo $arg | tr [:lower:] [:upper:])
+    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
+      no_clab="True"
+    fi
   elif [ "$keyword" = "no_crops" ]; then
     arg=$(echo $arg | tr [:lower:] [:upper:])
     if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
       no_crops="True"
-    else
-      no_crops="False"
     fi
   elif [ "$keyword" = "lc_threshold" ]; then
     lc_threshold=$arg
@@ -158,7 +182,8 @@ out_apar="Ent_APAR_${years}_${runname}_plots_${append_rng}.pdf"
 out_fapar="Ent_FAPAR_${years}_${runname}_plots_${append_rng}.pdf"
 out_map="Ent_${years}_${runname}_maps_${append_rng}.pdf"
 out_msplue="Ent_MSP_LUE_${years}_${runname}_plots_${append_rng}.pdf"
-out_txt="Ent_${years}_${runname}_globalsum_${append_rng}.txt"
+out_txt="Ent_${years}_${runname}_globalsummary_${append_rng}.txt"
+out_biomass="Ent_Biomass_${years}_${runname}_${append_rng}.nc"
 
 # run aij2prectemp.py
 cp "aij2prectemp.py" "${userout}aij2prectemp_${append_rng}.py"
@@ -224,15 +249,16 @@ mv "${outdirn}EntKG${resolution}_Rplots_${append_rng}.pdf" "${outdirn}${biomeplo
 cp "regress_APAR_stat.py" "${userout}regress_APAR_stat_${append_rng}.py"
 
 ex "${userout}regress_APAR_stat_${append_rng}.py" <<EOF
-  17s/@@INDIR/${indir}/
-  18s/@@BIOME/${outdir}${biome}/
-  20s/@@OUTDIR/${outdir}/
-  21s/@@OUT_NC/${out_nc}/
-  22s/@@OUT_APAR_PDF/${out_apar}/
-  23s/@@OUT_FAPAR_PDF/${out_fapar}/
-  24s/@@OUT_WW_PDF/${out_map}/
-  25s/@@OUT_MSPLUE_PDF/${out_msplue}/
-  26s/@@OUT_SUMMARY_TXT/${out_txt}/
+  16s/@@INDIR/${indir}/
+  17s/@@BIOME/${outdir}${biome}/
+  19s/@@OUTDIR/${outdir}/
+  20s/@@OUT_NC/${out_nc}/
+  21s/@@OUT_APAR_PDF/${out_apar}/
+  22s/@@OUT_FAPAR_PDF/${out_fapar}/
+  23s/@@OUT_WW_PDF/${out_map}/
+  24s/@@OUT_MSPLUE_PDF/${out_msplue}/
+  25s/@@OUT_SUMMARY_TXT/${out_txt}/
+  26s/@@OUT_BIOMASS/${out_biomass}/
   28s/@@YEAR/${years}/
   29s/@@RUNNAME/${runname}/
   30s/@@CANOPYMODEL/${canopy_model}/
@@ -257,6 +283,10 @@ ex "${userout}regress_APAR_stat_${append_rng}.py" <<EOF
   59s/@@BIOMASS_VAR/${biomass_var}/
   62s/@@CROPS/${no_crops}/
   64s/@@LC_THRESHOLD/${lc_threshold}/
+  66s/@@MSPAR/${msp_ar}/
+  67s/@@BIOMASSLIVE/${biomass_live}/
+  68s/@@BIOMASSAGB/${biomass_agb}/
+  69s/@@NOCLAB/${no_clab}/
   wq
 EOF
 
