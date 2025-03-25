@@ -32,7 +32,7 @@ if (Rpath=="/") {
 } else {
   cat("R_Ent not set \n")
   cat("Please set environment variable R_Ent to the path to your Rfiles directory. \n")
-  quit()
+#  quit()
 }
 
 source(paste0(Rpath, "/utils_noSDMTools.R"))
