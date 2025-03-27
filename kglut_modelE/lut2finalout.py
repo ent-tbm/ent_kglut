@@ -195,7 +195,7 @@ with nc.Dataset(outdir+HITEent_out, mode='w', format=outNETCDF_format) as datase
 
 print("Writing LC file")
 with nc.Dataset(outdir+LC_out, mode='w', format=outNETCDF_format) as dataset:
-  dataset.setncattr("title", "Estimated Height")
+  dataset.setncattr("title", "Estimated Land Cover")
   dataset.setncattr("source", LUT_file)
   dataset.setncattr("data_source", LC_datasource)
   dataset.setncattr("info", "@@METADATA_DATASOURCELUT")
