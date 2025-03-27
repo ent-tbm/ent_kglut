@@ -39,7 +39,7 @@ HITEent = np.zeros((18, 40))
 LC = np.zeros((18, 40))
 
 def translateCode(code):
-  regexmatch = re.match("PFT(\d+)/KG(\d+)/(\w{4})", code)
+  regexmatch = re.match(r"PFT(\d+)/KG(\d+)/(\w{4})", code)
   if regexmatch:
     PFT, KG, hemi = regexmatch.groups()
   else:
