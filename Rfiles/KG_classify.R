@@ -16,7 +16,7 @@ args = commandArgs(trailingOnly=TRUE)
 print(args)
 numargs = length(args)
 if (numargs < 1) {
-print ('Usage:  Rscript KG_classify.R <config_file>', quote = FALSE )
+print ('Usage:  Rscript KG_classify.R <config_file> <ignorepathin>', quote = FALSE )
 print('config_file = text file name', quote = FALSE)
 print('config_file must contain the following:', quote=FALSE)
 print(' res < spatial resolution 2x2h | 4x5 | hxh | qxq >', quote = FALSE)
@@ -31,6 +31,12 @@ quit()
 }
 
 configfile = args[1]
+
+if (numargs>1) {
+	if.ignorepathin=args[2]
+} else {
+	if.ignorepathin=FALSE
+}
 
 Rpath = Sys.getenv("R_Ent")
 Rpath
@@ -93,8 +99,13 @@ IM = IM.JM[1]
 JM = IM.JM[2]
 #print(paste("IM, JM = ", IM, JM))
 
-Tnc = paste(pathin, "/", tempfile, sep="")
-Pnc = paste(pathin, "/", precfile, sep="")
+if (if.ignorepathin) {
+  Tnc = tempfile
+  Pnc = precfile
+} else {
+  Tnc = paste(pathin, "/", tempfile, sep="")
+  Pnc = paste(pathin, "/", precfile, sep="")
+}
 print(Tnc)
 print(Pnc)
 #KGnum = run.KG(Tnc="TEMPERATURE_DATA",

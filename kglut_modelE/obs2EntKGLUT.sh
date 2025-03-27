@@ -175,7 +175,7 @@ ex "${userout}KG_classify_config_${append_rng}.txt" <<EOF
   wq
 EOF
 
-Rscript "../Rfiles/KG_classify.R" "${userout}KG_classify_config_${append_rng}.txt"
+Rscript "../Rfiles/KG_classify.R" "${userout}KG_classify_config_${append_rng}.txt" "TRUE"
 
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
