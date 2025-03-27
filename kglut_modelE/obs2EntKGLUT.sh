@@ -87,7 +87,11 @@ while IFS=$'=' read -r -a args; do
       overwrite_laimax="False"
     fi
   elif [ "$keyword" = "suffix" ]; then
-    append_rng="$arg-$(date '+%Y-%m-%d')"
+    if [ ${#arg} -eq 0 ]; then
+      append_rng=$(date '+%Y-%m-%d')
+    else
+      append_rng="$arg-$(date '+%Y-%m-%d')"
+    fi
   fi
 
 done < "${ppwd}/${1}"

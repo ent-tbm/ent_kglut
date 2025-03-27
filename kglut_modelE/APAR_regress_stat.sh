@@ -100,7 +100,11 @@ while IFS=$'=' read -r -a args; do
   elif [ "$keyword" = "lc_threshold" ]; then
     lc_threshold=$arg
   elif [ "$keyword" = "suffix" ]; then
-    append_rng="$arg-$(date '+%Y-%m-%d')"
+    if [ ${#arg} -eq 0 ]; then
+      append_rng=$(date '+%Y-%m-%d')
+    else
+      append_rng="$arg-$(date '+%Y-%m-%d')"
+    fi
   fi
 done < "${ppwd}/${1}"
 
