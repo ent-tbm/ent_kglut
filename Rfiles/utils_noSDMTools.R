@@ -1865,7 +1865,7 @@ var.def.put.nc = function(ncid, varname, dimensions=c('lon','lat'), longname, va
 }
 
 #------------
-create.map.template.nc = function(res, varname, longname, units, vardescr="", timedim=NULL, timeunits="", timedescr="", description="", undef=-1e30,  fileout, contact="Nancy.Y.Kiang@nasa.gov", vartype='NC_FLOAT') {
+create.map.template.nc = function(res, varname, longname, units, vardescr="", timedim=NULL, timeunits="", timedescr="", timename='time', description="", undef=-1e30,  fileout, contact="Nancy.Y.Kiang@nasa.gov", vartype='NC_FLOAT') {
     lon.lat = grid.lon.lat(res)
     IM = length(lon.lat[[1]])
     JM = length(lon.lat[[2]])
@@ -1874,14 +1874,14 @@ create.map.template.nc = function(res, varname, longname, units, vardescr="", ti
     dim.def.nc(ncid, "lon", IM)
     dim.def.nc(ncid, "lat", JM)
     if (!is.null(timedim)) {
-    	dim.def.nc(ncid, "time", unlim=TRUE)
+    	dim.def.nc(ncid, timename, unlim=TRUE)
     }
 
     var.def.nc(ncid, 'lon', 'NC_FLOAT', 'lon')
     var.def.nc(ncid, 'lat', 'NC_FLOAT', 'lat')
     if (!is.null(timedim)) {
-    	var.def.nc(ncid, 'time', 'NC_FLOAT', 'time')
-	    var.def.nc(ncid, varname, vartype, dimensions=c('lon','lat', 'time'))
+    	var.def.nc(ncid, timename, 'NC_FLOAT', timename)
+	    var.def.nc(ncid, varname, vartype, dimensions=c('lon','lat', timename))
 	} else {	    
 	    var.def.nc(ncid, varname, vartype, dimensions=c('lon','lat'))
     }
@@ -1890,10 +1890,10 @@ create.map.template.nc = function(res, varname, longname, units, vardescr="", ti
     att.put.nc(ncid, 'lat', 'long_name', 'NC_CHAR', 'latitude degrees north')
 
     if (!is.null(timedim)) {
-		att.put.nc(ncid, 'time', 'units', 'NC_CHAR', timeunits)
+		att.put.nc(ncid, timename, 'units', 'NC_CHAR', timeunits)
 	}
-    att.put.nc(ncid, varname, 'long_name', 'NC_CHAR', longname)
     att.put.nc(ncid, varname, 'units', 'NC_CHAR', units)
+    att.put.nc(ncid, varname, 'long_name', 'NC_CHAR', longname)
     att.put.nc(ncid, varname, 'description', 'NC_CHAR', vardescr)
     att.put.nc(ncid, varname, '_FillValue', vartype, undef)
 
@@ -1911,7 +1911,26 @@ create.map.template.nc = function(res, varname, longname, units, vardescr="", ti
 #    	var.put.nc(ncid, varname, matrix(undef, IM,JM), start=c(1,1), count=c(IM,JM))
 #    }
     close.nc(ncid)
-} 
+}
+#------------
+map.var.def.nc = function(ncid, varname, units, vardescr, varlongname="", vartype='NC_FLOAT', undef=-1.e30, if.dim=TRUE, if.time=FALSE) {
+	#Add a new map array layer to an existing netcdf map file
+	
+	if (if.dim) { #Dimensions not previously defined.
+	if (if.time) {
+	    var.def.nc(ncid, varname, vartype, dimensions=c('lon','lat', 'time'))
+	} else {	    
+	    var.def.nc(ncid, varname, vartype, dimensions=c('lon','lat'))
+    }
+    } else {  #Dimensions previously defined, fetch
+    		lon = dim.inq.nc(ncid, 'lon')
+    }
+    att.put.nc(ncid, varname, 'long_name', 'NC_CHAR', varlongname)
+    att.put.nc(ncid, varname, 'units', 'NC_CHAR', units)
+    att.put.nc(ncid, varname, 'description', 'NC_CHAR', vardescr)
+    att.put.nc(ncid, varname, '_FillValue', vartype, undef)
+	
+ }
 
 #------------
 create.entgvsd.template.4D.nc.fn = function(res, varname, longname, units, NAMECOV,NCOV, undef=-1e30, description, fileout, contact="Nancy.Y.Kiang@nasa.gov") {
