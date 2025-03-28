@@ -1913,12 +1913,13 @@ create.map.template.nc = function(res, varname, longname, units, vardescr="", ti
     close.nc(ncid)
 }
 #------------
-map.var.def.nc = function(ncid, varname, units, vardescr, varlongname="", vartype='NC_FLOAT', undef=-1.e30, if.dim=TRUE, if.time=FALSE) {
+map.var.def.nc = function(ncid, varname, units, vardescr, varlongname="", vartype='NC_FLOAT', undef=-1.e30, if.dim=TRUE, if.time=FALSE, timename='time') {
+
 	#Add a new map array layer to an existing netcdf map file
 	
 	if (if.dim) { #Dimensions not previously defined.
 	if (if.time) {
-	    var.def.nc(ncid, varname, vartype, dimensions=c('lon','lat', 'time'))
+	    var.def.nc(ncid, varname, vartype, dimensions=c('lon','lat', timename))
 	} else {	    
 	    var.def.nc(ncid, varname, vartype, dimensions=c('lon','lat'))
     }
