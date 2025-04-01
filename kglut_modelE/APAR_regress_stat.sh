@@ -18,13 +18,13 @@ fi
 
 pyinstance=$(module list | grep -c "python/")
 if [ $pyinstance -eq 0 ]; then
-  echo "Python is not loaded, run the command "module load python/GEOSpyD/Min4.8.3_py3.8" (or the latest version) and try again"
+  echo "Python is not loaded. See kglut_modelE/README for module load requirements, and try again"
   exit 3
 fi
 
 Rinstance=$(module list | grep -c "R/")
 if [ $Rinstance -eq 0 ]; then
-  echo "R is not loaded, run the command "module load R/3.6.3" (or the latest version) and try again"
+  echo "R is not loaded.  See kglut_modelE/README for module load requirements, and try again"
   exit 3
 fi
 

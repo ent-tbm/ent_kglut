@@ -7,9 +7,8 @@ Scripts to automatically run and generate GISS ModelE Ent vegetation boundary co
 
 Required modules:  R, Python, and NetCDF
 On discover, modules that work are:
-module load R/4.1.0
-module load python/GEOSpyD/Min4.8.3_py3.8
-module load netcdf-4.5.0_impi_intel-19.1.0.166
+module load R/4.3.1
+module load python/GEOSpyD/Min24.4.0-0_py3.12
 
 Short summary:
 
@@ -69,14 +68,19 @@ lai_threshold_replace: threshold for monthly LAI to be replaced by the dominant 
 metadata_datasourceLUT: (also optional, but not really) metadata specifying all data sources and versions. Should specify how the lookup table was generated (Values for cover fraction are weighed by grid surface area. Values for LAI, LAImax, and height are weighed by grid surface area and cover fraction.) as well as where they came from and the version of the files.
 
 TO RUN:
-1. Make or choose the config file
+1. Fetch input data:
+   cd ${Ent_utils}/kglut_modelE/data
+   ./data_get_HXH.sh
+   cd ${Ent_utils}
+
+2. Make or choose the config file
    A template config file with default data is in: 
       user/config_py_templates/config_obs2EntKGLUT_EntGVSDv1.0.txt
-2. cd user
-3. From the user directory, run the script with:
+3. cd user
+4. From the user directory, run the script with:
       ./../kglut_modelE/obs2EntKGLUT.sh <config_file>
    (NOTE: If the config file is in the user directory, you may have to specify it with the path ../user/<config_file>
-4. Outputs will be in user/output/.
+5. Outputs will be in user/output/.
 ----------------------------------------------
 
 Calls:`

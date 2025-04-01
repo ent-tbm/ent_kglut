@@ -1,13 +1,16 @@
-temp=../kglut_modelE/data/cru_ts3.22_TS_means_2001-2010_2HX2.nc
-prec=../kglut_modelE/data/GPCC_v6_PREC_means_2001-2010_2HX2.nc
-lai=../kglut_modelE/data/V144x90_EntMM16_lai_trimmed_scaled_ext1.nc
-laimax=../kglut_modelE/data/V144x90_EntMM16_lai_max_trimmed_scaled_ext1.nc
-height=../kglut_modelE/data/V144x90_EntMM16_height_trimmed_scaled_ext1.nc
-lc=../kglut_modelE/data/V144x90_EntMM16_lc_max_trimmed_scaled.nc
-resolution=2X2H
-metadata_dataversion=Ent GVSD v1.0.KG2004
+temp=./data/cru_ts3.22_TS_means_2001-2010_HXH.nc
+prec=./data/GPCC_v6_PREC_means_2001-2010_HXH.nc
+lai=./data/V720x360_EntGVSD16_MM_lai_trimmed_scaled_v1.0b.nc
+laimax=./data/V720x360_EntGVSD16_MM_lai_max_trimmed_scaled_nocrops_v1.0b.nc
+height=./data/V720x360_EntGVSD16_MM_height_trimmed_scaled_nocrops_v1.0b.nc
+lc=./data/V720x360_EntGVSD16_MM_lc_max_trimmed_scaled_nocrops_v1.0b.nc
+resolution=HXH
+metadata_dataversion=Ent GVSD v1.0.KG
 outdir=../user/output/
 netcdf_format=NETCDF3_CLASSIC
+hgt=NO
+overwrite_laimax=YES
 lctrimfrac=0.08
 lai_threshold_replace=0.1
-metadata_datasourcelut=Ent Global Vegetation Structure Dataset (Ent GVSD)  v1.0, classified into Koeppen-Geiger biome groupings with average monthly 2001-2010 surface temperature from the Climate Research Unit of the University of East Anglia  (CRU TS3.22) and precipitation from the Global Precipitation Climatology Centre (GPCC v.6). Values for cover fraction are weighed by grid surface area. Values for LAI, LAImax, and height are weighed by grid surface area and cover fraction. All values are derived from the MODIS Average of 2001-2005, v4, March 2014 dataset.
+metadata_datasourcelut=Vegetation data from Ent Global Vegetation Structure Dataset (Ent GVSD) v1.0b, 0.5 degree x 0.5 degree, classified into Koeppen-Geiger biome groupings with climatology from 0.5 degree x 0.5 degree average monthly 2001-2010 surface temperature from the Climate Research Unit of the University of East Anglia  (CRU TS3.22) and precipitation from the Global Precipitation Climatology Centre (GPCC v.6). 
+
