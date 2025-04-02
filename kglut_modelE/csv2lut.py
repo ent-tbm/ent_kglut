@@ -137,12 +137,12 @@ biome_desc = np.array([
 
 print("Writing to netCDF file")
 with nc.Dataset(outdir+LUT_out, mode='w', format=outNETCDF_format) as dataset:
-  dataset.setncattr("description", "Ent Global Vegetation Structure Dataset (Ent GVSD) v1.0.KG2004.  Koeppen-Geiger biome class lookup table of Ent Terrestrial Biosphere Model vegetation boundary conditions.")
+  dataset.setncattr("data_sources", "Generated from files: @@METADATA_FILENAMES")
   dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
   dataset.setncattr("version", "@@METADATA_DATAVERSION")
-  dataset.setncattr("contact", "James.Lui@nasa.gov, Nancy.Y.Kiang@nasa.gov, Allegra.N.LeGrande@nasa.gov")
+  dataset.setncattr("contact", "James.Lui@nasa.gov, Nancy.Y.Kiang@nasa.gov")
   dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
-  dataset.setncattr("data_sources", "@@METADATA_DATASOURCELUT")
+  dataset.setncattr("description", "Koeppen-Geiger biome class lookup table of vegetation boundary conditions. @@METADATA_DESCRIPTION")
   #dataset.setncattr("lcn_names", "ever_br_early ever_br_late ever_nd_early ever_nd_late cold_br_early cold_br_late drought_br decid_nd cold_shrub arid_shrub c3_grass_per c4_grass c3_grass_ann c3_grass_arct crops_herb crops_woody bare_bright bare_dark")
   #dataset.setncattr("kgn_names", "Af Am As Aw BWk BWh BSk BSh Csa Csb Csc Csd Cwa Cwb Cwc Cwd Cfa Cfb Cfc Cfd Dsa Dsb Dsc Dsd Dwa Dwb Dwc Dwd Dfa Dfb Dfc Dfd EF ET UA UAu UB UE Ufu Uuu")
 

@@ -42,7 +42,7 @@ prec = np.empty((12, dimlat, dimlon))
 
 print("Fetching data... Warning could be slow! Please be patient")
 for i in range(12):
-  with nc.Dataset(indir+aij[i]) as dataset:
+  with nc.Dataset("{}/{}".format(indir, aij[i])) as dataset:
     print("Fetching data from {}".format(aij[i]))
     prec[i] = dataset[inprecname][:] * daymonth[i]
     temp[i] = dataset[intempname][:]
@@ -50,7 +50,7 @@ for i in range(12):
 with nc.Dataset(outdir+outfilename_prec, mode='w') as precdataset:
   precdataset.setncattr("title", "Mean monthly precipitation")
   precdataset.setncattr("comment", "Generated with script by James Lui")
-  precdataset.setncattr("source", indir)
+  precdataset.setncattr("source", "{}/{}".format(indir, aij[0]))
   precdataset.createDimension('lat', size=dimlat)
   precdataset.createDimension('lon', size=dimlon)
   precdataset.createDimension('time', size=0)
@@ -76,7 +76,7 @@ with nc.Dataset(outdir+outfilename_prec, mode='w') as precdataset:
 with nc.Dataset(outdir+outfilename_temp, mode='w') as tempdataset:
   tempdataset.setncattr("title", "Mean monthly temperature")
   tempdataset.setncattr("comment", "Generated with script by James Lui")
-  tempdataset.setncattr("source", indir)
+  tempdataset.setncattr("source", "{}/{}".format(indir, aij[0]))
   tempdataset.createDimension('lat', size=dimlat)
   tempdataset.createDimension('lon', size=dimlon)
   tempdataset.createDimension('time', size=0)

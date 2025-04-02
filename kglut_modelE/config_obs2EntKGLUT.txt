@@ -12,5 +12,5 @@ hgt=NO
 overwrite_laimax=YES
 lctrimfrac=0.08
 lai_threshold_replace=0.1
-metadata_datasourcelut=Vegetation data from Ent Global Vegetation Structure Dataset (Ent GVSD) v1.0b, 0.5 degree x 0.5 degree, classified into Koeppen-Geiger biome groupings with climatology from 0.5 degree x 0.5 degree average monthly 2001-2010 surface temperature from the Climate Research Unit of the University of East Anglia  (CRU TS3.22) and precipitation from the Global Precipitation Climatology Centre (GPCC v.6). 
+metadata_description=Vegetation data from Ent Global Vegetation Structure Dataset (Ent GVSD) v1.0b, 0.5 degree x 0.5 degree, classified into Koeppen-Geiger biome groupings with climatology from 0.5 degree x 0.5 degree average monthly 2001-2010 surface temperature from the Climate Research Unit of the University of East Anglia  (CRU TS3.22) and precipitation from the Global Precipitation Climatology Centre (GPCC v.6). 
 

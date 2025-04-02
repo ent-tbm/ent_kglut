@@ -16,10 +16,10 @@ outNETCDF_format = "@@NETCDF_FORMAT"
 biome_file = "@@BIOME"
 LUT_file = "@@LUT"
 
-LAI_datasource = "@@METADATA_DATAVERSION" 
-LAImax_datasource = "@@METADATA_DATAVERSION"
-HITEent_datasource = "@@METADATA_DATAVERSION"
-LC_datasource = "@@METADATA_DATAVERSION"
+LAI_dataversion = "@@METADATA_DATAVERSION" 
+LAImax_dataversion = "@@METADATA_DATAVERSION"
+HITEent_dataversion = "@@METADATA_DATAVERSION"
+LC_dataversion = "@@METADATA_DATAVERSION"
 
 hgt = "@@HGT"
 
@@ -78,9 +78,9 @@ dimlat, dimlon = outdimensions
 print("Writing LAI file (this may take a while)")
 with nc.Dataset(outdir+LAI_out, mode='w', format=outNETCDF_format) as dataset:
   dataset.setncattr("title", "Estimated LAI")
-  dataset.setncattr("source", LUT_file)
-  dataset.setncattr("data_source", LAI_datasource)
-  dataset.setncattr("info", "@@METADATA_DATASOURCELUT")
+  dataset.setncattr("data_sources", "LUT: {} Biomes: {}".format(LUT_file, biome_file))
+  dataset.setncattr("data_version", LAI_dataversion)
+  dataset.setncattr("description", "@@METADATA_DESCRIPTION")
   dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov")
   dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
   dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
@@ -125,9 +125,9 @@ with nc.Dataset(outdir+LAI_out, mode='w', format=outNETCDF_format) as dataset:
 print("Writing LAImax file")
 with nc.Dataset(outdir+LAImax_out, mode='w', format=outNETCDF_format) as dataset:
   dataset.setncattr("title", "Estimated LAImax")
-  dataset.setncattr("source", LUT_file)
-  dataset.setncattr("data_source", LAImax_datasource)
-  dataset.setncattr("info", "@@METADATA_DATASOURCELUT")
+  dataset.setncattr("data_sources", "LUT: {} Biomes: {}".format(LUT_file, biome_file))
+  dataset.setncattr("data_version", LAImax_dataversion)
+  dataset.setncattr("description", "@@METADATA_DESCRIPTION")
   dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov")
   dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
   dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
@@ -160,9 +160,9 @@ with nc.Dataset(outdir+LAImax_out, mode='w', format=outNETCDF_format) as dataset
 print("Writing HITEent file")
 with nc.Dataset(outdir+HITEent_out, mode='w', format=outNETCDF_format) as dataset:
   dataset.setncattr("title", "Estimated Height")
-  dataset.setncattr("source", LUT_file)
-  dataset.setncattr("data_source", HITEent_datasource)
-  dataset.setncattr("info", "@@METADATA_DATASOURCELUT")
+  dataset.setncattr("data_sources", "LUT: {} Biomes: {}".format(LUT_file, biome_file))
+  dataset.setncattr("data_version", HITEent_dataversion)
+  dataset.setncattr("description", "@@METADATA_DESCRIPTION")
   dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov")
   dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
   dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
@@ -196,9 +196,9 @@ with nc.Dataset(outdir+HITEent_out, mode='w', format=outNETCDF_format) as datase
 print("Writing LC file")
 with nc.Dataset(outdir+LC_out, mode='w', format=outNETCDF_format) as dataset:
   dataset.setncattr("title", "Estimated Land Cover")
-  dataset.setncattr("source", LUT_file)
-  dataset.setncattr("data_source", LC_datasource)
-  dataset.setncattr("info", "@@METADATA_DATASOURCELUT")
+  dataset.setncattr("data_sources", "LUT: {} Biomes: {}".format(LUT_file, biome_file))
+  dataset.setncattr("data_version", LC_dataversion)
+  dataset.setncattr("description", "@@METADATA_DESCRIPTION")
   dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov")
   dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
   dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))

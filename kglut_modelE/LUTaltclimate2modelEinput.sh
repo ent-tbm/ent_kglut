@@ -78,8 +78,8 @@ while IFS=$'=' read -r -a args; do
     fi
   elif [ "$keyword" = "metadata_dataversion" ]; then
     metadata_dataversion=$(echo ${arg//"/"/"\/"})
-  elif [ "$keyword" = "metadata_datasourcelut" ]; then
-    metadata_datasourcelut=$(echo ${arg//"/"/"\/"})
+  elif [ "$keyword" = "metadata_description" ]; then
+    metadata_description=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "suffix" ]; then
     if [ ${#arg} -eq 0 ]; then
       append_rng=$(date '+%Y-%m-%d')
@@ -240,7 +240,7 @@ ex "${userout}lut2finalout_${append_rng}.py" <<EOF
   28s/@@LAIMAX_OUT/${laimax_out}/
   29s/@@HEIGHT_OUT/${height_out}/
   30s/@@LC_OUT/${lc_out}/
-  83,201s/@@METADATA_DATASOURCELUT/${metadata_datasourcelut}/
+  83,201s/@@METADATA_DESCRIPTION/${metadata_description}/
   wq
 EOF
 

@@ -77,8 +77,8 @@ while IFS=$'=' read -r -a args; do
     lctrimfrac=$arg
   elif [ "$keyword" = "lai_threshold_replace" ]; then
     lai_threshold_replace=$arg
-  elif [ "$keyword" = "metadata_datasourcelut" ]; then
-    metadata_datasourcelut=$(echo ${arg//"/"/"\/"})
+  elif [ "$keyword" = "metadata_description" ]; then
+    metadata_description=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "overwrite_laimax" ]; then
     arg=$(echo $arg | tr [:lower:] [:upper:])
     if [ "$arg" = "YES" ] || [ "$arg" = "Y" ]; then
@@ -141,8 +141,11 @@ userout="../user/output/"
 
 # generate filenames 
 
+# data sources
+metadata_filenames="${prec} ${temp} ${lai} ${laimax} ${lc} ${height} at resolution ${dimname}"
+
 # output of prectemp2biome.sh
-biome="V${dimname}_KGbiomes_${years}_${runname}_${append_rng}.nc"
+biome="V${dimname}_KGbiomes_${append_rng}.nc"
 
 # output of regress_biome2laihite.py
 lai_csv_file_raw="EntKG_regressionLAI_monthly_raw_${append_rng}.csv"
@@ -281,8 +284,9 @@ ex "${userout}csv2lut_${append_rng}.py" <<EOF
   29s/@@LAIMAX_CSV_FILE/${outdir}${laimax_csv_file}/
   30s/@@HEIGHT_CSV_FILE/${outdir}${height_csv_file}/
   31s/@@LC_CSV_FILE/${outdir}${lc_csv_file}/
-  120,150s/@@METADATA_DATAVERSION/$metadata_dataversion/
-  120,150s/@@METADATA_DATASOURCELUT/$metadata_datasourcelut/
+  140s/@@METADATA_FILENAMES/$metadata_filenames/
+  142s/@@METADATA_DATAVERSION/$metadata_dataversion/
+  145s/@@METADATA_DESCRIPTION/$metadata_description/
   26s/@@NETCDF_FORMAT/$netcdf_format/
   33s/@@OUTDIR/$outdir/
   34s/@@LUT_OUT/$lut_out/
