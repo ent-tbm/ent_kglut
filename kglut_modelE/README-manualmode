@@ -12,7 +12,7 @@ INSTRUCTIONS ON HOW TO RUN THESE SCRIPTS
 *******************************************************************************
 
 AIJ TO PREC AND TEMP
-The aij files are monthly files with all aij characteristics as output for each month by modelE and its branches. This script is only interested in extracting temperature and precipitation.
+The ModelE "aij" files are netcdf files of global horizontal gridded model diagnostics, which can be output in temporal means at the monthly, seasonal, or annual time scale. These aij files can further be average over generally 10-30 years to provide climatological means.  This script takes monthly aij files, which should be climatological monthly means, and extracts the diagnostics for surface temperature (tsurf) and precipitation (prec).
 
 Edit the script "aij2prectmp.py" to the file names and directories for both input files and output files. The fill value can also be chosen. Since the variable names might be different depending on which version of the model is being run, tell the script what variable is precipitation (inprecname = “prec”) and temperature (intempname = “tsurf”) in the aij files. For the outputs do not change the names from “prec” and “temp” as the next script will need them (unless it’s been changed there as well).
 
@@ -27,14 +27,14 @@ If there are many prec and temp files to covert to biomes, this script can batch
 
 The biome classification will go over any grid cells where a value is present, so it will classify ocean cells as well. It will put in a masked value if it cannot classify a certain cell.
 
-To run you will need R 3.6.3+ loaded, then type ./prectemp2biome.sh <name of your text file>.
+To run you will need R loaded (see required version in README), then type ./prectemp2biome.sh <name of your text file>.
 
 A newer script KG_classify.R also can be used, see the source code for documentation.
 
 *******************************************************************************
 
 REGRESSION OF BIOMES TO LC LAI LAIMAX HITEENT
-This script samples LC, LAI, LAImax, and height from source files for every biome and generates csv files detailing the average value with standard deviation of LC, LAI, LAImax, and height. LC is weighed using grid surface area (axyp, here it is called wxyp as it is in arbitrary units), while the other three are weighed using grid surface area and cover fraction. This script also generates netcdf files for an desired biome layout, useful for generating datasets for running with paleo-biomes or with alternate Earth biomes though these files are uncurated (see below sections). 
+This script samples LC, LAI, LAImax, and height from source files for every biome and generates csv files detailing the average value with standard deviation of LC, LAI, LAImax, and height. LC is weighted using grid surface area (axyp, here it is called wxyp as it is in arbitrary units), while the other three are weighed using grid surface area and cover fraction. This script also generates netcdf files for an desired biome layout, useful for generating datasets for running with paleo-biomes or with alternate Earth biomes though these files are uncurated (see below sections). 
 
 The LAI file must be a 12-month yearly file.
 
@@ -71,3 +71,5 @@ LOOKUP TABLE TO LC LAI LAIMAX HITEENT
 After the values for the csv files have been finalized and converted into a lookup table file as above, put the name of the lookup table and the corresponding biome for output into this script and run it. This will generate netCDF files for LC, LAI, LAImax, height similar to the regression file but with the lookup table.
 
 To run this file type "python lut2finalout.py"
+
+
