@@ -10,7 +10,7 @@ if [ $# -ne 1 ]; then
 fi
 
 if ! [ -f $1 ]; then
-  echo "File does not exist"
+  echo "File $1 does not exist"
   exit 2
 fi
 

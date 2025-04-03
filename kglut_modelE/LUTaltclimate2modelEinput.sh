@@ -1,17 +1,28 @@
-# Generates a lookup input files for modelE and its branches (LAI, LAImax, height, LC) 
+# Generates a vegetation input files for modelE and its branches (LAI, LAImax, height, LC) 
 # AUTHOR - James Lui
 # contact - james.lui@nasa.gov
 
 # !/bin/bash
 
-if [ $# -ne 1 ]; then
+if [ $# -ne 1 ] && [ $# -ne 2 ]; then
   echo "Incorrect number of arguments"
   exit 1
 fi
 
 if ! [ -f $1 ]; then
-  echo "File does not exist"
+  echo "File $1 does not exist"
   exit 2
+fi
+
+if [ $# -eq 2 ]; then
+  generateKGonly=$(echo $1 | tr [:lower:] [:upper:])
+  if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
+    generateKGonly=true
+  else
+    generateKGonly=false
+  fi
+else
+  generateKGonly=false
 fi
 
 # Check if the python module is loaded
@@ -72,7 +83,7 @@ while IFS=$'=' read -r -a args; do
     netcdf_format=$arg
   elif [ "$keyword" = "hgt" ]; then
     arg=$(echo $arg | tr [:lower:] [:upper:])
-    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ]; then
+    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
       hgt="hgt_"
       dohgt=true
     fi
@@ -219,6 +230,14 @@ Rscript "../Rfiles/KG_classify.R" "${userout}KG_classify_config_${append_rng}.tx
 if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
   exit 10
+fi
+
+if [ $generateKGonly ]; then
+  echo "Generated KG file"
+  echo "Intermediate scripts used to generate outputs can be found here: ${path}${userout}"
+  echo "All output files:"
+  ls ${outdir}*${append_rng}*
+  exit 0
 fi
 
 mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"

@@ -10,7 +10,7 @@ if [ $# -ne 1 ]; then
 fi
 
 if ! [ -f $1 ]; then
-  echo "File does not exist"
+  echo "File $1 does not exist"
   exit 2
 fi
 
@@ -58,7 +58,7 @@ while IFS=$'=' read -r -a args; do
     metadata_dataversion=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "hgt" ]; then
     arg=$(echo $arg | tr [:lower:] [:upper:])
-    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ]; then
+    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
       hgt="hgt_"
     else
       hgt=""
@@ -81,7 +81,7 @@ while IFS=$'=' read -r -a args; do
     metadata_description=$(echo ${arg//"/"/"\/"})
   elif [ "$keyword" = "overwrite_laimax" ]; then
     arg=$(echo $arg | tr [:lower:] [:upper:])
-    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ]; then
+    if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
       overwrite_laimax="True"
     else
       overwrite_laimax="False"

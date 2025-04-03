@@ -1,0 +1,6 @@
+aij_dir=/discover/nobackup/nkiang/Lakes/L0_control_tr/gij
+aij_jan=JAN2000-2009.gijL0_control_tr.nc
+resolution=2X2H
+outdir=../user/output/
+netcdf_format=NETCDF3_CLASSIC
+suffix=KG_ONLY
