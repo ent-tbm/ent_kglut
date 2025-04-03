@@ -232,6 +232,9 @@ if [ $? -ne 0 ]; then
   exit 10
 fi
 
+mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
+#rm "KG_classify_config_${append_rng}.txt"
+
 if [ $generateKGonly ]; then
   echo "Generated KG file"
   echo "Intermediate scripts used to generate outputs can be found here: ${path}${userout}"
@@ -239,9 +242,6 @@ if [ $generateKGonly ]; then
   ls ${outdir}*${append_rng}*
   exit 0
 fi
-
-mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
-#rm "KG_classify_config_${append_rng}.txt"
 
 # run lut2finalout.py
 cp "lut2finalout.py" "${userout}lut2finalout_${append_rng}.py"
