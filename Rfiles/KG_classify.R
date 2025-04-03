@@ -128,7 +128,7 @@ KGnum = run.KG(Tnc=Tnc,
 	if.new=FALSE)
 
 #Plot 
-PLOTFILENAME=paste(pathout, "/", "EntKG",res,"_Rplots_", id, ".pdf", sep="")
+PLOTFILENAME=paste(pathout, "/", "EntKG",res,"_map_", id, ".pdf", sep="")
 pdf(PLOTFILENAME, width=9.6, height=6)
 par(omi=c(0,0,0,1)) #(bottom, left, top, right)
 par(omi=c(0,0,0,0), oma=c(0,0,0,4)) #(bottom, left, top, right) #Use for single
