@@ -1,6 +1,11 @@
 Ent_utils.git
-Contact: Nancy.Y.Kiang@nasa.gov
+Contact: Nancy.Y.Kiang@nasa.gov, James.Lui@nasa.gov
 Cite:  See comments in the different scripts for authors and citations for different utilities.
+
+Requirements: R, Python, and their NetCDF libraries
+On discover, modules that work are:
+module load R/4.3.1
+module load python/GEOSpyD/Min24.4.0-0_py3.12
 
 -------------
 This is a repository for programs and scripts for generating and making various alterations of Ent Terrestrial Biosphere Model (Ent TBM) data files for use in ModelE, specifically those used as the VEG, CROPS, HITEent, LAImax, and LAI monthly input files.  In addition, there are utilities for analyzing ground hydrology.
