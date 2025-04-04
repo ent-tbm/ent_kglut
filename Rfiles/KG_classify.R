@@ -17,7 +17,7 @@ print(args)
 numargs = length(args)
 if (numargs < 1) {
 print ('Usage:  Rscript KG_classify.R <config_file> <ignorepathin>', quote = FALSE )
-print('config_file = text file name', quote = FALSE)
+print('config_file = text file name. See sample config file in Rfiles/config/config_KG_classify_1951-1980.txt', quote = FALSE)
 print('config_file must contain the following:', quote=FALSE)
 print(' res < spatial resolution 2x2h | 4x5 | hxh | qxq >', quote = FALSE)
 print(' pathin < input path/ >', quote = FALSE)
