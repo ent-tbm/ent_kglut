@@ -61,9 +61,9 @@ hgt: Option YES or NO to specify whether the height dataset should have the hgt_
 
 overwrite_laimax: Option YES or NO to specify whether or not the LAImax field should be replaced by maximum LAI from LAI values or remain unchanged from LAImax file.
 
-lctrimfrac: threshold for land cover values to be trimmed from the final LC lookupt table. Default should be 0.08.
+lctrimfrac: threshold for land cover values to be trimmed from the final LC lookup table. Default should be 0.08.
 
-lai_threshold_replace: threshold for monthly LAI to be replaced by the dominant hemisphere (% difference). Some regressed values for LAI may have totally different range of values by hemisphere (or none at all for some colder biomes). This script aims to resolve that by having all LAI values for each hemisphere be in the same range with opposite seasonality. A value of 0 means the higher LAI values will always be used. A value of 1 means there is no replacement whatsoever. Alternatively, the LAI values for both hemispheres can be averaged, accounting for seasonality and relative abundance of each cover and biome. This option is set when the value is set to any negative number.
+lai_threshold_replace: threshold for monthly LAI to be replaced by the dominant hemisphere (fraction difference). Some regressed values for LAI may have a totally different range of values by hemisphere (or none at all for some colder biomes). This script aims to resolve that by having all LAI values for each hemisphere be in the same range with opposite seasonality. A value of 0 means the higher LAI values will always be used. A value of 1 means there is no replacement whatsoever. Alternatively, when lai_threshold_replace is set to any negative number, the LAI values for both hemispheres can be averaged, accounting for seasonality and relative abundance of each cover and biome. 
 
 metadata_description: Description that should specify how the lookup table was generated (Values for cover fraction are weighed by grid surface area. Values for LAI, LAImax, and height are weighed by grid surface area and cover fraction.) as well as where they came from and the version of the files.
 
@@ -80,7 +80,7 @@ TO RUN:
 4. From the user directory, run the script with:
       ./../kglut_modelE/obs2EntKGLUT.sh <config_file>
    (NOTE: If the config file is in the user directory, you may have to specify it with the path ../user/<config_file>
-5. Outputs will be in user/output/.
+5. Outputs will be in the "outdir" specified in the config file.
 ----------------------------------------------
 
 Calls:`
@@ -96,23 +96,23 @@ Outputs:
 KG_classify_config_<hash>_YYYY-MM-DD.txt - input config file to KG_classify.R script.
 EntKGHXH_map_<hash>_YYYY-MM-DD.pdf - KG biome map
 V720x360_KGbiomes_<hash>_YYYY-MM-DD.nc - netcdf file of KG biome class numbers
-regress_biome2laihite_<hash>_YYYY-MM-DD.py - python script to produce regressed vegetation boundary conditions by KG biome and PFT.
+regress_biome2laihite_<hash>_YYYY-MM-DD.py - python script to produce regressed vegetation boundary conditions by KG biome and PFT; this is a preliminary result prior to trimming off minor PFTs found in some biomes.
 EntKG_regressionLAI_monthly_raw_<hash>_YYYY-MM-DD.csv - table columns giving PFT, KG biome type, Nval|Nstd|Sval|Sstd, months 1-12, where Nval and Nstd are the NH mean and standard deviation of LAI, Sval and Sstd are the SH values.
 EntKG_regressionsamples_<hash>_YYYY-MM-DD.csv - table columns giving PFT, KG biome type, number of samples, weight (cover fraction x grid area) for the hemisphere, hemisphere, where the weight is for averaging across the hemispheres.
 EntKG_regressionLAI_max_raw_<hash>_YYYY-MM-DD.csv - 
 EntKG_regressionheight_raw_<hash>_YYYY-MM-DD.csv
 EntKG_regressionLC_raw_<hash>_YYYY-MM-DD.csv
-EntKG_regressionLAI_monthly_raw_<hash>_YYYY-MM-DD.csv_LAIplot.pdf
-csvLAIdominanthemi_<hash>_YYYY-MM-DD.py
-EntKG_regressionLAI_monthly_<hash>_YYYY-MM-DD.csv
-csvremoveSTD_<hash>_YYYY-MM-DD.py
+EntKG_regressionLAI_monthly_raw_<hash>_YYYY-MM-DD.csv_LAIplot.pdf - monthly time series plots of LAI by biome and PFT.
+csvLAIdominanthemi_<hash>_YYYY-MM-DD.py - python to modify the raw regresson outputs according to options in the config file for obs2EntKGLU.sh.
+EntKG_regressionLAI_monthly_<hash>_YYYY-MM-DD.csv - final monthly LAI values by biome and PFT.
+csvremoveSTD_<hash>_YYYY-MM-DD.py - python script to remove raw value standard deviations from the final LAImax and height tables for consistent format and clean input for generating the model input files.
 EntKG_regressionheight_<hash>_YYYY-MM-DD.csv
 EntKG_regressionLAI_max_<hash>_YYYY-MM-DD.csv
-trim_Ent_KG_LUT_<hash>_YYYY-MM-DD.R
-EntKG_regressionLC_trim_natveg_<hash>_YYYY-MM-DD.csv
-csv2lut_<hash>_YYYY-MM-DD.py
-Ent_vHXH_KoeppenGeigerLUT_<hash>_YYYY-MM-DD.nc
-Ent_vHXH_KoeppenGeigerLUT_<hash>_YYYY-MM-DD.nc_LAIplot.pdf
+trim_Ent_KG_LUT_<hash>_YYYY-MM-DD.R - copy of Rfiles R script with config parameters saved to trim off small cover fractions (default < 0.08, set in config file for obs2EntKGLU.sh), and rescale the retained PFTs to sum to 1.
+EntKG_regressionLC_trim_natveg_<hash>_YYYY-MM-DD.csv - table of trimmed land cover fractions.
+csv2lut_<hash>_YYYY-MM-DD.py - python script to convert the final csv tables into a netcdf file.
+Ent_vHXH_KoeppenGeigerLUT_<hash>_YYYY-MM-DD.nc - netcdf file of Ent Koeppen-Geiger lookup table (LUT).
+Ent_vHXH_KoeppenGeigerLUT_<hash>_YYYY-MM-DD.nc_LAIplot.pdf - time series plots of LAImax and monthly LAI in the LUT by biome and PFT.
 
 ***********************************************
 
@@ -136,7 +136,7 @@ TO RUN:
 3. From the user directory, run the script with:
       ./../kglut_modelE/LUTaltclimate2modelEinput.sh <config_file>
    (NOTE: If the config file is in the user directory, you may have to specify it with the path ../user/<config_file>
-4. Outputs will be in user/output/.
+4. Outputs will be in the "outdir" specified in the config file.
 ----------------------------------------------
 
 Calls:
