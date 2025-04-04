@@ -142,6 +142,7 @@ else
 fi
 
 userout="../user/output/"
+userout=$outdirn
 
 # aij generate filenames
 

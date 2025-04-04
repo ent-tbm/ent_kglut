@@ -138,6 +138,7 @@ else
 fi
 
 userout="../user/output/"
+userout=$outdirn
 
 # generate filenames 
 
