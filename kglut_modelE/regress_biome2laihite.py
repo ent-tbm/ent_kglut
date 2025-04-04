@@ -20,8 +20,8 @@ warnings.filterwarnings('ignore', category=RuntimeWarning)
 biomeIn_file = "@@BIOME" # biomeIn are the biomes corresponding to the source LAI LAImax height files, Koeppen-Geiger classification.
 LAI_file = "@@LAI" # 12 month LAI values for the PFT cover types
 LAImax_file = "@@LAIMAX" # LAI max values for the PFT cover types
-HITEent_file = "@@HEIGHT" # this specific file has hgt_ added to the front of every pft name, remove the hack below if not present
-HITEhack = "@@HGT"
+HITEent_file = "@@HEIGHT" # this specific file has hgt_ added to the front of every pft name, remove the prefix below if not present
+HITEprefix = "@@HGT"
 LC_file = "@@LC" # cover fractions to use as weights for regression - some contamination of data can occur for values of LAI if another pft is dominant
 
 LAI_datasource = "MODIS Average of 2001-2005, v4, March 2014"
@@ -42,25 +42,6 @@ lat_in = @@LATDIM
 lon_in = @@LONDIM
 
 outdir = "@@OUTDIR"
-
-################ IGNORE IF YOU DO NOT NEED NETCDF OUTPUT ##################
-
-# This section handles making an output based on raw values. Not recommended to use.
-
-writeNETCDF = False
-# define lat long coords/dimensions here, specify for biome_file and output files
-outdimensions = (90, 144)
-lat = np.arange(-89.0, 91, 2.0)
-lon = np.arange(-178.75, 180.25, 2.50)
-time = np.arange(1, 13)
-
-biome_file = "/discover/nobackup/jlui1/Koeppen/Koeppen-Geiger/eoceneKG.nc" # biome are the biomes corresponding to the desired output
-LAI_out = "V144x90_jcl_LAI_monthly_eocene_uncurated.nc"
-LAImax_out = "V144x90_jcl_LAImax_eocene_uncurated.nc"
-HITEent_out = "V144x90_jcl_HITEent_eocene_uncurated.nc"
-LC_out = "V144x90_jcl_LC_eocene_uncurated.nc"
-
-################ IGNORE IF YOU DO NOT NEED NETCDF OUTPUT ##################
 
 default_biome = 31 
 fillvalue = -1e+30
@@ -401,7 +382,7 @@ with nc.Dataset(LAImax_file) as dLAImax, nc.Dataset(HITEent_file) as dHITEent:
     else:
       LAImaxdata = dLAImax[pftvalue[0]][:]
       LCdata = dLC[pftvalue[0]][:]
-      HITEentdata = dHITEent[HITEhack + pftvalue[0]][:]
+      HITEentdata = dHITEent[HITEprefix + pftvalue[0]][:]
       #f.write("-----------------------------------------------------------\n")
       #f.write("\n{} {} LAI max:\n".format(pftvalue[0], pftvalue[1]))
       #f.write("-----------------------------------------------------------\n")
@@ -438,7 +419,7 @@ with nc.Dataset(HITEent_file) as dataset:
     if (pftvalue[pftIgnore]):
       continue
     else:
-      data = dataset[HITEhack + pftvalue[0]][:]
+      data = dataset[HITEprefix + pftvalue[0]][:]
       LCdata = dLC[pftvalue[0]][:]
       #f.write("-----------------------------------------------------------\n")
       #f.write("\n{} {} height:\n".format(pftvalue[0], pftvalue[1]))
@@ -623,164 +604,3 @@ with PdfPages("{}{}{}".format(outdir, regressionlai, "_LAIplot.pdf")) as LAIpdf:
   plt.tight_layout(rect=[0, 0.005, 1, 0.995])
   LAIpdf.savefig()
   plt.close()
-
-
-if not writeNETCDF:
-  exit(0)
-
-###########################################################
-
-print("Writing LAI file (this may take a while)")
-with nc.Dataset(outdir+LAI_out, mode='w', format=outNETCDF_format) as dataset:
-  dataset.setncattr("title", "Estimated LAI")
-  dataset.setncattr("source", LAI_file)
-  dataset.setncattr("data_source", LAI_datasource)
-  dataset.setncattr("info", "Estimated monthly LAI generated from input biomes: {} and weighed by grid-surface area and cover fraction: {}".format(biome_file, LC_file))
-  dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov, allegra.n.legrand@nasa.gov")
-  dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
-  dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
-  dataset.createDimension('lat', size=dimlat)
-  dataset.createDimension('lon', size=dimlon)
-  dataset.createDimension('time', size=0)
-
-  dataset.createVariable('lat', 'f4', ('lat'))
-  dataset.createVariable('lon', 'f4', ('lon'))
-  dataset.createVariable('time', 'i4', ('time'))
-  dataset['lat'][:] = lat
-  dataset['lon'][:] = lon
-  dataset['time'][:] = time
-  dataset['lat'].setncattr("long_name", "latitude")
-  dataset['lat'].setncattr("units", "degrees_north")
-  dataset['lon'].setncattr("long_name", "longitude")
-  dataset['lon'].setncattr("units", "degrees_east")
-  dataset['time'].setncattr("long_name", "time")
-  dataset['time'].setncattr("units", "months")
-
-  for pft, pftvalue in pfts.items():
-    dataset.createVariable(pftvalue[0], 'f4', dimensions=('time', 'lat', 'lon'), fill_value=fillvalue)
-    dataset[pftvalue[0]].setncattr("long_name", pftvalue[1]+" LAI")
-    dataset[pftvalue[0]].setncattr("units", "m2/m2")
-    if (pftvalue[2]):
-      continue
-    else:
-      data = np.zeros((12, dimlat, dimlon)) # Generate LAI values from table, split grid into north and south
-      for i in range(dimlat//2): # southern hemisphere
-        for j in range(dimlon):
-          KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j]) 
-          for month in range(12):  
-            data[month][i][j] = LAIs[pft-1][KG-1][month]
-      for i in range(dimlat//2, dimlat):
-        for j in range(dimlon):
-          KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
-          for month in range(12):  
-            data[month][i][j] = LAI[pft-1][KG-1][month]
-
-      dataset[pftvalue[0]][:] = data
-
-print("Writing LAImax file")
-with nc.Dataset(outdir+LAImax_out, mode='w', format=outNETCDF_format) as dataset:
-  dataset.setncattr("title", "Estimated LAImax")
-  dataset.setncattr("source", LAImax_file)
-  dataset.setncattr("data_source", LAImax_datasource)
-  dataset.setncattr("info", "Estimated LAI max generated from input biomes: {} picking the highest value in each biome".format(biome_file))
-  dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov, allegra.n.legrand@nasa.gov")
-  dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
-  dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
-  dataset.createDimension('lat', size=dimlat)
-  dataset.createDimension('lon', size=dimlon)
-
-  dataset.createVariable('lat', 'f4', ('lat'))
-  dataset.createVariable('lon', 'f4', ('lon'))
-  dataset['lat'][:] = lat
-  dataset['lon'][:] = lon
-  dataset['lat'].setncattr("long_name", "latitude")
-  dataset['lat'].setncattr("units", "degrees_north")
-  dataset['lon'].setncattr("long_name", "longitude")
-  dataset['lon'].setncattr("units", "degrees_east")
-  for pft, pftvalue in pfts.items():
-    dataset.createVariable(pftvalue[0], 'f4', dimensions=('lat', 'lon'), fill_value=fillvalue)
-    dataset[pftvalue[0]].setncattr("long_name", pftvalue[1]+" LAImax")
-    dataset[pftvalue[0]].setncattr("units", "m2/m2")
-    if (pftvalue[2]):
-      continue
-    else:
-      data = np.zeros(outdimensions)
-      for i in range(dimlat):
-        for j in range(dimlon):
-          KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j]) 
-          data[i][j] = LAImax[pft-1][KG-1]
-
-      dataset[pftvalue[0]][:] = data
-
-print("Writing HITEent file")
-with nc.Dataset(outdir+HITEent_out, mode='w', format=outNETCDF_format) as dataset:
-  dataset.setncattr("title", "Estimated Height")
-  dataset.setncattr("source", HITEent_file)
-  dataset.setncattr("data_source", HITEent_datasource)
-  dataset.setncattr("info", "Estimated height generated from input biomes: {} and weighed by grid-surface area and cover fraction: {}".format(biome_file, LC_file))
-  dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov, allegra.n.legrand@nasa.gov")
-  dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
-  dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
-  dataset.createDimension('lat', size=dimlat)
-  dataset.createDimension('lon', size=dimlon)
-
-  dataset.createVariable('lat', 'f4', ('lat'))
-  dataset.createVariable('lon', 'f4', ('lon'))
-  dataset['lat'][:] = lat
-  dataset['lon'][:] = lon
-  dataset['lat'].setncattr("long_name", "latitude")
-  dataset['lat'].setncattr("units", "degrees_north")
-  dataset['lon'].setncattr("long_name", "longitude")
-  dataset['lon'].setncattr("units", "degrees_east")
-
-  for pft, pftvalue in pfts.items():
-    dataset.createVariable(pftvalue[0], 'f4', dimensions=('lat', 'lon'), fill_value=fillvalue)
-    dataset[pftvalue[0]].setncattr("long_name", pftvalue[1]+" height")
-    dataset[pftvalue[0]].setncattr("units", "m")
-    if (pftvalue[2]):
-      continue
-    else:
-      data = np.zeros(outdimensions)
-      for i in range(dimlat):
-        for j in range(dimlon):
-          KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j]) 
-          data[i][j] = HITEent[pft-1][KG-1]
-
-      dataset[pftvalue[0]][:] = data
-
-print("Writing LC file")
-with nc.Dataset(outdir+LC_out, mode='w', format=outNETCDF_format) as dataset:
-  dataset.setncattr("title", "Estimated Height")
-  dataset.setncattr("source", LC_file)
-  dataset.setncattr("data_source", LC_datasource)
-  dataset.setncattr("info", "Estimated cover fraction generated from input biomes: {} and weighed by grid-surface area.".format(biome_file))
-  dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov, allegra.n.legrand@nasa.gov")
-  dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
-  dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
-  dataset.createDimension('lat', size=dimlat)
-  dataset.createDimension('lon', size=dimlon)
-
-  dataset.createVariable('lat', 'f4', ('lat'))
-  dataset.createVariable('lon', 'f4', ('lon'))
-  dataset['lat'][:] = lat
-  dataset['lon'][:] = lon
-  dataset['lat'].setncattr("long_name", "latitude")
-  dataset['lat'].setncattr("units", "degrees_north")
-  dataset['lon'].setncattr("long_name", "longitude")
-  dataset['lon'].setncattr("units", "degrees_east")
-
-  for pft, pftvalue in pfts.items():
-    dataset.createVariable(pftvalue[0], 'f4', dimensions=('lat', 'lon'), fill_value=fillvalue)
-    dataset[pftvalue[0]].setncattr("long_name", pftvalue[1]+" cover fraction")
-    dataset[pftvalue[0]].setncattr("units", "fraction")
-    if (pftvalue[2]):
-      continue
-    else:
-      data = np.zeros(outdimensions)
-      for i in range(dimlat):
-        for j in range(dimlon):
-          KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j]) 
-          data[i][j] = LC[pft-1][KG-1]
-
-      dataset[pftvalue[0]][:] = data
-
