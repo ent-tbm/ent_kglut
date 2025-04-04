@@ -92,6 +92,28 @@ Three scripts are called to filter out the csv files for the final lookup table 
 
 csv2lut.py generates the final lookup table, Ent_v$(dimensions)_KoeppenGeiegerLUT_0123abc.nc, and also plots final LAI monthly lookup table
 
+Outputs:
+KG_classify_config_<hash>_YYYY-MM-DD.txt - input config file to KG_classify.R script.
+EntKGHXH_map_<hash>_YYYY-MM-DD.pdf - KG biome map
+V720x360_KGbiomes_<hash>_YYYY-MM-DD.nc - netcdf file of KG biome class numbers
+regress_biome2laihite_<hash>_YYYY-MM-DD.py - python script to produce regressed vegetation boundary conditions by KG biome and PFT.
+EntKG_regressionLAI_monthly_raw_<hash>_YYYY-MM-DD.csv - table columns giving PFT, KG biome type, Nval|Nstd|Sval|Sstd, months 1-12, where Nval and Nstd are the NH mean and standard deviation of LAI, Sval and Sstd are the SH values.
+EntKG_regressionsamples_<hash>_YYYY-MM-DD.csv - table columns giving PFT, KG biome type, number of samples, weight (cover fraction x grid area) for the hemisphere, hemisphere, where the weight is for averaging across the hemispheres.
+EntKG_regressionLAI_max_raw_<hash>_YYYY-MM-DD.csv - 
+EntKG_regressionheight_raw_<hash>_YYYY-MM-DD.csv
+EntKG_regressionLC_raw_<hash>_YYYY-MM-DD.csv
+EntKG_regressionLAI_monthly_raw_<hash>_YYYY-MM-DD.csv_LAIplot.pdf
+csvLAIdominanthemi_<hash>_YYYY-MM-DD.py
+EntKG_regressionLAI_monthly_<hash>_YYYY-MM-DD.csv
+csvremoveSTD_<hash>_YYYY-MM-DD.py
+EntKG_regressionheight_<hash>_YYYY-MM-DD.csv
+EntKG_regressionLAI_max_<hash>_YYYY-MM-DD.csv
+trim_Ent_KG_LUT_<hash>_YYYY-MM-DD.R
+EntKG_regressionLC_trim_natveg_<hash>_YYYY-MM-DD.csv
+csv2lut_<hash>_YYYY-MM-DD.py
+Ent_vHXH_KoeppenGeigerLUT_<hash>_YYYY-MM-DD.nc
+Ent_vHXH_KoeppenGeigerLUT_<hash>_YYYY-MM-DD.nc_LAIplot.pdf
+
 ***********************************************
 
 B. LUTaltclimate2modelEinput.sh:

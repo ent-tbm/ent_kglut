@@ -24,10 +24,10 @@ HITEent_file = "@@HEIGHT" # this specific file has hgt_ added to the front of ev
 HITEprefix = "@@HGT"
 LC_file = "@@LC" # cover fractions to use as weights for regression - some contamination of data can occur for values of LAI if another pft is dominant
 
-LAI_datasource = "MODIS Average of 2001-2005, v4, March 2014"
-LAImax_datasource = "MODIS Average of 2001-2005, v4, March 2014"
-HITEent_datasource = "MODIS Average of 2001-2005 + EXT1"
-LC_datasource = "MODUS Average of 2001-2005, v4, March 2014"
+
+
+
+
 
 outNETCDF_format = "NETCDF3_CLASSIC" # see netcdf page for other formats
 
@@ -46,53 +46,55 @@ outdir = "@@OUTDIR"
 default_biome = 31 
 fillvalue = -1e+30
 
-# Table to define behavior for regression. Take samples instead of single grid for areas where possible.
-isSouthernHemi = 2 # If the coords given below  are in the southern hemisphere or, if takeSame is true and hasBothHemi is false, where to take the one-hemispheric sample 
+# Table to define decision tree for regression by KG biome type. Take samples instead of single grid for areas where possible. Indices to columns are:
+# I grid cell = column 0, value of -1 means not specified
+# J grid cell = column 1, value of -1 means not specified
+isSouthernHemi = 2 # If the (I,J) coords are in the southern hemisphere or, if takeSample is true and hasBothHemi is false, if isSouthernHemi TRUE, take sample grids in southern hemisphere (SH) else in northern hemisphere (NH).
 takeSample = 3 # Take a sample (weighted average over grid cells) instead of a single grid cell
 ignoreHemiVariations = 4 # Use for tropical biomes, regression will not take sample seperately and will not shift for seasonality
-hasBothHemi = 5 # If biomes exist on both hemispheres
+hasBothHemi = 5 # If biome existis in both hemispheres
 
-biome_coords = { # I90 J144 isSouthernHemi takeSample ignoreHemiVariations hasBothHemi (generic decision table)
-    1 : [0, 0, False, True, False, True],       #Af
-    2 : [0, 0, False, True, False, True],       #As
-    3 : [0, 0, False, True, False, True],       #Am
-    4 : [0, 0, False, True, False, True],       #Aw
-    5 : [0, 0, False, True, False, True],       #BWk
-    6 : [0, 0, False, True, False, True],       #BWh
-    7 : [0, 0, False, True, False, True],       #BSk
-    8 : [0, 0, False, True, False, True],       #BSh
-    9 : [0, 0, False, True, False, True],       #Csa
-    10: [0, 0, False, True, False, True],       #Csb
-    11: [0, 0, False, True, False, True],       #Csc
-    12: None,                                   #Csd # biome does not exist
-    13: [0, 0, False, True, False, True],       #Cwa
-    14: [0, 0, False, True, False, True],       #Cwb
-    15: [0, 0, False, True, False, True],       #Cwc
-    16: None,                                   #Cwd # biome does not exist
-    17: [0, 0, False, True, False, True],       #Cfa
-    18: [0, 0, False, True, False, True],       #Cfb
-    19: [0, 0, False, True, False, True],       #Cfc
-    20: None,                                   #Cfd # biome does not exist
-    21: [0, 0, False, True, False, True],       #Dsa
-    22: [0, 0, False, True, False, True],       #Dsb
-    23: [0, 0, False, True, False, True],       #Dsc
-    24: [0, 0, False, True, False, True],       #Dsd
-    25: [0, 0, False, True, False, True],       #Dwa
-    26: [0, 0, False, True, False, True],       #Dwb
-    27: [0, 0, False, True, False, True],       #Dwc
-    28: [0, 0, False, True, False, True],       #Dwd
-    29: [0, 0, False, True, False, True],       #Dfa
-    30: [0, 0, False, True, False, True],       #Dfb
-    31: [0, 0, False, True, False, True],       #Dfc
-    32: [0, 0, False, True, False, True],       #Dfd
-    33: [0, 0, False, True, False, True],       #EF
-    34: [0, 0, False, True, False, True],       #ET
-    35: None,                                   #UA
-    36: None,                                   #UAu
-    37: None,                                   #UB
-    38: None,                                   #UE
-    39: None,                                   #Ufu
-    40: None,                                   #Uuu
+biome_coords = { # I J isSouthernHemi takeSample ignoreHemiVariations hasBothHemi (generic decision table)
+    1 : [-1, -1, False, True, False, True],       #Af
+    2 : [-1, -1, False, True, False, True],       #As
+    3 : [-1, -1, False, True, False, True],       #Am
+    4 : [-1, -1, False, True, False, True],       #Aw
+    5 : [-1, -1, False, True, False, True],       #BWk
+    6 : [-1, -1, False, True, False, True],       #BWh
+    7 : [-1, -1, False, True, False, True],       #BSk
+    8 : [-1, -1, False, True, False, True],       #BSh
+    9 : [-1, -1, False, True, False, True],       #Csa
+    10: [-1, -1, False, True, False, True],       #Csb
+    11: [-1, -1, False, True, False, True],       #Csc
+    12: None,                                     #Csd # This biome does not exist
+    13: [-1, -1, False, True, False, True],       #Cwa
+    14: [-1, -1, False, True, False, True],       #Cwb
+    15: [-1, -1, False, True, False, True],       #Cwc
+    16: None,                                     #Cwd # This biome does not exist
+    17: [-1, -1, False, True, False, True],       #Cfa
+    18: [-1, -1, False, True, False, True],       #Cfb
+    19: [-1, -1, False, True, False, True],       #Cfc
+    20: None,                                     #Cfd # This biome does not exist
+    21: [-1, -1, False, True, False, True],       #Dsa
+    22: [-1, -1, False, True, False, True],       #Dsb
+    23: [-1, -1, False, True, False, True],       #Dsc
+    24: [-1, -1, False, True, False, True],       #Dsd
+    25: [-1, -1, False, True, False, True],       #Dwa
+    26: [-1, -1, False, True, False, True],       #Dwb
+    27: [-1, -1, False, True, False, True],       #Dwc
+    28: [-1, -1, False, True, False, True],       #Dwd
+    29: [-1, -1, False, True, False, True],       #Dfa
+    30: [-1, -1, False, True, False, True],       #Dfb
+    31: [-1, -1, False, True, False, True],       #Dfc
+    32: [-1, -1, False, True, False, True],       #Dfd
+    33: [-1, -1, False, True, False, True],       #EF
+    34: [-1, -1, False, True, False, True],       #ET
+    35: None,                                     #UA
+    36: None,                                     #UAu
+    37: None,                                     #UB
+    38: None,                                     #UE
+    39: None,                                     #Ufu
+    40: None,                                     #Uuu
     }
 biome_coords_144x90 = { # I90 J144 isSouthernHemi takeSample ignoreHemiVariations hasBothHemi (decision table based on 144x90 dataset)
     1 : [47, 45, False, True, False, True],     #Af
