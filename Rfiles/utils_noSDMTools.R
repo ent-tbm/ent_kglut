@@ -1426,7 +1426,7 @@ Ent_calc_lc_weighted_map_GISS = function(filelc, filevar, pathout=".",
 			timedim=TIMEDIM; timeunits=""; timedescr=""
 		}
 		fileout=paste(pathout, fileoutnc, sep="")
-		create.map.template.nc(res=res.from.IM.JM(IM,JM), varname=varname, longname=longname, units="m", vardescr=vardescr, timedim=timedim, timeunits="", timedescr="", description=paste("source files:", filelc, fileoutpre), undef=-1e30,  fileout=fileout, contact="Nancy.Y.Kiang@nasa.gov", vartype='NC_FLOAT') 
+		create.map.template.nc(res=res.from.IM.JM(IM,JM), varname=varname, longname=longname, units=units, vardescr=vardescr, timedim=timedim, timeunits="", timedescr="", description=paste("source files:", filelc, fileoutpre), undef=-1e30,  fileout=fileout, contact="Nancy.Y.Kiang@nasa.gov", vartype='NC_FLOAT') 
 		nc = open.nc(con=fileout, write=TRUE)
 		var.put.nc(nc, varname, varwtdlc)
 		if (if.time) {

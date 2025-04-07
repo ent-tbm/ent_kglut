@@ -209,7 +209,7 @@ LAIs= np.zeros((18, 40, 12)) # SouthernHemi
 LAImax = np.zeros((18, 40)) # PFT Biome
 HITEent = np.zeros((18, 40))
 LC = np.zeros((40, 18))
-biomes = np.empty(outdimensions)
+#biomes = np.empty(outdimensions)
 
 stdLAI = np.zeros((18, 40, 12))
 stdLAIs = np.zeros((18, 40, 12))
@@ -222,8 +222,8 @@ samplesWeight = np.zeros((2, 18, 40))
 sampleCode = np.full((2, 18, 40), 'X')
 
 print("Fetching biome files")
-with nc.Dataset(biome_file) as dataset:
-  biomes = dataset["KG"][:]
+#with nc.Dataset(biome_file) as dataset:
+#  biomes = dataset["KG"][:]
 with nc.Dataset(biomeIn_file) as dataset:
   biomesIn = dataset["KG"][:]
 
@@ -470,7 +470,7 @@ for pft, pftvalue in pfts.items():
 
 flc.close()
 
-dimlat, dimlon = outdimensions
+#dimlat, dimlon = outdimensions
 
 print("Creating plots")
 

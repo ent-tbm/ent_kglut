@@ -5,7 +5,8 @@
 # !/bin/bash
 
 if [ $# -ne 1 ] && [ $# -ne 2 ]; then
-  echo "Incorrect number of arguments"
+  echo "Incorrect number of arguments."
+  echo "Usage: ./LUTaltclimate2modelEinput.sh <config file> <optional: YES-only generate Koeppen-Geiger classification, NO (default)-classify climate and generate vegetation boundary conditions>"
   exit 1
 fi
 
@@ -14,6 +15,7 @@ if ! [ -f $1 ]; then
   exit 2
 fi
 
+generateKGonly=false #default
 if [ $# -eq 2 ]; then
   generateKGonly=$(echo $1 | tr [:lower:] [:upper:])
   if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
