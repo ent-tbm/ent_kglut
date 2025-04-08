@@ -1,10 +1,10 @@
 temp=./data/cru_ts3.22_TS_means_2001-2010_HXH.nc
 prec=./data/GPCC_v6_PREC_means_2001-2010_HXH.nc
-lut=../user/output/Ent_v2X2H_KoeppenGeigerLUT_60ef725.nc
+lut=../kglut_modelE/EntKoeppenGeigerLUTv1.0_hxh_a62e225-2025-04-07.nc
 resolution=2X2H
 outdir=../user/output/
 netcdf_format=NETCDF3_CLASSIC
 hgt=YES
-metadata_dataversion=MODIS Average of 2001-2005, v4, March 2014
+metadata_dataversion=Ent Global Vegetation Structure Dataset (Ent GVSD) v1.0
 metadata_description=Ent Global Vegetation Structure Dataset (Ent GVSD)  v1.0, classified into Koeppen-Geiger biome groupings with average monthly 2001-2010 surface temperature from the Climate Research Unit of the University of East Anglia  (CRU TS3.22) and precipitation from the Global Precipitation Climatology Centre (GPCC v.6). Estimated monthly LAI generated from input biomes and weighed by grid-surface area and cover fraction.
 suffix=
