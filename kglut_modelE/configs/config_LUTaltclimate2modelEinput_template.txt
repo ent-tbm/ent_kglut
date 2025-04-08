@@ -1,6 +1,6 @@
 aij_dir=<directory where your ModelE aij monthly climatological diagnostics files are>
 aij_jan=<name of January aij file, e.g. JANYYY1-YYY2.aij<run_name>.nc>
-lut=<Ent KG Lookup table, e.g. ../../kglut_modelE/EntKoeppenGeigerLUTv1.0_hxh_a62e225-2025-04-07.nc
+lut=<Ent KG Lookup table, e.g. ../../kglut_modelE/EntKoeppenGeigerLUTv1.0_hxh_a62e225-2025-04-07.nc>
 resolution=2X2H
 outdir=../user/output/
 netcdf_format=NETCDF3_CLASSIC

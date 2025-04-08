@@ -99,7 +99,7 @@ while IFS=$'=' read -r -a args; do
     if [ ${#arg} -eq 0 ]; then
       append_rng=$(date '+%Y-%m-%d')
     else
-      append_rng="$arg-$(date '+%Y-%m-%d')"
+      append_rng="${arg}_$(date '+%Y-%m-%d')"
     fi
   elif [ "$keyword" = "temp" ]; then
     config_temp=$arg
@@ -189,6 +189,9 @@ lc_out="V${dimname}_lc_${years}_${runname}_${append_rng}.nc"
 
 # check if prec and temp are specified, no need to generate them if so, and make a symlink
 if [ -f "$config_prec" ] && [ -f "$config_temp" ]; then
+  prec="prec_${resolution}_${append_rng}.nc"
+  temp="temp_${resolution}_${append_rng}.nc"
+  biome="V${dimname}_KGbiomes_${append_rng}.nc"
   ln -s $(realpath $config_prec) $(realpath ${outdirn}${prec})
   ln -s $(realpath $config_temp) $(realpath ${outdirn}${temp})
   skip_aij=true
@@ -197,13 +200,20 @@ fi
 
 # check if kg is specified, no need to generate prec, temp, KG if so, and make a symlink
 if [ -f "$config_kg" ]; then
+  biome="V${dimname}_KGbiomes_${append_rng}.nc"
   ln -s $(realpath $config_kg) $(realpath ${outdirn}${biome})
   skip_aij=true
   skip_tp=true
   echo "KG biomes file specified and exists"
 fi
 
-if ! $skip_aij; then
+if $skip_aij; then
+  # change output file names to remove years and runname as those no longer exist
+  lai_out="V${dimname}_lai_${append_rng}.nc"
+  laimax_out="V${dimname}_laimax_${append_rng}.nc"
+  height_out="V${dimname}_height_${append_rng}.nc"
+  lc_out="V${dimname}_lc_${append_rng}.nc"
+else
 # run aij2prectemp.py
 cp "aij2prectemp.py" "${userout}aij2prectemp_${append_rng}.py"
 

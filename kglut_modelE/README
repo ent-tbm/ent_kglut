@@ -26,11 +26,11 @@ Short summary:
 ==========================================================================================================================================
 Detailed summary:
 
-A. obs2EntKGLUT.sh: Generate LUT
+A. obs2EntKGLUT.sh: 
 
-The user does not need to run this script unless they wish to generate alternative lookup tables (LUT) with other data sets. The default LUT of vegetation boundary conditions by Koeppen-Geiger biome type and Ent PFT as published is included in the repository.
+This script generates a look up table of vegetation boundary conditions (height, LAI, LAImax, land cover fraction) based on regression of values over a Koeppen-Geiger biome. The user does not need to run this script unless they wish to generate alternative lookup tables (LUT) with other data sets. The default LUT of vegetation boundary conditions by Koeppen-Geiger biome type and Ent PFT as published is included in the repository.
 
-  frozen LUT:  Ent_utils/kglut_modelE/Ent_vHXH_KoeppenGeigerLUT_v1.0_<##TBD hash##>_YYYY-MM-DD.nc
+  frozen LUT:  Ent_utils/kglut_modelE/data/EntKoeppenGeigerLUTv1.0_hxh_a62e225-2025-04-07.nc
 
 This script takes observed climate and vegetation maps and generates a Koeppen-Geiger climate-biome classification of Ent PFT and bare soil pcover fraction, height, annual maximum LAI, and monthly LAI in a lookup table (LUT). Input data files and some parameter settings are specified by a configuration file. Relative paths are relative to the kglut_modelE directory.
 
@@ -89,7 +89,7 @@ Three scripts are called to filter out the csv files for the final lookup table 
 
 csv2lut.py generates the final lookup table, Ent_v$(dimensions)_KoeppenGeiegerLUT_0123abc.nc, and also plots final LAI monthly lookup table
 
-Outputs:
+Example outputs:
 KG_classify_config_<hash>_YYYY-MM-DD.txt - input config file to KG_classify.R script.
 EntKGHXH_map_<hash>_YYYY-MM-DD.pdf - KG biome map
 V720x360_KGbiomes_<hash>_YYYY-MM-DD.nc - netcdf file of KG biome class numbers
@@ -115,9 +115,9 @@ Ent_vHXH_KoeppenGeigerLUT_<hash>_YYYY-MM-DD.nc_LAIplot.pdf - time series plots o
 
 B. LUTaltclimate2modelEinput.sh:
 
-This script generates input files in netCDF format based on alternate climitology to be used in modelE using input from the config file: config_LUTaltclimate2modelEinput.sh. Relative paths are relative to the kglut_modelE directory.
+This script generates input files in netCDF format based on alternate climatology to be used in modelE using input from the config file. Relative paths are relative to the kglut_modelE directory.
    LUTaltclimate2modelEinput.sh: Takes alternative climate (monthly temperature and precip) from ModelE aij files, and applies the lookup table to generate alternative ModelE map input files of vegetation boundary conditions.  
-        config: User-specified, with example in "config_LUTaltclimate2modelEinput.txt."
+        config: User-specified, with example in "config_LUTaltclimate2modelEinput_EntKGLUTv1.0_Eocene.txt."
         calls: aij2prectemp.py, prectemp2biome.sh, lut2finalout.py, Ent_map_lc_weighted.R, Ent_maps.R
 
 The config file fields are:
@@ -156,7 +156,7 @@ Ent_maps.R generates pft maps for all variables individually.
 
 ----------------------------------------------
 
-Outputs:
+Example outputs:
 aij2prectemp_<hash>-YYYY-MM-DD.py - python script that is generated if user inputs ModelE aij diagnostic files for climate.
 prec_4X5_3507-3516_P2SAoM40_Phan85Ma1500_2_<hash>-YYYY-MM-DD.nc - netcdf file of monthly climatological precipitation (mm/month) formatted for input the Rfiles R script KG_classify.R.
 temp_4X5_3507-3516_P2SAoM40_Phan85Ma1500_2_<hash>-YYYY-MM-DD.nc - netcdf file of monthly climatological surface temperature (Celsius) formatted for input the Rfiles R script KG_classify.R.
@@ -182,6 +182,13 @@ V72x46_height_3507-3516_P2SAoM40_Phan85Ma1500_2_<hash>-YYYY-MM-DD.nc.pdf
 V72x46_laimax_3507-3516_P2SAoM40_Phan85Ma1500_2_<hash>-YYYY-MM-DD.nc.pdf
 V72x46_lai_3507-3516_P2SAoM40_Phan85Ma1500_2_<hash>-YYYY-MM-DD.nc.pdf
 V72x46_lc_3507-3516_P2SAoM40_Phan85Ma1500_2_<hash>-YYYY-MM-DD_85.0Ma.nc
+
+***********************************************
+
+B-1. modelE2KGBiomes.sh
+
+This script makes it easier to convert modelE diagnostics files into a Koeppen-Geiger map. This is essentially just the first two steps of the LUTaltclimate2modelEinput.sh script. Its input config file, config_modelE2KGBiomes.txt is the same config file as config_LUTaltclimate2modelEinput
+
 
 ***********************************************
 

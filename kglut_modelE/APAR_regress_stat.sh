@@ -103,7 +103,7 @@ while IFS=$'=' read -r -a args; do
     if [ ${#arg} -eq 0 ]; then
       append_rng=$(date '+%Y-%m-%d')
     else
-      append_rng="$arg-$(date '+%Y-%m-%d')"
+      append_rng="${arg}_$(date '+%Y-%m-%d')"
     fi
   fi
 done < "${ppwd}/${1}"

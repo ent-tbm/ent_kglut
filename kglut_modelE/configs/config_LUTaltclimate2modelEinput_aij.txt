@@ -1,6 +1,6 @@
 aij_dir=/discover/nobackup/projects/giss_ana/pub/Ent_TBM/Ent_KGLUT_v1.0/TRENDY2023_2HX2_gij
 aij_jan=JAN2000-2009.gijL0_control_tr.nc
-lut=../kglut_modelE/EntKoeppenGeigerLUTv1.0_hxh_a62e225-2025-04-07.nc
+lut=./data/EntKoeppenGeigerLUTv1.0_hxh_a62e225-2025-04-07.nc
 resolution=2X2H
 outdir=../user/output/
 netcdf_format=NETCDF3_CLASSIC
