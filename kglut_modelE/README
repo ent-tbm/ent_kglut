@@ -36,7 +36,7 @@ This script takes observed climate and vegetation maps and generates a Koeppen-G
 
   data: Default input observations are put in the data directory. Run data_get_HXH.sh to fetch provided data.  This script will get the data from either the NASA Center for Climate Simulation (NCCS) web data portal, or for users of the NCCS discover linux cluster, or copy from the same portal via an internal path.
 
-  config: Default config file "config_obs2EntKGLUT.txt" specifies the default input observations in the data directory and parameter settings.
+  config: Default config file "config_obs2EntKGLUT_default.txt" specifies the default input observations in the data directory and parameter settings.
 
 The config file fields are:
 
@@ -70,7 +70,7 @@ TO RUN:
 
 2. Make or choose the config file
    A config file with default data is in: 
-      ${Ent_utils}/kglut_modelE/config_examples/config_obs2EntKGLUT_EntGVSDv1.0.txt
+      ${Ent_utils}/kglut_modelE/config_examples/config_obs2EntKGLUT_default.txt
 3. cd user
 4. From the user directory, run the script with:
       ./../kglut_modelE/obs2EntKGLUT.sh <config_file>
