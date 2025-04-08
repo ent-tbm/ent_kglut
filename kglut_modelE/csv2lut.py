@@ -79,11 +79,11 @@ with open(laimax_file) as flaimax, open(height_file) as fheight, open(lc_file) a
       pftno = int(laimaxline[0][3:-4])
       if not 'VAL' in laimaxline[0]:
         int(laimaxline[0][3:-4])
-        continue # this is extremely asinine, for some god forsaken reason running this script from bash makes string slicing WRONG
-      LAImax[pftno-1][:] = np.array(laimaxline[1:]).astype(np.float64) # so e.g. laimaxline[0] = 'PFT5/VAL'
-      HITEent[pftno-1][:] = np.array(heightline[1:]).astype(np.float64) # therefore laimaxline[0][3:-4] -> '5' right? (orig script)
-      LC[pftno-1][:] = np.array(lcline[1:]).astype(np.float64) # NOPE! It gives T5/ ???? WHY IS IT COUNTING '' AS PART OF THE STRING????
-    except ValueError as e: # OH AND EVEN WORSE, [4:-5] and [3:-4][1:-1] DOESN'T FIX IT! IT JUST MAKES AN EMPTY STRING
+        continue 
+      LAImax[pftno-1][:] = np.array(laimaxline[1:]).astype(np.float64) 
+      HITEent[pftno-1][:] = np.array(heightline[1:]).astype(np.float64) 
+      LC[pftno-1][:] = np.array(lcline[1:]).astype(np.float64) 
+    except ValueError as e: 
       #print(e)
       break
 

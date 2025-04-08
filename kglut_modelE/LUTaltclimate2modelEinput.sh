@@ -17,7 +17,7 @@ fi
 
 generateKGonly=false #default
 if [ $# -eq 2 ]; then
-  generateKGonly=$(echo $1 | tr [:lower:] [:upper:])
+  generateKGonly=$(echo $2 | tr [:lower:] [:upper:])
   if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
     generateKGonly=true
   else
@@ -51,6 +51,8 @@ append_rng=$(date | md5sum | cut -c 1-7)-$(date '+%Y-%m-%d')
 # Loop over the input file
 
 dohgt=false
+skip_aij=false
+skip_tp=false
 
 while IFS=$'=' read -r -a args; do
   keyword=${args[0]}
@@ -99,6 +101,12 @@ while IFS=$'=' read -r -a args; do
     else
       append_rng="$arg-$(date '+%Y-%m-%d')"
     fi
+  elif [ "$keyword" = "temp" ]; then
+    config_temp=$arg
+  elif [ "$keyword" = "prec" ]; then
+    config_prec=$arg
+  elif [ "$keyword" = "kg_biomes" ]; then
+    config_kg=$arg
   fi
 done < "${ppwd}/${1}"
 
@@ -179,6 +187,23 @@ laimax_out="V${dimname}_laimax_${years}_${runname}_${append_rng}.nc"
 height_out="V${dimname}_height_${years}_${runname}_${append_rng}.nc"
 lc_out="V${dimname}_lc_${years}_${runname}_${append_rng}.nc"
 
+# check if prec and temp are specified, no need to generate them if so, and make a symlink
+if [ -f "$config_prec" ] && [ -f "$config_temp" ]; then
+  ln -s $(realpath $config_prec) $(realpath ${outdirn}${prec})
+  ln -s $(realpath $config_temp) $(realpath ${outdirn}${temp})
+  skip_aij=true
+  echo "prec and temp files specified and exist"
+fi
+
+# check if kg is specified, no need to generate prec, temp, KG if so, and make a symlink
+if [ -f "$config_kg" ]; then
+  ln -s $(realpath $config_kg) $(realpath ${outdirn}${biome})
+  skip_aij=true
+  skip_tp=true
+  echo "KG biomes file specified and exists"
+fi
+
+if ! $skip_aij; then
 # run aij2prectemp.py
 cp "aij2prectemp.py" "${userout}aij2prectemp_${append_rng}.py"
 
@@ -212,7 +237,9 @@ if [ $? -ne 0 ]; then
   echo "Error raised in step, halting."
   exit 10
 fi
+fi
 
+if ! $skip_tp; then
 # use KG_classify instead ~~run prectemp2biome.sh~~
 #echo -e "${prec}\t${temp}\t${outdirn}${biome}" > "ptb_${append_rng}.txt"
 #./prectemp2biome.sh "ptb_${append_rng}.txt"
@@ -237,9 +264,13 @@ fi
 
 mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
 #rm "KG_classify_config_${append_rng}.txt"
+fi
 
-if [ $generateKGonly ]; then
-  echo "Generated KG file"
+if $generateKGonly; then
+  if $skip_tp; then
+    echo "Huh??"
+    exit 0
+  fi
   echo "Intermediate scripts used to generate outputs can be found here: ${path}${userout}"
   echo "All output files:"
   ls ${outdir}*${append_rng}*
@@ -266,7 +297,7 @@ ex "${userout}lut2finalout_${append_rng}.py" <<EOF
   wq
 EOF
 
-if [ $dohgt ]; then
+if $dohgt; then
   ex "${userout}lut2finalout_${append_rng}.py" <<EOF 
     24s/@@HGT/${hgt}/
     wq
@@ -299,7 +330,7 @@ ex "${userout}Ent_map_lcwtd_config_${append_rng}.txt" <<EOF
   wq
 EOF
 
-if [ $dohgt ]; then
+if $dohgt; then
   ex "${userout}Ent_map_lcwtd_config_${append_rng}.txt" <<EOF
     5s/@@HGT/hgt/
     4,7s/@@NA/NA
