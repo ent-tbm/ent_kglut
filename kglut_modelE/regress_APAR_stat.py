@@ -5,13 +5,13 @@ from datetime import datetime
 import netCDF4 as nc
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.colors as colors
+import matplotlib.colors as colors, matplotlib.cm as cm
 import matplotlib.ticker as mticker
 from matplotlib.lines import Line2D
 from mpl_toolkits.basemap import Basemap
 from math import sqrt
 import statsmodels.api as sm
-import warnings
+import warnings, gc
 
 indir = "@@INDIR"
 biome_file = "@@BIOME" 
@@ -95,6 +95,7 @@ srvissurf = np.empty((13, dimlat, dimlon))
 apar_pft = np.empty((13, 18, dimlat, dimlon)) # ra041
 fapar_pft = np.empty((13, 18, dimlat, dimlon)) # ra043
 lc_pft = np.empty((18, dimlat, dimlon)) # ra001
+lai_pft = np.empty((18, dimlat, dimlon)) # ra007
 c_biomass = np.empty((18, dimlat, dimlon)) # ra017 - ra024
 population_pft = np.empty((18, dimlat, dimlon)) # ra029
 npp_pft = np.empty((13, 18, dimlat, dimlon)) # ra015 - ra016
@@ -253,6 +254,13 @@ def get_MMM(arr, wxyp):
     maxval = np.ma.max(arrm)
     return minval, meanval, maxval
 
+def garbage_collect(plt):
+    plt.cla() # memory stuff
+    plt.clf()
+    plt.close(fig)
+    plt.close("all")
+    gc.collect()
+
 print("Fetching data... Warning could be slow! Please be patient")
 for i in range(13):
     with nc.Dataset(indir+aij[i]) as dataset:
@@ -279,6 +287,7 @@ for i in range(13):
             npp_pft[i,j] = dataset["ra015{:03d}".format(j+1)][:] - rauto_pft[i,j]
             if (i == 12):
                 lc_pft[j] = dataset["ra001{:03d}".format(j+1)][:]
+                lai_pft[j] = dataset["ra007{:03d}".format(j+1)][:]
                 c_biomass[j] = dataset["ra017{:03d}".format(j+1)][:] - dataset["ra024{:03d}".format(j+1)][:]
                 c_lab[j] = dataset["ra018{:03d}".format(j+1)][:]
                 c_folsw[j] = dataset["ra019{:03d}".format(j+1)][:] + dataset["ra020{:03d}".format(j+1)][:]
@@ -346,6 +355,7 @@ soilresp = np.where(soilresp >= -100., soilresp, 0) # gC m-2 day-1 vf
 apar_pft = np.where(apar_pft >= 0., apar_pft, 0) # W m-2
 fapar_pft = np.where(fapar_pft >= 0., fapar_pft, 0) # frac
 lc_pft = np.where(lc_pft >= lc_threshold, lc_pft, 0) # frac
+lai_pft = np.where(lai_pft >= 0., lai_pft, 0) # m2 m-2
 population_pft = np.where(population_pft >= 0, population_pft, 0) # m-2
 npp_pft = np.where(npp_pft >=-100., npp_pft, 0) # gC m-2 d-1 vf
 rauto_pft = np.where(rauto_pft >=-100., npp_pft, 0) # gC m-2 d-1 vf
@@ -420,7 +430,7 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
         f.write("----------------- {} -----------------\n".format(month_names[(i+12)%13].decode('utf-8').strip()))
         f.write("Global Downward Radiation: {:.2f} ZJ\n".format(np.ma.sum(incsw_grnd[(i+12)%13] * soilfr * axyp * 86400 * month_day[(i+12)%13] / 1e21)))
         f.write("Global PAR: {:.2f} ZJ\n".format(np.ma.sum(srvissurf[(i+12)%13] * vsfr * axyp * 86400 * month_day[(i+12)%13] / 1e21)))
-        f.write("Global APAR: {:.2f} ZJ\n".format(np.ma.sum(apar[(i+12)%13] * vsfr * axyp * 86400 * month_day[(i+12)%13] / 1e21)))
+        f.write("Global {}: {:.2f} ZJ\n".format("Gibbs Energy" if msp_ar else "APAR", np.ma.sum(apar[(i+12)%13] * vsfr * axyp * 86400 * month_day[(i+12)%13] / 1e21)))
         f.write("Global Evapotranspiration: {:.2f} km3\n".format(np.ma.sum(transp[(i+12)%13] * vsfr / 1000 * axyp * month_day[(i+12)%13] / 1e9)))
         f.write("Global Gross Primary Productivity: {:.2f} PgC\n".format(np.ma.sum(gpp[(i+12)%13] * vsfr * axyp * month_day[(i+12)%13] / 1e15)))
         f.write("Global Net Primary Productivity: {:.2f} PgC\n".format(np.ma.sum((gpp[(i+12)%13] - rauto[(i+12)%13]) * vsfr * axyp * month_day[(i+12)%13] / 1e15)))
@@ -435,7 +445,7 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
     print("\033[1mGlobal Biomass: \033[0m{:.2f} PgC".format(np.ma.sum(c_biomass_sum * vsfr * axyp) / 1e12))
     print("\033[1mGlobal Downward Radiation: \033[0m{:.2f} ZJ yr-1".format(np.ma.sum(incsw_grnd[12] * soilfr * axyp * 86400 * 365 / 1e21)))
     print("\033[1mGlobal PAR: \033[0m{:.2f} ZJ yr-1".format(np.ma.sum(srvissurf[12] * vsfr * axyp * 86400 * 365 / 1e21)))
-    print("\033[1mGlobal APAR: \033[0m{:.2f} ZJ yr-1".format(np.ma.sum(apar[12] * vsfr * axyp * 86400 * 365 / 1e21)))
+    print("\033[1mGlobal {}: \033[0m{:.2f} ZJ yr-1".format("Gibbs Energy" if msp_ar else "APAR", np.ma.sum(apar[12] * vsfr * axyp * 86400 * 365 / 1e21)))
     print("\033[1mGlobal Evapotranspiration: \033[0m{:.2f} km3 yr-1".format(np.ma.sum(transp[12] * vsfr / 1000 * axyp * 365 / 1e9)))
     print("\033[1mGlobal Gross Primary Productivity: \033[0m{:.2f} PgC yr-1".format(np.ma.sum(gpp[12] * vsfr * axyp * 365 / 1e15)))
     print("\033[1mGlobal Net Primary Productivity: \033[0m{:.2f} PgC yr-1".format(np.ma.sum((gpp[12] - rauto[12]) * vsfr * axyp * 365 / 1e15)))
@@ -488,7 +498,7 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
 
     ########################################################################
 
@@ -531,7 +541,7 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
     
     ########################################################################
 
@@ -573,7 +583,7 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
 
     ########################################################################
 
@@ -592,7 +602,7 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
 
     ########################################################################
 
@@ -640,7 +650,7 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
 
     ########################################################################
     
@@ -648,7 +658,7 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
     PFTlegend = [ Line2D([], [], color='black', marker=mStyles[PFT], label=lcn_names_full[PFT], linestyle='', markersize=15) for PFT in valid_pft]
     PFTlegendcolor = [ Line2D([], [], color=entcolors[PFT], marker=mStyles[PFT], label=lcn_names_full[PFT], linestyle='', markersize=15) for PFT in valid_pft]
     # dummy plot for color bar
-    axi = m.imshow([[np.nan, np.nan], [np.nan, np.nan]], norm=colors.Normalize(vmin=6.5, vmax=40.5), cmap=KG_cmap_r)
+    #axi = m.imshow([[np.nan, np.nan], [np.nan, np.nan]], norm=colors.Normalize(vmin=6.5, vmax=40.5), cmap=KG_cmap_r)
     
     # number of valid points
     no_points = np.count_nonzero(c_biomass * lc_pft)
@@ -656,17 +666,18 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
     # CSV kitchen sink
     with open(outdir+outWWpdf[:-4]+"_ks.csv", mode='w') as g, open(outdir+outWWpdf[:-4]+"_errorpts.csv", mode='w') as h:
-        g.write("lat,lon,pft,biome,lc.frac,popdens.m-2,{}_biodens.kgC m-2,{}_indivmass.gC,{}.GJ m-2 yr-1,fapar.frac,msp{}.W gC-1,turnover.yr-1\n".format("agb" if biomass_agb else "total", "agb" if biomass_agb else "total", "gibbsenergy" if msp_ar else "apar", "_gibbs" if msp_ar else ""))
-        h.write("lat,lon,pft,biome,lc.frac,popdens.m-2,{}_biodens.kgC m-2,{}_indivmass.gC,{}.W m-2,fapar.frac,msp{}.W gC-1,turnover.yr-1,npp.gC m-2 d-1,gpp.gC m-2 d-1,rauto.gC m-2 d-1\n".format("agb" if biomass_agb else "total", "agb" if biomass_agb else "total", "gibbsenergy" if msp_ar else "apar", "_gibbs" if msp_ar else ""))
+        g.write("lat,lon,pft,biome,lc.frac,lai.m2 m-2,popdens.m-2,{}_biodens.kgC m-2,{}_indivmass.gC,{}.GJ m-2 yr-1,fapar.frac,msp{}.W gC-1,turnover.yr-1\n".format("agb" if biomass_agb else "total", "agb" if biomass_agb else "total", "gibbsenergy" if msp_ar else "apar", "_gibbs" if msp_ar else ""))
+        h.write("lat,lon,pft,biome,lc.frac,lai.m2 m-2,popdens.m-2,{}_biodens.kgC m-2,{}_indivmass.gC,{}.W m-2,fapar.frac,msp{}.W gC-1,turnover.yr-1,npp.gC m-2 d-1,gpp.gC m-2 d-1,rauto.gC m-2 d-1,clab.kgC m-2\n".format("agb" if biomass_agb else "total", "agb" if biomass_agb else "total", "gibbsenergy" if msp_ar else "apar", "_gibbs" if msp_ar else ""))
         for PFT in valid_pft:
             for i in range(dimlat):
                 for j in range(dimlon):
                     if (c_biomass[PFT,i,j] * lc_pft[PFT,i,j] > 0 and biomes[i,j] > 0):
-                        g.write("{},{},{},{},{},{},{},{},{},{},{},{}\n".format(lat[i],lon[j],lcn_names_full[PFT], biome_names_py[int(biomes[i,j])-1], lc_pft[PFT,i,j], population_pft[PFT,i,j], c_biomass[PFT,i,j], c_biomass[PFT,i,j] * lc_pft[PFT,i,j] / population_pft[PFT,i,j] * 1000,apar_pft[12,PFT,i,j] * 86400 * 365 / 1e9, fapar_pft[12,PFT,i,j], apar_pft[12,PFT,i,j] / c_biomass[PFT,i,j] / 1000, npp_pft[12,PFT,i,j] * 365 / 1000 / c_biomass[PFT,i,j]))
+                        g.write("{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(lat[i],lon[j],lcn_names_full[PFT], biome_names_py[int(biomes[i,j])-1], lc_pft[PFT,i,j], lai_pft[PFT,i,j], population_pft[PFT,i,j], c_biomass[PFT,i,j], c_biomass[PFT,i,j] * lc_pft[PFT,i,j] / population_pft[PFT,i,j] * 1000,apar_pft[12,PFT,i,j] * 86400 * 365 / 1e9, fapar_pft[12,PFT,i,j], apar_pft[12,PFT,i,j] / c_biomass[PFT,i,j] / 1000, npp_pft[12,PFT,i,j] * 365 / 1000 / c_biomass[PFT,i,j]))
                         if (npp_pft[12,PFT,i,j] <= 0. or apar_pft[12,PFT,i,j] <= 0.):
-                            h.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(lat[i],lon[j],lcn_names_full[PFT], biome_names_py[int(biomes[i,j])-1], lc_pft[PFT,i,j], population_pft[PFT,i,j], c_biomass[PFT,i,j], c_biomass[PFT,i,j] * lc_pft[PFT,i,j] / population_pft[PFT,i,j] * 1000,apar_pft[12,PFT,i,j], fapar_pft[12,PFT,i,j], apar_pft[12,PFT,i,j] / c_biomass[PFT,i,j] / 1000, npp_pft[12,PFT,i,j] * 365 / 1000 / c_biomass[PFT,i,j], npp_pft[12,PFT,i,j], npp_pft[12,PFT,i,j] + rauto_pft[12,PFT,i,j], rauto_pft[12,PFT,i,j]))
-    exit()
-    """
+                            h.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(lat[i],lon[j],lcn_names_full[PFT], biome_names_py[int(biomes[i,j])-1], lc_pft[PFT,i,j], lai_pft[PFT,i,j], population_pft[PFT,i,j], c_biomass[PFT,i,j], c_biomass[PFT,i,j] * lc_pft[PFT,i,j] / population_pft[PFT,i,j] * 1000,apar_pft[12,PFT,i,j], fapar_pft[12,PFT,i,j], apar_pft[12,PFT,i,j] / c_biomass[PFT,i,j] / 1000, npp_pft[12,PFT,i,j] * 365 / 1000 / c_biomass[PFT,i,j], npp_pft[12,PFT,i,j], npp_pft[12,PFT,i,j] + rauto_pft[12,PFT,i,j], rauto_pft[12,PFT,i,j], c_lab[PFT,i,j]))
+
+    ########################################################################
+    
     pagenum+=1
     #Scatter plot
     #Power GJ m-2 yr-1 vs. mass density
@@ -685,6 +696,8 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
     print("Plotting APAR scatter")
     plt.subplot(1,1,1)
+    cbar = plt.colorbar(cm.ScalarMappable(norm=colors.Normalize(vmin=6.5, vmax=40.5), cmap=KG_cmap_r), ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]), ax=plt.gca())
+    cbar.ax.tick_params(labelsize=20)
     plt.title("Annual Power vs. Mass Density", fontsize = 40)
     plt.ylabel("Power per Vegetated Area {}(GJ/m²/year)".format("(Gibbs Energy Estimate) " if msp_ar else ""), fontsize = 30)
     plt.xlabel("Mass Density per Grid Area {}(kgC/m²)".format(biomass_label), fontsize = 30)
@@ -700,14 +713,12 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
         KG_mask = np.where(biomes != KG+1, True, False)
         for PFT in valid_pft:
             plt.scatter(np.ma.MaskedArray(c_biomass[PFT] * lc_pft[PFT], mask=KG_mask).flatten(), np.ma.MaskedArray(apar_pft[12,PFT] * 86400 * 365 / 1e9, mask=KG_mask).flatten(), marker=mStyles[PFT], color=KGcolors[KG], s=(lc_pft[PFT].flatten() * 8)**2)
-    cbar = plt.colorbar(axi, ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]))
-    cbar.ax.tick_params(labelsize=20)
     plt.legend(handles=PFTlegend, fontsize=20, title="n={}, lc≥{:.2f}, {}".format(no_points, lc_threshold, "no crops" if no_crops else "with crops"), title_fontsize=25, framealpha=0.1)
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
-    plt.close()
-
+    garbage_collect(plt)
+    
     ########################################################################
 
     pagenum+=1
@@ -728,6 +739,8 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
     print("Plotting FAPAR scatter")
     plt.subplot(1,1,1)
+    cbar = plt.colorbar(cm.ScalarMappable(norm=colors.Normalize(vmin=6.5, vmax=40.5), cmap=KG_cmap_r), ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]), ax=plt.gca())
+    cbar.ax.tick_params(labelsize=20)
     plt.title("FAPAR vs. Mass Density", fontsize = 40)
     plt.ylabel("Fraction of APAR (fraction)", fontsize = 30)
     plt.xlabel("Mass Density per Grid Area {}(kgC/m²)".format(biomass_label), fontsize = 30)
@@ -740,13 +753,11 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
         KG_mask = np.where(biomes != KG+1, True, False)
         for PFT in valid_pft:
             plt.scatter(np.ma.MaskedArray(c_biomass[PFT] * lc_pft[PFT], mask=KG_mask).flatten(), np.ma.MaskedArray(fapar_pft[12,PFT], mask=KG_mask).flatten(), marker=mStyles[PFT], color=KGcolors[KG], s=(lc_pft[PFT].flatten() * 8)**2)
-    cbar = plt.colorbar(axi, ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]))
-    cbar.ax.tick_params(labelsize=20)
     plt.legend(handles=PFTlegend, fontsize=20, title="n={}, lc≥{:.2f}, {}".format(no_points, lc_threshold, "no crops" if no_crops else "with crops"), title_fontsize=25, framealpha=0.1)
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
     
     ########################################################################
 
@@ -772,6 +783,8 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
     print("Plotting MSP scatter")
     plt.subplot(1,1,1)
+    cbar = plt.colorbar(cm.ScalarMappable(norm=colors.Normalize(vmin=6.5, vmax=40.5), cmap=KG_cmap_r), ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]), ax=plt.gca())
+    cbar.ax.tick_params(labelsize=20)
     plt.title("Mass Specific Power vs. Mass Density", fontsize = 40)
     plt.ylabel("Mass Specific Power {}(W/gC)".format("(Gibbs Energy Estimate) " if msp_ar else ""), fontsize = 30)
     plt.xlabel("Mass Density per Grid Area {}(kgC/m²)".format(biomass_label), fontsize = 30)
@@ -788,8 +801,6 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
         KG_mask = np.where(biomes != KG+1, True, False)
         for PFT in valid_pft:
             plt.scatter(np.ma.MaskedArray(c_biomass[PFT] * lc_pft[PFT], mask=KG_mask).flatten(), np.ma.MaskedArray(apar_pft[12,PFT] / c_biomass[PFT] / 1000, mask=KG_mask).flatten(), marker=mStyles[PFT], color=KGcolors[KG], s=(lc_pft[PFT].flatten() * 8)**2)
-    cbar = plt.colorbar(axi, ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]))
-    cbar.ax.tick_params(labelsize=20)
     plt.gca().add_artist(plt.legend(handles=PFTlegend, fontsize=20, loc=1, title="n={}, lc≥{:.2f}, {}".format(no_points, lc_threshold, "no crops" if no_crops else "with crops"), title_fontsize=25, framealpha=0.1))
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
@@ -818,7 +829,7 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
         f.write("\n")
         WWpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
 
     ########################################################################
     
@@ -844,6 +855,8 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
     
     print("Plotting MSP scatter (number, biome colors)")
     plt.subplot(1,1,1)
+    cbar = plt.colorbar(cm.ScalarMappable(norm=colors.Normalize(vmin=6.5, vmax=40.5), cmap=KG_cmap_r), ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]), ax=plt.gca())
+    cbar.ax.tick_params(labelsize=20)
     plt.title("Mass Specific Power vs. Individual Mass", fontsize = 40)
     plt.ylabel("Mass Specific Power {}(W/gC)".format("(Gibbs Energy Estimate) " if msp_ar else ""), fontsize = 30)
     plt.xlabel("Individual Mass {}(gC)".format(biomass_label), fontsize = 30)
@@ -860,8 +873,6 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
         KG_mask = np.where(biomes != KG+1, True, False)
         for PFT in valid_pft:
             plt.scatter(np.ma.MaskedArray(c_biomass[PFT] * lc_pft[PFT] / population_pft[PFT] * 1000, mask=KG_mask).flatten(), np.ma.MaskedArray(apar_pft[12,PFT] / c_biomass[PFT] / 1000, mask=KG_mask).flatten(), marker=mStyles[PFT], color=KGcolors[KG], s=(lc_pft[PFT].flatten() * 8)**2)
-    cbar = plt.colorbar(axi, ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]))
-    cbar.ax.tick_params(labelsize=20)
     plt.gca().add_artist(plt.legend(handles=PFTlegend, fontsize=20, loc=1, title="n={}, lc≥{:.2f}, {}".format(no_points, lc_threshold, "no crops" if no_crops else "with crops"), title_fontsize=25, framealpha=0.1))
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig() # figures with and without fit lines
@@ -891,7 +902,7 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
         #plt.legend(handles=fithandles, fontsize=10, loc=3)
         f.write("\n")
         WWpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
 
     ########################################################################
 
@@ -921,7 +932,6 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
     plt.yscale('log')
     for PFT in valid_pft:
         plt.scatter(np.ma.masked_invalid(c_biomass[PFT] * lc_pft[PFT] / population_pft[PFT] * 1000).flatten(), np.ma.masked_invalid(apar_pft[12,PFT] / c_biomass[PFT] / 1000).flatten(), marker=mStyles[PFT], color=entcolors[PFT], s=(lc_pft[PFT].flatten() * 8)**2)
-    cbar.ax.tick_params(labelsize=20)
     plt.gca().add_artist(plt.legend(handles=PFTlegendcolor, fontsize=20, loc=1, title="n={}, lc≥{:.2f}, {}".format(no_points, lc_threshold, "no crops" if no_crops else "with crops"), title_fontsize=25, framealpha=0.1))
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig() # figures with and without fit lines
@@ -950,10 +960,38 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
         #plt.legend(handles=fithandles, fontsize=15, loc=3)
         WWpdf.savefig()
         f.write("\n")
-    plt.close()
-    """
-    ########################################################################
+    garbage_collect(plt)
     
+    ########################################################################
+
+    pagenum+=1
+    #Scatter Plot
+    #individual mass vs. mass density per area
+    fig = plt.figure(figsize=(20, 20))
+    fig.suptitle("{} ({}) ({}) Scatter Plot Page {}".format(runname, year, canopy_model, pagenum), fontsize = 40)
+
+    print("Plotting individual mass vs. mass density scatter (PFT color)")
+    plt.subplot(1,1,1)
+    plt.title("Individual Mass vs. Mass Density", fontsize = 40)
+    plt.ylabel("Individual Mass {}(gC)".format(biomass_label), fontsize = 30)
+    plt.xlabel("Mass Density per Grid Area {}(kgC/m²)".format(biomass_label), fontsize = 30)
+    plt.ylim(1e-2, 1e7)
+    plt.xlim(0.001, 30)
+    plt.yticks(fontsize = 35)
+    plt.xticks(fontsize = 35)
+    plt.xscale('log')
+    plt.yscale('log')
+
+    for PFT in valid_pft:
+        plt.scatter(np.ma.masked_invalid(c_biomass[PFT] * lc_pft[PFT]).flatten(), np.ma.masked_invalid(c_biomass[PFT] * lc_pft[PFT] / population_pft[PFT] * 1000).flatten(), marker=mStyles[PFT], color=entcolors[PFT], s=(lc_pft[PFT].flatten() * 8)**2)
+
+    plt.gca().add_artist(plt.legend(handles=PFTlegendcolor, fontsize=20, loc=2, title="n={}, lc≥{:.2f}, {}".format(no_points, lc_threshold, "no crops" if no_crops else "with crops"), title_fontsize=25, framealpha=0.1))
+    plt.tight_layout(rect=[0, 0.03, 1, 0.96])
+    WWpdf.savefig()
+    garbage_collect(plt)
+
+    ########################################################################
+
     pagenum+=1
     #Scatter plot
     #Turnover rate NPP/biomass vs MSP (BIOME COLOR)
@@ -977,6 +1015,8 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
     
     print("Plotting Turnover scatter (number, biome colors)")
     plt.subplot(1,1,1)
+    cbar = plt.colorbar(cm.ScalarMappable(norm=colors.Normalize(vmin=6.5, vmax=40.5), cmap=KG_cmap_r), ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]), ax=plt.gca())
+    cbar.ax.tick_params(labelsize=20)
     plt.title("Mass Specific Carbon Turnover Rate vs. Mass Specific Power", fontsize = 40)
     plt.ylabel("Mass Specific Carbon Turnover Rate (yr-1)".format(biomass_label), fontsize = 30)
     plt.xlabel("Mass Specific Power {}(W/gC)".format("(Gibbs Energy Estimate) " if msp_ar else ""), fontsize = 30)
@@ -992,9 +1032,12 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
     for KG in range(40):
         KG_mask = np.where(biomes != KG+1, True, False)
         for PFT in valid_pft:
-            plt.scatter(np.ma.MaskedArray(apar_pft[12,PFT] / c_biomass[PFT] / 1000, mask=KG_mask).flatten(), np.ma.MaskedArray(npp_pft[12,PFT] * 365 / 1000 / c_biomass[PFT], mask=KG_mask).flatten(), marker=mStyles[PFT], color=KGcolors[KG], s=(lc_pft[PFT].flatten() * 8)**2)
-    cbar = plt.colorbar(axi, ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]))
-    cbar.ax.tick_params(labelsize=20)
+            dataptsx = np.ma.MaskedArray(apar_pft[12,PFT] / c_biomass[PFT] / 1000, mask=KG_mask)
+            dataptsy = np.ma.MaskedArray(npp_pft[12,PFT] * 365 / 1000 / c_biomass[PFT], mask=KG_mask)
+            plt.scatter(dataptsx.flatten(), dataptsy.flatten(), marker=mStyles[PFT], color=KGcolors[KG], s=(lc_pft[PFT].flatten() * 8)**2)
+            if (not no_clab):
+                # also mark the 'dead' plants (c_lab < 0.01)
+                plt.scatter(np.ma.masked_where(c_lab[PFT] > 0.01, dataptsx).flatten(), np.ma.masked_where(c_lab[PFT] > 0.01, dataptsy).flatten(), facecolors='none', edgecolors='red', s=(lc_pft[PFT].flatten() * 12)**2)
     plt.gca().add_artist(plt.legend(handles=PFTlegend, fontsize=20, loc=2, title="n={}, lc≥{:.2f}, {}".format(no_points, lc_threshold, "no crops" if no_crops else "with crops"), title_fontsize=25, framealpha=0.1))
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig() # figures with and without fit lines
@@ -1027,8 +1070,8 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
         #plt.legend(handles=fithandles, fontsize=10, loc=3)
         f.write("\n")
         WWpdf.savefig()
-    plt.close()
-
+    garbage_collect(plt)
+    
     ########################################################################
 
     pagenum+=1
@@ -1057,8 +1100,12 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
     plt.xscale('log')
     plt.yscale('log')
     for PFT in valid_pft:
-        plt.scatter(np.ma.masked_invalid(apar_pft[12,PFT] / c_biomass[PFT] / 1000).flatten(), np.ma.masked_invalid(npp_pft[12,PFT] * 365 / 1000 / c_biomass[PFT]).flatten(), marker=mStyles[PFT], color=entcolors[PFT], s=(lc_pft[PFT].flatten() * 8)**2)
-    cbar.ax.tick_params(labelsize=20)
+        dataptsx = np.ma.masked_invalid(apar_pft[12,PFT] / c_biomass[PFT] / 1000)
+        dataptsy = np.ma.masked_invalid(npp_pft[12,PFT] * 365 / 1000 / c_biomass[PFT])
+        plt.scatter(dataptsx.flatten(), dataptsy.flatten(), marker=mStyles[PFT], color=entcolors[PFT], s=(lc_pft[PFT].flatten() * 8)**2)
+        if (not no_clab):
+            # also mark the 'dead' plants (c_lab < 0.01)
+            plt.scatter(np.ma.masked_where(c_lab[PFT] > 0.01, dataptsx).flatten(), np.ma.masked_where(c_lab[PFT] > 0.01, dataptsy).flatten(), facecolors='none', edgecolors='red', s=(lc_pft[PFT].flatten() * 12)**2)
     plt.gca().add_artist(plt.legend(handles=PFTlegendcolor, fontsize=20, loc=2, title="n={}, lc≥{:.2f}, {}".format(no_points, lc_threshold, "no crops" if no_crops else "with crops"), title_fontsize=25, framealpha=0.1))
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig() # figures with and without fit lines
@@ -1090,8 +1137,7 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
         #plt.legend(handles=fithandles, fontsize=15, loc=3)
         WWpdf.savefig()
         f.write("\n")
-    plt.close()
-    exit()
+    garbage_collect(plt)
     ########################################################################
 
     pagenum+=1
@@ -1102,6 +1148,8 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
     print("Plotting NPP scatter")
     plt.subplot(1,1,1)
+    cbar = plt.colorbar(cm.ScalarMappable(norm=colors.Normalize(vmin=6.5, vmax=40.5), cmap=KG_cmap_r), ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]), ax=plt.gca())
+    cbar.ax.tick_params(labelsize=20)
     plt.title("Annual Power vs. Net Primary Productivity", fontsize = 40)
     plt.ylabel("Power per Vegetated Area {}(GJ/m²/year)".format("(Gibbs Energy Estimate) " if msp_ar else ""), fontsize = 30)
     plt.xlabel("Net Primary Productivity per Vegetated Area (gC/m²/year)", fontsize = 30)
@@ -1117,13 +1165,11 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
         KG_mask = np.where(biomes != KG+1, True, False)
         for PFT in valid_pft:
             plt.scatter(np.ma.MaskedArray(npp_pft[12,PFT] * 365, mask=KG_mask).flatten(), np.ma.MaskedArray(apar_pft[12,PFT] * 86400 * 365 / 1e9, mask=KG_mask).flatten(), marker=mStyles[PFT], color=KGcolors[KG], s=(lc_pft[PFT].flatten() * 8)**2)
-    cbar = plt.colorbar(axi, ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]))
-    cbar.ax.tick_params(labelsize=20)
     plt.legend(handles=PFTlegend, fontsize=20, title="n={}, lc≥{:.2f}, {}".format(no_points, lc_threshold, "no crops" if no_crops else "with crops"), title_fontsize=25, framealpha=0.1)
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
     
     ########################################################################
     
@@ -1156,6 +1202,8 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
 
     print("Plotting Hoehler")
     plt.subplot(1,1,1)
+    cbar = plt.colorbar(cm.ScalarMappable(norm=colors.Normalize(vmin=6.5, vmax=40.5), cmap=KG_cmap_r), ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]), ax=plt.gca())
+    cbar.ax.tick_params(labelsize=20)
     plt.title("Mass Specific Power vs. Biome Biomass", fontsize = 40)
     plt.ylabel("Mass Specific Power {}(W/gC)".format("(Gibbs Energy Estimate) " if msp_ar else ""), fontsize = 30)
     plt.xlabel("Total Biome Biomass {}(PgC)".format(biomass_label), fontsize = 30)
@@ -1173,14 +1221,11 @@ with open(outdir+outTXTsummary, mode='w') as f, PdfPages(outdir+outWWpdf) as WWp
         plt.errorbar(c_biomass_biome[KG,2,0], msp_avg[KG,12,2], yerr=msp_std[KG,12,2], color=KGcolors[KG], fmt='o')
     plt.scatter(c_biomass_biome[40,2,0], msp_avg[40,12,2], color='black', marker='*', s=300)
     plt.errorbar(c_biomass_biome[40,2,0], msp_avg[40,12,2], yerr=msp_std[40,12,2], color='black', fmt='o')
-    cbar = plt.colorbar(axi, ticks=range(7,41), format=mticker.FixedFormatter(biome_names_py[-8::-1]))
-    cbar.ax.tick_params(labelsize=20)
     plt.legend(handles=[Line2D([], [], color='black', marker='*', label='Global', linestyle='', markersize=15), Line2D([], [], color='black', marker='o', label='Biome', linestyle='', markersize=15)], fontsize=20)
 
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     WWpdf.savefig()
-    plt.close()
-    exit() 
+    garbage_collect(plt)
     ########################################################################
 
 with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as dataset, PdfPages(outdir+outAPARpdf) as APARpdf, PdfPages(outdir+outFAPARpdf) as FAPARpdf, PdfPages(outdir+outMSPLUEpdf) as MSPLUEpdf:
@@ -1444,7 +1489,7 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
             plt.legend(framealpha=0.1)
         plt.tight_layout(rect=[0, 0.03, 1, 0.96])
         APARpdf.savefig()
-        plt.close()
+        garbage_collect(plt)
 
         # FAPAR by PFT
         fig = plt.figure(figsize=(30, 20))
@@ -1468,7 +1513,7 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
             plt.legend(framealpha=0.1)
         plt.tight_layout(rect=[0, 0.03, 1, 0.96])
         FAPARpdf.savefig()
-        plt.close()
+        garbage_collect(plt)
     
         if (PFT == 16):
             dataset['apar_global'][:,:,:,:] = apar_kgn
@@ -1511,7 +1556,7 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
         plt.legend(framealpha=0.1)
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     MSPLUEpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
 
     # LUE
     fig = plt.figure(figsize=(30, 20))
@@ -1532,7 +1577,7 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
         plt.legend(framealpha=0.1)
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     MSPLUEpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
 
     # APAR by Biomes
     fig = plt.figure(figsize=(30, 150))
@@ -1603,7 +1648,7 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
 
     plt.tight_layout(rect=[0, 0.005, 1, 0.995])
     APARpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
 
     # FAPAR by Biomes
     fig = plt.figure(figsize=(30, 150))
@@ -1674,4 +1719,4 @@ with nc.Dataset(outdir+outfilename, mode='w', format=outNETCDF_format) as datase
 
     plt.tight_layout(rect=[0, 0.005, 1, 0.995])
     FAPARpdf.savefig()
-    plt.close()
+    garbage_collect(plt)
