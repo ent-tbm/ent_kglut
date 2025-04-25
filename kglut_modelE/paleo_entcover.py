@@ -8,7 +8,7 @@ from datetime import datetime
 import os, sys, argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-i', '--input', nargs='+', required=True, help='List of input files.')
+parser.add_argument('-i', '--input', nargs='+', required=True, help='List of modelE standard input files for land cover types.')
 parser.add_argument('-o', '--output', nargs='*', help='List of output file names (must match number of input files). Otherwise t is appended to file name')
 parser.add_argument('-t', '--time', nargs=1, required=True, help='Time in Ma for vegetation changes.')
 parser.add_argument('-fmt', '-f', '--format', nargs='?', help='NetCDF format of output dataset(s).')
@@ -58,29 +58,27 @@ evolved = 2 # time pft first evolved
 rampup = 3 # ramp up time, i.e. from 100% replacement to 0% replacement
 
 pfts = { # varname longname 
-    1 : ["ever_br_early", "1 - Evergeen Broadleaf Early Succ", 145, 40], # First Angiosperms - 145 Ma
+    1 : ["ever_br_early", "1 - Evergeen Broadleaf Early Succ", 145, 40], 
     2 : ["ever_br_late", "2 - Evergreen Broadleaf Late Succ", 145, 40],
-    3 : ["ever_nd_early", "3 - Evergreen Needleleaf Early Succ", 380, 40], # First conifers Late Devonian-Carboniferous
-    4 : ["ever_nd_late", "4 - Evergreen Needleleaf Late Succ", 380, 40],
-    5 : ["cold_br_early", "5 - Cold Deciduous Broadleaf Early Succ", 66, 46], # https://doi.org/10.1086/692627, https://doi.org/10.1126/science.246.4930.675 Deciduous trees evolved at K-Pg boundary and outcompeted evergreens in temperate biomes late Miocene
+    3 : ["ever_nd_early", "3 - Evergreen Needleleaf Early Succ", 4540, 0], # not set in code yet 380, 40
+    4 : ["ever_nd_late", "4 - Evergreen Needleleaf Late Succ", 4540, 0], # not set in code yet 380, 40
+    5 : ["cold_br_early", "5 - Cold Deciduous Broadleaf Early Succ", 66, 46], 
     6 : ["cold_br_late", "6 - Cold Deciduous Broadleaf Late Succ", 66, 46],
     7 : ["drought_br", "7 - Drought Deciduous Broadleaf", 66, 46],
-    8 : ["decid_nd", "8 - Deciduous Needleleaf", 100.5, 34.5], # https://www.researchgate.net/publication/266022845_The_evolutionary_history_of_the_genus_Larix_Pinaceae "it would seem likely the origin of the group [Larix] is found well before the Eocene and most probably in the Cretaceous." This also accounts for Metasequoia, which would be a deciduous needleleaf (transitioned from evergreen) present during the Cretaceous, and Taxodium cypress, which also originates during the Cretaceous.
-    9 : ["cold_shrub", "9 - Cold Adapted Shrub", 360, 60], # Late Paleozoic Icehouse
-    10: ["arid_shrub", "10 - Arid Adapted Shrub", 420, 60], # First vegetation on land
-    11: ["c3_grass_per", "11 - C3 Grass Perennial", 80, 40], # https://doi.org/10.1146/annurev-earth-040809-152402
-    12: ["c4_grass", "12 - C4 Grass", 32, 24], # https://doi.org/10.1146/annurev-earth-040809-152402, https://doi.org/10.1126/science.1177216, C4 grasses evolved multiple times but only came to dominate tropics in the Miocene
-        # see also https://www.ndsu.edu/agriculture/sites/default/files/2023-03/The%20Age%20of%20Grasses%20has%20Recently%20Doubled%20to%20113%20Million%20Years_0.pdf
-    13: ["c3_grass_ann", "13 - C3 Grass Annual", 66, 10], # annuals came after perennials, https://doi.org/10.1146/annurev-earth-040809-152402
-    14: ["c3_grass_arct", "14 - Arctic C3 Grass", 47.5, 21.5], # https://doi.org/10.3389/fpls.2013.00167
-    15: ["crops_herb", "15 - Crops Herb", 0, 0], # no crops in the distant past!
-    16: ["crops_woody", "16 - Crops Woody", 0, 0], # no crops in the distant past!
+    8 : ["decid_nd", "8 - Deciduous Needleleaf", 120, 40], 
+    9 : ["cold_shrub", "9 - Cold Adapted Shrub", 4540, 0], # not set in code yet 360, 60
+    10: ["arid_shrub", "10 - Arid Adapted Shrub", 4540, 0], # not set in code yet 420, 60
+    11: ["c3_grass_per", "11 - C3 Grass Perennial", 80, 30], 
+    12: ["c4_grass", "12 - C4 Grass", 32, 24], 
+    13: ["c3_grass_ann", "13 - C3 Grass Annual", 80, 30], 
+    14: ["c3_grass_arct", "14 - Arctic C3 Grass", 47.5, 21.5], 
+    15: ["crops_herb", "15 - Crops Herb", 0, 0], 
+    16: ["crops_woody", "16 - Crops Woody", 0, 0], 
     17: ["bare_bright", "17 - Bright Bare Soil", 4540, 0],
     18: ["bare_dark", "18 - Dark Bare Soil", 4540, 0]
     }
 
-# Account for multi-story niches not existing as shade tolerance did not evolve until the Eocene.
-shadeTolerance = [None, None, 60, 10]
+# shadeTolerance = [None, None, 60, 10]
 
 # PFT replacement scheme. Rule is only invoked if replacement is necessary for specified time period.
 
@@ -128,8 +126,8 @@ pftreplace = { # [pft, a value, b value]
     9 : [[10, 1, 1]], # cold_shrub
     10: [[17, 0, 0.3], [18, 0, 0.7]], # arid_shrub
     11: [[17, 0, 0.3], [18, 0, 0.7]], # c3_grass_per
-    12: [[11, 1, 1], [12, 1, 1]], # c4_grass
-    13: [[11, 1, 1]], # c3_grass_ann
+    12: [[11, 1, 1], [13, 1, 0], [14, 1, 0]], # c4_grass
+    13: [[17, 0, 0.3], [18, 0, 0.7]], # c3_grass_ann
     14: [[11, 1, 1]], # c3_grass_arct
     15: [[11, 0.5, 0.2], [13, 0.5, 0.8], [17, 0, 0.1], [18, 0, 0.2]], # crops_herb
     16: [[2, 1, 0], [4, 1, 0], [6, 1, 0], [7, 1, 0], [17, 0, 0.1], [18, 0, 0.2]], # crops_woody
