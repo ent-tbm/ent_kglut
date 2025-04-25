@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.colors as colors
 import warnings
+from scipy import stats, signal
 warnings.filterwarnings('ignore', category=UserWarning)
 warnings.filterwarnings('ignore', category=RuntimeWarning)
-
 
 
 
@@ -28,7 +28,7 @@ LC_file = "@@LC" # cover fractions to use as weights for regression - some conta
 
 
 
-
+regression_method = "@@REGRESSION" # regression method, weighted_average or kde
 outNETCDF_format = "NETCDF3_CLASSIC" # see netcdf page for other formats
 
 regressionlai = "@@LAI_CSV_FILE_RAW"
@@ -173,6 +173,42 @@ def weighted_average_std(values, weights):
   variance = np.average((values-average)**2, weights=weights)
   return average, sqrt(variance)
 
+# generates a gaussian probability density function to find the tallest peak and full-width at half maximum
+def kde_mode_fwhm(values, weights, method='scott'):
+  values = np.ma.masked_array(values, mask=weights == 0).compressed()
+  weights = np.ma.masked_array(weights, mask=weights == 0).compressed()
+  if (values.size <= 10): # KDE is probably not good for few sample points
+    return weighted_average_std(values, weights)
+  if (np.all(np.isclose(values, values[0]))): # will cause error if values are very close
+    return weighted_average_std(values, weights)
+  sample_distribution = np.linspace(min(values), max(values), min(max(values.size, 30), 300))
+  density_values = stats.gaussian_kde(values, bw_method=method, weights=weights).evaluate(sample_distribution)
+  peak_idxs, properties = signal.find_peaks(density_values)
+  if (peak_idxs.size == 0): # no peaks found, default to weighted average
+    return weighted_average_std(values, weights)
+  fwhms = signal.peak_widths(density_values, peak_idxs, rel_height=0.5)
+  fwhm_peak_idx = np.argmax(density_values[peak_idxs])
+  max_peak_idx = peak_idxs[fwhm_peak_idx]
+  mode = sample_distribution[max_peak_idx]
+  fwhm = fwhms[0][fwhm_peak_idx] * (sample_distribution[1] - sample_distribution[0])
+  #print(mode, fwhm)
+  return mode, fwhm
+
+#def kde_bandwidth(obj, fac=1.0):
+#  return np.power(obj.n, -1./(obj.d+4)) * fac
+
+def regress(values, weights, method='weighted_average'):
+  if (method == 'weighted_average'):
+    return weighted_average_std(values, weights)
+  elif (method == 'kde' or method == 'kde_scott'):
+    return kde_mode_fwhm(values, weights)
+#  elif (method == 'kde_scott0.5'):
+#    return kde_mode_fwhm(values, weights, method=partial(kde_bandwidth, fac=0.5))
+  elif (method == 'kde_silverman'):
+    return kde_mode_fwhm(values, weights, method='silverman')
+  else:
+    raise ValueError("Invalid method for regression {} selected".format(method))
+    
 def getCosWeight(start_lat, end_lat):
   if start_lat > 90:
     start_lat = 90
@@ -255,7 +291,7 @@ with nc.Dataset(LAI_file) as dataset:
                 samplesN = "0,0,X"
                 samplesS = "0,0,X"
                 continue
-              LAI[pft-1][KG-1][i], stdLAI[pft-1][KG-1][i] = weighted_average_std(data[i][:][:], weights)
+              LAI[pft-1][KG-1][i], stdLAI[pft-1][KG-1][i] = regress(data[i][:][:], weights, method=regression_method)
               LAIs[pft-1][KG-1][i] = LAI[pft-1][KG-1][i] # duplicate the data
               stdLAIs[pft-1][KG-1][i] = stdLAI[pft-1][KG-1][i]
 
@@ -270,7 +306,7 @@ with nc.Dataset(LAI_file) as dataset:
               if np.sum(weights) == 0:
                 samplesN = "0,0,X"
               else:
-                LAI[pft-1][KG-1][i], stdLAI[pft-1][KG-1][i] = weighted_average_std(northernSlice, weights)
+                LAI[pft-1][KG-1][i], stdLAI[pft-1][KG-1][i] = regress(northernSlice, weights, method=regression_method)
                 samples[0,pft-1,KG-1] = np.count_nonzero(weights)
                 samplesWeight[0,pft-1,KG-1] = np.sum(weights)
                 sampleCode[0,pft-1,KG-1] = 'N'
@@ -281,7 +317,7 @@ with nc.Dataset(LAI_file) as dataset:
               if np.sum(weights) == 0:
                 samplesS = "0,0,X"
               else:
-                LAIs[pft-1][KG-1][i], stdLAIs[pft-1][KG-1][i] = weighted_average_std(southernSlice, weights)
+                LAIs[pft-1][KG-1][i], stdLAIs[pft-1][KG-1][i] = regress(southernSlice, weights, method=regression_method)
                 samples[1,pft-1,KG-1] = np.count_nonzero(weights)
                 sampleCode[1,pft-1,KG-1] = 'S'
                 samplesWeight[1,pft-1,KG-1] = np.sum(weights)
@@ -295,7 +331,7 @@ with nc.Dataset(LAI_file) as dataset:
                 samplesN = "0,0,X"
                 samplesS = "0,0,X"
                 continue
-              LAIs[pft-1][KG-1][i], stdLAIs[pft-1][KG-1][i] = weighted_average_std(southernSlice, weights)
+              LAIs[pft-1][KG-1][i], stdLAIs[pft-1][KG-1][i] = regress(southernSlice, weights, method=regression_method)
               LAI[pft-1][KG-1][(i+6)%12] = LAIs[pft-1][KG-1][i]
               stdLAI[pft-1][KG-1][(i+6)%12] = stdLAIs[pft-1][KG-1][i]
               samples[:,pft-1,KG-1] = np.count_nonzero(weights)
@@ -311,7 +347,7 @@ with nc.Dataset(LAI_file) as dataset:
                 samplesN = "0,0,X"
                 samplesS = "0,0,X"
                 continue
-              LAI[pft-1][KG-1][i], stdLAI[pft-1][KG-1][i] = weighted_average_std(northernSlice, weights)
+              LAI[pft-1][KG-1][i], stdLAI[pft-1][KG-1][i] = regress(northernSlice, weights, method=regression_method)
               LAIs[pft-1][KG-1][(i+6)%12] = LAI[pft-1][KG-1][i]
               stdLAIs[pft-1][KG-1][(i+6)%12] = stdLAI[pft-1][KG-1][i]
               samples[:,pft-1,KG-1] = np.count_nonzero(weights)
@@ -394,9 +430,9 @@ with nc.Dataset(LAImax_file) as dLAImax, nc.Dataset(HITEent_file) as dHITEent:
         if np.sum(weights) == 0:
           pass
         else:
-          LAImax[pft-1][KG-1], stdLAImax[pft-1][KG-1] = weighted_average_std(LAImaxdata, weights)
-          HITEent[pft-1][KG-1], stdHITEent[pft-1][KG-1] = weighted_average_std(HITEentdata, weights)
-          LC[KG-1][pft-1], stdLC[KG-1][pft-1] = weighted_average_std(LCdata, weightsLC)
+          LAImax[pft-1][KG-1], stdLAImax[pft-1][KG-1] = regress(LAImaxdata, weights, method=regression_method)
+          HITEent[pft-1][KG-1], stdHITEent[pft-1][KG-1] = regress(HITEentdata, weights, method=regression_method)
+          LC[KG-1][pft-1], stdLC[KG-1][pft-1] = regress(LCdata, weightsLC) # weighted average for LC
           #print("{}, {}, {}, {}".format(KG, pft, LC[KG-1][pft-1], stdLC[KG-1][pft-1]))
         #fulldata = np.where(biomesIn == KG, data, 0)
         #LAImax[pft-1][KG-1] = np.amax(fulldata) # get the highest LAImax value per biome per PFT
@@ -431,7 +467,7 @@ with nc.Dataset(HITEent_file) as dataset:
         if np.sum(weights) == 0:
           pass
         else:
-          HITEent[pft-1][KG-1], stdHITEent[pft-1][KG-1] = weighted_average_std(data, weights)
+          HITEent[pft-1][KG-1], stdHITEent[pft-1][KG-1] = regress(data, weights, method=regression_method)
       else:
         HITEent[pft-1][KG-1] = data[biomecoords[0]-1][biomecoords[1]-1]
         #print(pft, KG, HITEent[pft-1][KG-1])
@@ -534,7 +570,7 @@ with PdfPages("{}{}{}".format(outdir, regressionlai, "_LAIplot.pdf")) as LAIpdf:
       plt.ylabel("LAI (m²/m²)")
       plt.xlabel("Month")
       plt.xlim(1, 12)
-      plt.ylim(0, 6)
+      plt.ylim(0, 7)
       if (sampleCode[0,PFT,KG] != 'X') or (sampleCode[1,PFT,KG] != 'X'):
         plt.plot(ran, np.full((12), LAImax[PFT,KG]), color='black', label="LAImax", linestyle='dashed', alpha=0.5)
         plt.fill_between(ran, np.full((12), LAImax[PFT,KG]+stdLAImax[PFT,KG]), np.full((12), LAImax[PFT,KG]-stdLAImax[PFT,KG]), color='black', alpha=0.05)
@@ -568,7 +604,7 @@ with PdfPages("{}{}{}".format(outdir, regressionlai, "_LAIplot.pdf")) as LAIpdf:
     plt.ylabel("LAI (m²/m²)")
     plt.xlim(0.8, 12.2)
     plt.xlabel("Month")
-    plt.ylim(0, 6)
+    plt.ylim(0, 7)
     for PFT in range(16):
       if (sampleCode[0,PFT,KG] == 'X') or (sampleCode[0,PFT,KG] == 'R'):
         continue
@@ -586,7 +622,7 @@ with PdfPages("{}{}{}".format(outdir, regressionlai, "_LAIplot.pdf")) as LAIpdf:
     plt.ylabel("LAI (m²/m²)")
     plt.xlim(0.8, 12.2)
     plt.xlabel("Month")
-    plt.ylim(0, 6)
+    plt.ylim(0, 7)
     for PFT in range(16):
       if (sampleCode[1,PFT,KG] == 'X') or (sampleCode[1,PFT,KG] == 'R'):
         continue

@@ -48,6 +48,8 @@ resolution: describes the resolution of all input data. Accepted formats: 4X5, 2
 
 metadata_dataversion: (optional) text describing the version of the input files.
 
+regression: Method for regression for values of LAI, height, and LAImax. Option chooses the method of regression from weighted_average, kde (Scott's rule), or kde_silvermann (Silverman's rule). Using weighted average will calculate the mean for a given set of data using the area of the grid cell multiply by cover fraction as the weights, while KDE will find the highest density of the set of the data using the same weights (roughly equivalent to the highest peak of a histogram). This option does not affect the method of regression for land cover fractions, which will always use weighted average using the area of the grid cell as its weight..
+
 outdir: output directory, all files generated will be placed into this directory. 
 
 netcdf_format (NETCDF3-CLASS | NETCDF4): format of the final lookup table (see netCDF API documentation for python -> https://unidata.github.io/netcdf4-python/#creatingopeningclosing-a-netcdf-file). NETCDF3-CLASSIC is a safe option

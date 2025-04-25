@@ -5,6 +5,7 @@ laimax=./data/V720x360_EntGVSD16_MM_lai_max_trimmed_scaled_nocrops_v1.0b.nc
 height=./data/V720x360_EntGVSD16_MM_height_trimmed_scaled_nocrops_v1.0b.nc
 lc=./data/V720x360_EntGVSD16_MM_lc_max_trimmed_scaled_nocrops_v1.0b.nc
 resolution=HXH
+regression=kde
 metadata_dataversion=Ent GVSD v1.0.KG
 outdir=../user/output/
 netcdf_format=NETCDF3_CLASSIC

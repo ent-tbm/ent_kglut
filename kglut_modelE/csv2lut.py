@@ -225,7 +225,7 @@ with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
       plt.ylabel("LAI (m²/m²)")
       plt.xlabel("Month")
       plt.xlim(1, 12)
-      plt.ylim(0, 6)
+      plt.ylim(0, 7)
       if (LC[PFT,KG] == 0):
         continue
       plt.plot(ran, np.full((12), LAImax[PFT,KG]), color='black', label="LAImax", linestyle='dashed', alpha=0.5)
@@ -247,7 +247,7 @@ with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
     plt.ylabel("LAI (m²/m²)")
     plt.xlim(0.8, 12.2)
     plt.xlabel("Month")
-    plt.ylim(0, 6)
+    plt.ylim(0, 7)
     for PFT in range(16):
       if (LC[PFT,KG] == 0):
         continue
@@ -263,7 +263,7 @@ with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
     plt.ylabel("LAI (m²/m²)")
     plt.xlim(0.8, 12.2)
     plt.xlabel("Month")
-    plt.ylim(0, 6)
+    plt.ylim(0, 7)
     for PFT in range(16):
       if (LC[PFT,KG] == 0):
         continue

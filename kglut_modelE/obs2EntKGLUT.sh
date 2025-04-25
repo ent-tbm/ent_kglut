@@ -37,6 +37,7 @@ append_rng=$(date | md5sum | cut -c 1-7)-$(date '+%Y-%m-%d')
 
 # Loop over the input file
 
+regression="kde"
 while IFS=$'=' read -r -a args; do
   keyword=${args[0]}
   arg=${args[1]}
@@ -91,6 +92,15 @@ while IFS=$'=' read -r -a args; do
       append_rng=$(date '+%Y-%m-%d')
     else
       append_rng="${arg}_$(date '+%Y-%m-%d')"
+    fi
+  elif [ "$keyword" = "regression" ]; then
+    arg=$(echo $arg | tr [:upper:] [:lower:])
+    if [ "$arg" = "kde" ] || [ "$arg" = "kde_scott" ] || [ "$arg" = "kdescott" ] || [ "$arg" = "scott" ] || [ "$arg" = "pdf" ]; then
+      regression="kde"
+    elif [ "$arg" = "kde_silverman" ] || [ "$arg" = "kdesilverman" ] || [ "$arg" = "silverman" ]; then
+      regression="kde_silverman"
+    elif [ "$arg" = "average" ] || [ "$arg" = "weighted_average" ] || [ "$arg" = "weightedaverage" ] || [ "$arg" = "wtd_avg" ] || [ "$arg" = "wtdavg" ] || [ "$arg" = "avg" ]; then
+      regression="weighted_average"
     fi
   fi
 
@@ -199,6 +209,7 @@ ex "${userout}regress_biome2laihite_${append_rng}.py" <<EOF
   23s/@@HEIGHT/$height/
   24s/@@HGT/$hgt/
   25s/@@LC/$lc/
+  31s/@@REGRESSION/$regression/
   40s/@@DIMENSIONS/$dimensions/
   41s/@@LATDIM/$latdim/
   42s/@@LONDIM/$londim/
