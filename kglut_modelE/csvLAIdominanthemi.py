@@ -37,8 +37,8 @@ with open(LAI_in, 'r') as flin, open(outdir+LAI_out, 'w') as flout, open(samples
     if (threshold < 0): # take weighted average of N and S hemispheres
       nweight = float(nweightline.split(',')[-2])
       sweight = float(sweightline.split(',')[-2])
-      ncode = nweightline.split(',')[-1]
-      scode = sweightline.split(',')[-1]
+      ncode = nweightline.rstrip().split(',')[-1]
+      scode = sweightline.rstrip().split(',')[-1]
 
       if ((nweight + sweight) == 0 or ncode == 'B' or scode == 'B'):
         flout.write(nline)

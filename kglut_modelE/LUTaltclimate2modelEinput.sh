@@ -214,6 +214,19 @@ if $skip_aij; then
   height_out="V${dimname}_height_${append_rng}.nc"
   lc_out="V${dimname}_lc_${append_rng}.nc"
 else
+# check for files existing
+if ! [ -f ${indir}${JAN} ]; then # note this does not check all AIJ monthly files, only January
+  if [ "$config_prec" != "" ] || [ "$config_temp" != "" ]; then
+    echo "Specified prec and temp files do not exist"
+    exit 5
+  elif [ "$config_kg" != "" ]; then
+    echo "Specified KG biomes file does not exist"
+    exit 5
+  else
+    echo "Specified AIJ file/directory do not exist"
+    exit 5
+  fi
+fi
 # run aij2prectemp.py
 cp "aij2prectemp.py" "${userout}aij2prectemp_${append_rng}.py"
 

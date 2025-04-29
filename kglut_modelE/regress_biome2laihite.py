@@ -55,7 +55,7 @@ ignoreHemiVariations = 4 # Use for tropical biomes, regression will not take sam
 hasBothHemi = 5 # If biome existis in both hemispheres
 
 biome_coords = { # I J isSouthernHemi takeSample ignoreHemiVariations hasBothHemi (generic decision table)
-    1 : [-1, -1, False, True, False, True],       #Af
+    1 : [-1, -1, False, True, True, True],        #Af
     2 : [-1, -1, False, True, False, True],       #As
     3 : [-1, -1, False, True, False, True],       #Am
     4 : [-1, -1, False, True, False, True],       #Aw
