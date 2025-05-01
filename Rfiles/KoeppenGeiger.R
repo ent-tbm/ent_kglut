@@ -16,7 +16,7 @@ source(paste0(Rpath,"/utils_noSDMTools.R"))
 #Packages to install:  sp, fields, spam, maps, maptools, rworldmap, SDMTools(legend.gradient, only does vertical), plotrix(color.legend, can do horizontal and vertical)
 library(sp)
 library(fields) 
-library(spam) 
+#library(spam64) #loaded in utils_noSDMTools.R 
 library(maps) 
 library(maptools) 
 library(rworldmap) 
