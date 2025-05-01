@@ -54,6 +54,12 @@ dohgt=false
 skip_aij=false
 skip_tp=false
 
+if [[ ${1:0:1} = '.' || ${1:0:1} != '/' ]]; then
+  configfile="${ppwd}/${1}"
+else
+  configfile=$1
+fi
+
 while IFS=$'=' read -r -a args; do
   keyword=${args[0]}
   arg=${args[1]}
@@ -108,7 +114,7 @@ while IFS=$'=' read -r -a args; do
   elif [ "$keyword" = "kg_biomes" ]; then
     config_kg=$arg
   fi
-done < "${ppwd}/${1}"
+done < $configfile
 
 mkdir -p $outdirn
 
@@ -215,7 +221,7 @@ if $skip_aij; then
   lc_out="V${dimname}_lc_${append_rng}.nc"
 else
 # check for files existing
-if ! [ -f ${indir}${JAN} ]; then # note this does not check all AIJ monthly files, only January
+if ! [ -f $(echo ${indir//"\/"/"/"})/${JAN} ]; then # note this does not check all AIJ monthly files, only January
   if [ "$config_prec" != "" ] || [ "$config_temp" != "" ]; then
     echo "Specified prec and temp files do not exist"
     exit 5

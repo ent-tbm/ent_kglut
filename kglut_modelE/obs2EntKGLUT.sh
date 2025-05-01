@@ -37,6 +37,12 @@ append_rng=$(date | md5sum | cut -c 1-7)-$(date '+%Y-%m-%d')
 
 # Loop over the input file
 
+if [[ ${1:0:1} = '.' || ${1:0:1} != '/' ]]; then
+  configfile="${ppwd}/${1}"
+else
+  configfile=$1
+fi
+
 regression="kde"
 while IFS=$'=' read -r -a args; do
   keyword=${args[0]}
@@ -104,7 +110,7 @@ while IFS=$'=' read -r -a args; do
     fi
   fi
 
-done < "${ppwd}/${1}"
+done < $configfile
 
 mkdir -p $outdirn
 
