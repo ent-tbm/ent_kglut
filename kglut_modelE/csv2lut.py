@@ -87,6 +87,26 @@ with open(laimax_file) as flaimax, open(height_file) as fheight, open(lc_file) a
       #print(e)
       break
 
+# unknown biomes assign default values
+if (np.sum(LC[:,34]) < 0.999): # UA
+  LC[16,34] = 0.3
+  LC[17,34] = 0.7
+if (np.sum(LC[:,35]) < 0.999): # UAu
+  LC[16,35] = 0.3
+  LC[17,35] = 0.7
+if (np.sum(LC[:,36]) < 0.999): # UB
+  LC[16,36] = 0.6
+  LC[17,36] = 0.4
+if (np.sum(LC[:,37]) < 0.999): # UE
+  LC[16,37] = 0.82
+  LC[17,37] = 0.18
+if (np.sum(LC[:,38]) < 0.999): # Ufu
+  LC[16,38] = 0.82
+  LC[17,38] = 0.18
+if (np.sum(LC[:,39]) < 0.999): # Uuu
+  LC[16,39] = 0.3
+  LC[17,39] = 0.7
+
 if(overwriteLAImax):
   for PFT in range(16):
     for KG in range(40):
