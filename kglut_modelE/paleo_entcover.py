@@ -273,11 +273,14 @@ for infile, outfile in zip(infiles, outfiles):
             dst[name].setncatts(src[name].__dict__)
             dst[name][:] = src[name][:]
 
-        # checksum
-        dst.createVariable('checksum', src['decid_nd'].datatype, src['decid_nd'].dimensions, zlib=True, fill_value=fillvalue_giss)
-        dst['checksum'].setncattr("name", "checksum")
-        dst['checksum'].setncattr("long_name", "checksum")
-        dst['checksum'].setncattr("units", "frac")
+        try:
+            # checksum
+            dst.createVariable('checksum', src['decid_nd'].datatype, src['decid_nd'].dimensions, zlib=True, fill_value=fillvalue_giss)
+            dst['checksum'].setncattr("name", "checksum")
+            dst['checksum'].setncattr("long_name", "checksum")
+            dst['checksum'].setncattr("units", "frac")
+        except:
+            pass
 
         # dominant PFT
         dst.createVariable('domlc', src['decid_nd'].datatype, src['decid_nd'].dimensions, zlib=True, fill_value=fillvalue_giss)

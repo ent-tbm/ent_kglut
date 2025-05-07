@@ -214,8 +214,10 @@ with nc.Dataset(outdir+LC_out, mode='w', format=outNETCDF_format) as dataset:
   dataset['lon'].setncattr("long_name", "longitude")
   dataset['lon'].setncattr("units", "degrees_east")
 
+  checksum = np.zeros((dimlat,dimlon))
+
   for pft, pftvalue in pfts.items():
-    dataset.createVariable(pftvalue[0], 'f4', dimensions=('lat', 'lon'), fill_value=fillvalue)
+    dataset.createVariable(pftvalue[0], 'f4', dimensions=('lat', 'lon'), zlib=True, fill_value=fillvalue)
     dataset[pftvalue[0]].setncattr("long_name", pftvalue[1]+" cover fraction")
     dataset[pftvalue[0]].setncattr("units", "fraction")
     if (pftvalue[2]):
@@ -228,3 +230,12 @@ with nc.Dataset(outdir+LC_out, mode='w', format=outNETCDF_format) as dataset:
           data[i][j] = LC[pft-1][KG-1]
 
       dataset[pftvalue[0]][:] = data
+      checksum += data
+
+  # checksum
+  dataset.createVariable('checksum', 'f4', dimensions=('lat', 'lon'), zlib=True, fill_value=fillvalue)
+  dataset['checksum'].setncattr("name", "checksum")
+  dataset['checksum'].setncattr("long_name", "checksum")
+  dataset['checksum'].setncattr("units", "frac")
+
+  dataset['checksum'][:] = checksum
