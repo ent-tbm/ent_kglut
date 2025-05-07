@@ -232,10 +232,8 @@ with nc.Dataset(outdir+LC_out, mode='w', format=outNETCDF_format) as dataset:
       dataset[pftvalue[0]][:] = data
       checksum += data
 
-  # checksum
-  dataset.createVariable('checksum', 'f4', dimensions=('lat', 'lon'), zlib=True, fill_value=fillvalue)
-  dataset['checksum'].setncattr("name", "checksum")
-  dataset['checksum'].setncattr("long_name", "checksum")
-  dataset['checksum'].setncattr("units", "frac")
-
-  dataset['checksum'][:] = checksum
+checkones = np.isclose(checksum, 1.0)
+for i in range(dimlat):
+  for j in range(dimlon):
+    if (not checkones[i][j]):
+      print("Sum of fractions in cell {}, {} is not 1.0! ({:.5f})".format(i,j,checksum[i][j]))
