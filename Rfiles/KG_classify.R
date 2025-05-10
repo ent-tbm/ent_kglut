@@ -128,7 +128,7 @@ KGnum = run.KG(Tnc=Tnc,
 	if.new=FALSE)
 
 #Plot 
-PLOTFILENAME=paste(pathout, "/", "EntKG",res,"_map_", id, ".pdf", sep="")
+PLOTFILENAME=paste(pathout, "/", "KGbiomes_",res,"_map_", id, ".pdf", sep="")
 pdf(PLOTFILENAME, width=9.6, height=6)
 par(omi=c(0,0,0,1)) #(bottom, left, top, right)
 par(omi=c(0,0,0,0), oma=c(0,0,0,4)) #(bottom, left, top, right) #Use for single
@@ -140,7 +140,7 @@ legend(-180, 101, legend=KGcat[21:40,"KGcode"],col=KGrgbhex[21:40], pt.cex=2, pc
 dev.off()
 
 #Write netcdf file
-OUTPUTFILENAME=paste(pathout, "/", "KG", res,"_biomes_",id, ".nc", sep="")
+OUTPUTFILENAME=paste(pathout, "/", "KGbiomes_",res,"_",id, ".nc", sep="")
 write.KoeppenGeiger.netcdf(KGnum, fname=OUTPUTFILENAME, varname="KG", undef=-1e30, description=paste("Koeppen-Geiger classification of: ", tempfile, ", ", precfile,".", sep=""))
 
 

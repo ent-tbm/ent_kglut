@@ -3,9 +3,6 @@ Contact: Nancy.Y.Kiang@nasa.gov, James.Lui@nasa.gov
 Cite:  See comments in the different scripts for authors and citations for different utilities.
 
 Requirements: R, Python, and their NetCDF libraries
-On discover, modules that work are:
-module load R/4.3.1
-module load python/GEOSpyD/Min24.4.0-0_py3.12
 
 -------------
 This is a repository for programs and scripts for generating and making various alterations of Ent Terrestrial Biosphere Model (Ent TBM) data files for use in ModelE, specifically those used as the VEG, CROPS, HITEent, LAImax, and LAI monthly input files.  In addition, there are utilities for analyzing ground hydrology.
@@ -25,17 +22,15 @@ Rfunctions:  R utility functions.
 Rfunctions/config:  Template config input files to some R files.
 
 --------------------------------
-For use on discover:
-As of 11/30/2022:
+For use on the NASA Center fo Climate Simulation (NCCS) discover linux cluster:
+As of 5/2/2025:
 
-Set up an environment variable, edit path below (may have to be set before you load the module so that the module gets it):
-export R_Ent=/discover/nobackup/<username>/Ent_utils/Rfiles
-#If you get errors from the R scripts not finding the path, then make an environment file in your home directory:
+#Make an environment file in your home directory:
 cd
 vi .Renviron
-#Put this in your .Renviron:   R_Ent=/discover/nobackup/<usename>/Ent_utils/Rfiles
+#Put this in your .Renviron:   R_Ent=/discover/nobackup/<username>/Ent_utils/Rfiles
 
-module load R/4.1.0
-module load python/GEOSpyD/Min4.8.3_py3.8
-
+#Load these modules, and best to do a module purge beforehand:
+module load R/4.3.1
+module load python/GEOSpyD/Min24.4.0-0_py3.12
 

@@ -197,7 +197,7 @@ lc_out="V${dimname}_lc_${years}_${runname}_${append_rng}.nc"
 if [ -f "$config_prec" ] && [ -f "$config_temp" ]; then
   prec="prec_${resolution}_${append_rng}.nc"
   temp="temp_${resolution}_${append_rng}.nc"
-  biome="V${dimname}_KGbiomes_${append_rng}.nc"
+  biome="KGbiomes_${dimname}_${append_rng}.nc"
   ln -s $(realpath $config_prec) $(realpath ${outdirn}${prec})
   ln -s $(realpath $config_temp) $(realpath ${outdirn}${temp})
   skip_aij=true
@@ -206,7 +206,7 @@ fi
 
 # check if kg is specified, no need to generate prec, temp, KG if so, and make a symlink
 if [ -f "$config_kg" ]; then
-  biome="V${dimname}_KGbiomes_${append_rng}.nc"
+  biome="KGbiomes_${dimname}_${append_rng}.nc"
   ln -s $(realpath $config_kg) $(realpath ${outdirn}${biome})
   skip_aij=true
   skip_tp=true
@@ -291,7 +291,7 @@ if [ $? -ne 0 ]; then
   exit 10
 fi
 
-mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
+mv "${outdirn}KGbiomes_${resolution}_${append_rng}.nc" "${outdirn}${biome}"
 #rm "KG_classify_config_${append_rng}.txt"
 fi
 

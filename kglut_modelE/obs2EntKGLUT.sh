@@ -162,7 +162,7 @@ userout=$outdirn
 metadata_filenames="${prec} ${temp} ${lai} ${laimax} ${lc} ${height} at resolution ${dimname}"
 
 # output of prectemp2biome.sh
-biome="V${dimname}_KGbiomes_${append_rng}.nc"
+biome="KGbiomes_${dimname}_${append_rng}.nc"
 
 # output of regress_biome2laihite.py
 lai_csv_file_raw="EntKG_regressionLAI_monthly_raw_${append_rng}.csv"
@@ -178,7 +178,7 @@ height_csv_file="EntKG_regressionheight_${append_rng}.csv"
 lc_csv_file="EntKG_regressionLC_trim_natveg_${append_rng}.csv"
 
 # output of csv2lut.py
-lut_out="Ent_v${resolution}_KoeppenGeigerLUT_${append_rng}.nc"
+lut_out="EntKGLUT_${resolution}_${append_rng}.nc"
 
 # use KG_classify instead ~~run prectemp2biome.sh~~
 #echo -e "${prec}\t${temp}\t${outdirn}${biome}" > "ptb_${append_rng}.txt"
@@ -202,7 +202,7 @@ if [ $? -ne 0 ]; then
   exit 10
 fi
 
-mv "${outdirn}KG${resolution}_biomes_${append_rng}.nc" "${outdirn}${biome}"
+mv "${outdirn}KGbiomes_${resolution}_${append_rng}.nc" "${outdirn}${biome}"
 #rm "KG_classify_config_${append_rng}.txt"
 
 # run regress_biome2laihite.py
