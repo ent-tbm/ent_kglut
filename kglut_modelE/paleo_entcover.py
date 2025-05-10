@@ -124,7 +124,7 @@ pftreplace = { # [pft, a value, b value]
     7 : [[4, 1, 0]], # drought_br
     8 : [[4, 1, 0]], # decid_nd
     9 : [[10, 1, 1]], # cold_shrub
-    10: [[17, 0, 0.3], [18, 0, 0.7]], # arid_shrub
+    10: [[17, 0, 0.6], [18, 0, 0.4]], # arid_shrub
     11: [[17, 0, 0.3], [18, 0, 0.7]], # c3_grass_per
     12: [[11, 1, 1], [13, 1, 0], [14, 1, 0]], # c4_grass
     13: [[17, 0, 0.3], [18, 0, 0.7]], # c3_grass_ann
@@ -273,11 +273,14 @@ for infile, outfile in zip(infiles, outfiles):
             dst[name].setncatts(src[name].__dict__)
             dst[name][:] = src[name][:]
 
-        # checksum
-        dst.createVariable('checksum', src['decid_nd'].datatype, src['decid_nd'].dimensions, zlib=True, fill_value=fillvalue_giss)
-        dst['checksum'].setncattr("name", "checksum")
-        dst['checksum'].setncattr("long_name", "checksum")
-        dst['checksum'].setncattr("units", "frac")
+        try:
+            # checksum
+            dst.createVariable('checksum', src['decid_nd'].datatype, src['decid_nd'].dimensions, zlib=True, fill_value=fillvalue_giss)
+            dst['checksum'].setncattr("name", "checksum")
+            dst['checksum'].setncattr("long_name", "checksum")
+            dst['checksum'].setncattr("units", "frac")
+        except:
+            pass
 
         # dominant PFT
         dst.createVariable('domlc', src['decid_nd'].datatype, src['decid_nd'].dimensions, zlib=True, fill_value=fillvalue_giss)

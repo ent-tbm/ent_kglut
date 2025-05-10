@@ -23,14 +23,14 @@ Rfunctions/config:  Template config input files to some R files.
 
 --------------------------------
 For use on the NASA Center fo Climate Simulation (NCCS) discover linux cluster:
-As of 5/2/2025:
+As of 5/07/2025:
 
 #Make an environment file in your home directory:
 cd
 vi .Renviron
 #Put this in your .Renviron:   R_Ent=/discover/nobackup/<username>/Ent_utils/Rfiles
 
-#Load these modules, and best to do a module purge beforehand:
+On discover, load these modules, and best to do a module purge beforehand:
 module load R/4.3.1
 module load python/GEOSpyD/Min24.4.0-0_py3.12
 
