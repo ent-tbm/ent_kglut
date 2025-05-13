@@ -96,6 +96,28 @@ for (i in 1:length(diff1)) {
 		ent.kg.mean.nocrops.sc.trim.sc.sig.fix[index,i] = ent.kg.mean.nocrops.sc.trim.sc.sig.fix[index,i] - diff1[i]
 	}
 }
+
+#Assign bare soil fractions to U* classes.
+bb = match("bare_bright", trim(EntGVSD_PFTs))
+bd = match("bare_dark", trim(EntGVSD_PFTs))
+# Undefined equatorial
+k = match("UA", KGcat[,"KGcode"]) 
+ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bb,k] = 0.3; ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bd,k] = 0.7
+k = match("UAu", KGcat[,"KGcode"]) 
+ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bb,k] = 0.3; ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bd,k] = 0.7
+# Undefined arid
+k = match("UB", KGcat[,"KGcode"]) 
+ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bb,k] = 0.6; ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bd,k] = 0.4
+# Undefined polar and snow
+k = match("UE", KGcat[,"KGcode"])
+ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bb,k] = 0.82; ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bd,k] = 0.18
+k = match("Ufu", KGcat[,"KGcode"])
+ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bb,k] = 0.82; ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bd,k] = 0.18
+# Undefined otherwise
+k = match("Uuu", KGcat[,"KGcode"])
+ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bb,k] = 0.6; ent.kg.mean.nocrops.sc.trim.sc.sig.fix[bd,k] =  0.4
+
+#Check sum to 1.  NOTE:  KG12=Csd and KG16=Cwd do not exist, so have all zeros.
 tot.mean.nocrops.sc.trim.sc.sig.fix = apply(ent.kg.mean.nocrops.sc.trim.sc.sig.fix, 2, sum)
 
 print(paste("Writing", fileout))
