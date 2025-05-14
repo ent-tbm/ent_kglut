@@ -41,6 +41,7 @@ trimfrac = @@LCTRIMFRAC
 
 #R script utilities created for Ent processing.
 source(paste(Rpath, "utils_noSDMTools.R", sep=""))
+source(paste0(Rpath, "/KoeppenGeiger.R"))
 
 #Routine to do the trimming
 trim_Ent_KG_LUT = function(filein, fileout, trimfrac = trimfrac) {
