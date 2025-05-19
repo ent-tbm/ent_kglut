@@ -1,4 +1,7 @@
 # Changes the ent covers to account for evolutionary history of plants
+# Script takes in cover file(s) and depending on the selected time replaces anachronistic cover types with other cover types that existed then or with bare soil.
+# Script can also take in optional file(s) for LAI, LAImax, and height, and if a cover type that is substituted in for an anachronistic cover type does not have boundary conditions, they are added in.
+# Values are updated only if source and destination PFTs are the same growth form (tree to tree, grass to grass), destination PFT is not bare soil, and if destination PFT does not already have values.
 # @auth James Lui james.lui@nasa.gov Februrary 2025
 # @contact Nancy Kiang nancy.y.kiang@nancy.gov
 
@@ -10,6 +13,12 @@ import os, sys, argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--input', nargs='+', required=True, help='List of modelE standard input files for land cover types.')
 parser.add_argument('-o', '--output', nargs='*', help='List of output file names (must match number of input files). Otherwise t is appended to file name')
+parser.add_argument('-il', '--input_lai', nargs='*', help='List of LAI input files')
+parser.add_argument('-ilm', '--input_laimax', nargs='*', help='List of LAImax input files')
+parser.add_argument('-ih', '--input_height', nargs='*', help='List of height input files')
+parser.add_argument('-ol', '--output_lai', nargs='*', help='List of LAI output file names (must match number of input files). Otherwise t is appended to file name')
+parser.add_argument('-olm', '--output_laimax', nargs='*', help='List of LAImax output file names (must match number of input files). Otherwise t is appended to file name')
+parser.add_argument('-oh', '--output_height', nargs='*', help='List of height output file names (must match number of input files). Otherwise t is appended to file name')
 parser.add_argument('-t', '--time', nargs=1, required=True, help='Time in Ma for vegetation changes.')
 parser.add_argument('-fmt', '-f', '--format', nargs='?', help='NetCDF format of output dataset(s).')
 
@@ -22,6 +31,18 @@ for k, v in vars(args).items():
         infiles = v
     elif (k == 'output'):
         outfiles = v
+    elif (k == 'input_lai'):
+        infiles_lai = v
+    elif (k == 'output_lai'):
+        outfiles_lai = v
+    elif (k == 'input_laimax'):
+        infiles_laimax = v
+    elif (k == 'output_laimax'):
+        outfiles_laimax = v
+    elif (k == 'input_height'):
+        infiles_height = v
+    elif (k == 'output_height'):
+        outfiles_height = v
     elif (k == 'format'):
         nc_format = v.upper() if v is not None else 'NETCDF3_CLASSIC'
         if nc_format not in valid_netcdf_fmt:
@@ -48,6 +69,39 @@ if (outfiles is None):
 if (len(outfiles) != len(infiles)):
     print("Number of output files does not match number of input files")
     exit(4)
+
+if (infiles_lai is not None):
+    for infile in infiles_lai:
+        if (not os.path.isfile(infile)):
+            print("Specified file {} does not exist, exiting...".format(infile))
+            exit(3)
+    if (outfiles_lai is None):
+        outfiles_lai = ["{}_{}Ma.nc".format(infile[:-3], time) for infile in infiles_lai]
+    if (len(outfiles_lai) != len(infiles_lai)):
+        print("Number of output lai files does not match number of input lai files")
+        exit(4)
+
+if (infiles_laimax is not None):
+    for infile in infiles_laimax:
+        if (not os.path.isfile(infile)):
+            print("Specified file {} does not exist, exiting...".format(infile))
+            exit(3)
+    if (outfiles_laimax is None):
+        outfiles_laimax = ["{}_{}Ma.nc".format(infile[:-3], time) for infile in infiles_laimax]
+    if (len(outfiles_laimax) != len(infiles_laimax)):
+        print("Number of output laimax files does not match number of input laimax files")
+        exit(4)
+
+if (infiles_height is not None):
+    for infile in infiles_height:
+        if (not os.path.isfile(infile)):
+            print("Specified file {} does not exist, exiting...".format(infile))
+            exit(3)
+    if (outfiles_height is None):
+        outfiles_height = ["{}_{}Ma.nc".format(infile[:-3], time) for infile in infiles_height]
+    if (len(outfiles_height) != len(infiles_height)):
+        print("Number of output height files does not match number of input height files")
+        exit(4)
 
 fillvalue_giss = -1e30
 replacements = ""
@@ -77,6 +131,29 @@ pfts = { # varname longname
     17: ["bare_bright", "17 - Bright Bare Soil", 4540, 0],
     18: ["bare_dark", "18 - Dark Bare Soil", 4540, 0]
     }
+
+trees = [1, 2, 3, 4, 5, 6, 7, 8]
+shrubs = [9, 10]
+grasses = [11, 12, 13, 14]
+crops = [15, 16]
+soil = [17, 18]
+
+def getPFTtype(pft):
+    if pft in trees:
+        return "tree"
+    elif pft in shrubs:
+        return "shrub"
+    elif pft in grasses:
+        return "grass"
+    elif pft in crops:
+        return "crop"
+    elif pft in soil:
+        return "soil"
+    else:
+        return "invalid"
+
+replacelist = set()
+lc_orig = None
 
 # shadeTolerance = [None, None, 60, 10]
 
@@ -182,13 +259,16 @@ def replacePFTlc(lc, dimlat, dimlon, pftin, pftinreplacefrac, pftout, pftoutweig
                 validpftreplaceweights /= sum(validpftreplaceweights)
                 for k in range(len(validpftreplace)):
                     lc[validpftreplace[k]-1,i,j] += validpftreplaceweights[k] * replace_lc
+                    replacelist.add((pftin, validpftreplace[k]))
             elif (pftfallback is not None):
                 pftfallbackweights /= sum(pftfallbackweights)
                 for k in range(len(pftfallback)):
                     lc[pftfallback[k]-1,i,j] += pftfallbackweights[k] * replace_lc
+                    replacelist.add((pftin, pftfallback[k]))
             else:
                 for k in range(len(defaultpftfallback)):
                     lc[defaultpftfallback[k]-1,i,j] += defaultpftoutweights[k] * replace_lc
+                    replacelist.add((pftin, defaultpftfallback[k]))
 
 # returns fraction of PFT that should be replaced
 def getreplacefrac(time, timeevolved, rampuptime):
@@ -251,6 +331,59 @@ def replace(pft):
         replacePFTlc(lc_pft, dimlat, dimlon, pft, f_replace, i, j, k, l)
     return replace_str
 
+# replaces values for lai, laimax, or height with values from replaced PFT. Suppose replacement has
+# C3 annual grasses replacing C4 grasses, but there are no values for lai/laimax/height for the cells
+# the new grass exists. This will add those values in if no values are present already.
+# Will only replace values for trees with trees, grasses with grasses, shrubs with shrubs.
+def replace_lmh(infile, outfile, replacelist, lc_orig):
+    with nc.Dataset(infile) as src, nc.Dataset(outfile, "w", format=nc_format) as dst:
+        # copy global attributes all at once via dictionary
+        dst.setncatts(src.__dict__)
+        dst.setncattr("simulated_time", "{}Ma".format(time))
+        dst.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
+
+        # copy dimensions
+        for name, dimension in src.dimensions.items():
+            dst.createDimension(name, (len(dimension) if not dimension.isunlimited() else None))
+            if (name == 'latitude' or name == 'lat' or name == 'y'):
+                dimlat = len(dimension)
+            elif (name == 'longitude' or name == 'lon' or name == 'x'):
+                dimlon = len(dimension)
+
+        # copy all file data
+        for name, variable in src.variables.items():
+            dst.createVariable(name, variable.datatype, variable.dimensions, zlib=True)
+            dst[name].setncatts(src[name].__dict__)
+            dst[name][:] = src[name][:]
+
+        values_pft = np.zeros((18, dimlat, dimlon))
+        isLAI = False
+
+        for k, v in pfts.items():
+            try:
+                values_pft[k-1] = src[v[varname]][:].filled(0.)
+            except IndexError:
+                values_pft[k-1] = src["hgt_"+v[varname]][:].filled(0.)
+            except ValueError:
+                values_pft = np.zeros((18, 12, dimlat, dimlon))
+                isLAI = True
+                values_pft[k-1] = src[v[varname]][:].filled(0.)
+
+        for replacements in replacelist:
+            srcpft, dstpft = replacements
+            if (getPFTtype(srcpft) == getPFTtype(dstpft)):
+                #values_pft[dstpft-1] = np.where(lc_orig[dstpft-1] == 0, values_pft[srcpft-1], values_pft[dstpft-1])
+                if (isLAI):
+                    values_pft[dstpft-1] = np.where(np.logical_and(lc_orig[dstpft-1] == 0, np.sum(values_pft[dstpft-1], axis=0) == 0), values_pft[srcpft-1], values_pft[dstpft-1])
+                else:
+                    values_pft[dstpft-1] = np.where(np.logical_and(lc_orig[dstpft-1] == 0, values_pft[dstpft-1] == 0), values_pft[srcpft-1], values_pft[dstpft-1])
+
+        for k, v in pfts.items():
+            try:
+                dst[v[varname]][:] = values_pft[k-1]
+            except IndexError:
+                dst["hgt_"+v[varname]][:] = values_pft[k-1]
+
 for infile, outfile in zip(infiles, outfiles):
     with nc.Dataset(infile) as src, nc.Dataset(outfile, "w", format=nc_format) as dst:
 
@@ -294,6 +427,7 @@ for infile, outfile in zip(infiles, outfiles):
         # get PFT all data
         for k, v in pfts.items():
             lc_pft[k-1] = src[v[varname]][:]
+        lc_orig = lc_pft
 
         # start with shade tolerance # IGNORE FOR NOW
         #shadereplace = getreplacefrac(time, shadeTolerance[evolved], shadeTolerance[rampup])
@@ -331,4 +465,12 @@ for infile, outfile in zip(infiles, outfiles):
         dst['domlc'][:] = np.where(checksum > 0.999, np.add(np.argmax(lc_pft, axis=0), 1), fillvalue_giss)
         dst.setncattr("replacements", replacements)
 
-
+if (infiles_lai is not None):
+    for infile, outfile in zip(infiles_lai, outfiles_lai):
+        replace_lmh(infile, outfile, replacelist, lc_orig)
+if (infiles_laimax is not None):
+    for infile, outfile in zip(infiles_laimax, outfiles_laimax):
+        replace_lmh(infile, outfile, replacelist, lc_orig)
+if (infiles_height is not None):
+    for infile, outfile in zip(infiles_height, outfiles_height):
+        replace_lmh(infile, outfile, replacelist, lc_orig)
