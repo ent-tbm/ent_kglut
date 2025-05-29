@@ -8,9 +8,9 @@ DATAPORTAL=https://portal.nccs.nasa.gov/datashare/GISS/Ent_TBM/Ent_utils/kglut_m
 
 ts="cru_ts3.22_TS_means_2001-2010_2HX2.nc"
 prec="GPCC_v6_PREC_means_2001-2010_2HX2.nc"
-height="V144x90_EntMM16_height_trimmed_scaled_ext1.nc"
-laimax="V144x90_EntMM16_lai_max_trimmed_scaled_ext1.nc"
-lai="V144x90_EntMM16_lai_trimmed_scaled_ext1.nc"
+height="V144x90_EntMM16_height_trimmed_scaled_ext.nc"
+laimax="V144x90_EntMM16_lai_max_trimmed_scaled_ext.nc"
+lai="V144x90_EntMM16_lai_trimmed_scaled_ext.nc"
 lc="V144x90_EntMM16_lc_max_trimmed_scaled.nc"
 
 if [ -d $DATAPATH ]; then

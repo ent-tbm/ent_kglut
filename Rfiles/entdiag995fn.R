@@ -114,14 +114,15 @@ plot995r = function(day=NULL,dat,fluxNEE=NULL, skip=0, drv=NULL,fluxET=NULL, lai
 		plot(day, dat[,i]/0.012e-6,pch=".",type=type, cex=3,xlab=xlab, ylab=paste("umol/m2/s"))
 		title(paste(i))
 		mtext(outer=TRUE,paste(titleouter),line=line)
-		}
-		i = "CO2flux"
-		plot(day, dat[,i]/0.012e-6,pch=".",type=type, cex=3,xlab=xlab, ylab=paste("umol/m2/s"),
-		ylim=c(min(min(dat[,i]/0.012e-6,na.omit(fluxNEE))),
+	}
+	i = "CO2flux"
+	plot(day, dat[,i]/0.012e-6,pch=".",type=type, cex=3,xlab=xlab, ylab=paste("umol/m2/s"),
+	ylim=c(min(min(dat[,i]/0.012e-6,na.omit(fluxNEE))),
 			max(max(dat[,i]/0.012e-6,na.omit(fluxNEE)))))
-		if (!is.null(fluxNEE)) {
-			points(day,fluxNEE,col=2,pch=".")
-		}
+	if (!is.null(fluxNEE)) {
+                print(paste(length(day), length(fluxNEE)))
+		points(day,fluxNEE,col=2,pch=".")
+	}
 		title(paste(i))
 		mtext(outer=TRUE,paste(titleouter),line=line)
 		
