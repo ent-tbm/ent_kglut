@@ -1,6 +1,7 @@
 #map_Ent_domlc.R
 
 #--------------------
+Rpath = paste0(Sys.getenv("R_Ent"), "/")
 
 args = commandArgs(trailingOnly=TRUE)
 print(args)
@@ -31,7 +32,7 @@ if (length(args)==4) {
 	numPFT = 16  #default
 }
 
-source("utils.R")
+source(paste0(Rpath, "utils_noSDMTools.R"))
 
 #-------------------
 
@@ -46,7 +47,13 @@ if (filetype=="VEG") {
 }
 
   res = res.from.IM.JM(dim(domlc)[1],dim(domlc)[2])
-  
+ 
+  fileoutnc = paste0(file,"_domlc.nc")
+  create.map.template.nc(res=res.from.IM.JM(dim(domlc)[1],dim(domlc)[2]), varname="domlc", longname="dominant Ent land cover", units="category", vardescr="dominant Ent land cover catergory", description=paste("source file:", file), undef=-1e30,  fileout=fileoutnc, contact="Nancy.Y.Kiang@nasa.gov", vartype='NC_FLOAT')
+nc = open.nc(con=fileoutnc, write=TRUE)
+var.put.nc(nc, "domlc", domlc)
+  close.nc(nc)
+ 
   pdf(paste0(file,"_domlc.pdf"), width=10, height=6)
   Ent_domlc_plot(lctype=domlc, numpft=numPFT, res=res, legend.cex=0.6, Entcolors=Entcolors, if.new=FALSE)
   mtext(outer=TRUE, file, line=-1.5)
