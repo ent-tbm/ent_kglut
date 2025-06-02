@@ -317,23 +317,23 @@ ex "${userout}lut2finalout_${append_rng}.py" <<EOF
   16s/@@BIOME/${outdir}${biome}/
   17s/@@LUT/${lut}/
   19,22s/@@METADATA_DATAVERSION/${metadata_dataversion}/
-  26s/@@OUTDIR/${outdir}/
-  27s/@@LAI_OUT/${lai_out}/
-  28s/@@LAIMAX_OUT/${laimax_out}/
-  29s/@@HEIGHT_OUT/${height_out}/
-  30s/@@LC_OUT/${lc_out}/
-  83,201s/@@METADATA_DESCRIPTION/${metadata_description}/
+  24s/@@METADATA_DESCRIPTION/${metadata_description}/
+  28s/@@OUTDIR/${outdir}/
+  29s/@@LAI_OUT/${lai_out}/
+  30s/@@LAIMAX_OUT/${laimax_out}/
+  31s/@@HEIGHT_OUT/${height_out}/
+  32s/@@LC_OUT/${lc_out}/
   wq
 EOF
 
 if $dohgt; then
   ex "${userout}lut2finalout_${append_rng}.py" <<EOF 
-    24s/@@HGT/${hgt}/
+    26s/@@HGT/${hgt}/
     wq
 EOF
 else
   ex "${userout}lut2finalout_${append_rng}.py" <<EOF
-    24s/@@HGT//
+    26s/@@HGT//
     wq
 EOF
 fi

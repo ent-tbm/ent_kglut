@@ -21,6 +21,8 @@ LAImax_dataversion = "@@METADATA_DATAVERSION"
 HITEent_dataversion = "@@METADATA_DATAVERSION"
 LC_dataversion = "@@METADATA_DATAVERSION"
 
+metadata_description = "@@METADATA_DESCRIPTION"
+
 hgt = "@@HGT"
 
 outdir = "@@OUTDIR"
@@ -29,7 +31,7 @@ LAImax_out = "@@LAIMAX_OUT"
 HITEent_out = "@@HEIGHT_OUT"
 LC_out = "@@LC_OUT"
 
-default_biome = 40
+default_biome = -1
 fillvalue = -1e+30
 
 LAI = np.zeros((18, 40, 12)) # PFT Biome Month
@@ -80,7 +82,7 @@ with nc.Dataset(outdir+LAI_out, mode='w', format=outNETCDF_format) as dataset:
   dataset.setncattr("title", "Estimated LAI")
   dataset.setncattr("data_sources", "LUT: {} Biomes: {}".format(LUT_file, biome_file))
   dataset.setncattr("data_version", LAI_dataversion)
-  dataset.setncattr("description", "@@METADATA_DESCRIPTION")
+  dataset.setncattr("description", metadata_description)
   dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov")
   dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
   dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
@@ -113,12 +115,22 @@ with nc.Dataset(outdir+LAI_out, mode='w', format=outNETCDF_format) as dataset:
         for j in range(dimlon):
           KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
           for month in range(12):
-            data[month][i][j] = LAIs[pft-1][KG-1][month]
+            try:
+              data[month][i][j] = LAIs[pft-1][KG-1][month]
+              if (KG < 1): # don't know why this doesn't raise an IndexError??
+                raise IndexError
+            except IndexError:
+              data[month][i][j] = np.nan
       for i in range(dimlat//2, dimlat):
         for j in range(dimlon):
           KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
           for month in range(12):
-            data[month][i][j] = LAI[pft-1][KG-1][month]
+            try:
+              data[month][i][j] = LAIs[pft-1][KG-1][month]
+              if (KG < 1):
+                raise IndexError
+            except IndexError:
+              data[month][i][j] = np.nan
 
       dataset[pftvalue[0]][:] = data
 
@@ -127,7 +139,7 @@ with nc.Dataset(outdir+LAImax_out, mode='w', format=outNETCDF_format) as dataset
   dataset.setncattr("title", "Estimated LAImax")
   dataset.setncattr("data_sources", "LUT: {} Biomes: {}".format(LUT_file, biome_file))
   dataset.setncattr("data_version", LAImax_dataversion)
-  dataset.setncattr("description", "@@METADATA_DESCRIPTION")
+  dataset.setncattr("description", metadata_description)
   dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov")
   dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
   dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
@@ -153,7 +165,12 @@ with nc.Dataset(outdir+LAImax_out, mode='w', format=outNETCDF_format) as dataset
       for i in range(dimlat):
         for j in range(dimlon):
           KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
-          data[i][j] = LAImax[pft-1][KG-1]
+          try:
+            data[i][j] = LAImax[pft-1][KG-1]
+            if (KG < 1):
+              raise IndexError
+          except IndexError:
+            data[i][j] = np.nan
 
       dataset[pftvalue[0]][:] = data
 
@@ -162,7 +179,7 @@ with nc.Dataset(outdir+HITEent_out, mode='w', format=outNETCDF_format) as datase
   dataset.setncattr("title", "Estimated Height")
   dataset.setncattr("data_sources", "LUT: {} Biomes: {}".format(LUT_file, biome_file))
   dataset.setncattr("data_version", HITEent_dataversion)
-  dataset.setncattr("description", "@@METADATA_DESCRIPTION")
+  dataset.setncattr("description", metadata_description)
   dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov")
   dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
   dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
@@ -189,7 +206,12 @@ with nc.Dataset(outdir+HITEent_out, mode='w', format=outNETCDF_format) as datase
       for i in range(dimlat):
         for j in range(dimlon):
           KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
-          data[i][j] = HITEent[pft-1][KG-1]
+          try:
+            data[i][j] = HITEent[pft-1][KG-1]
+            if (KG < 1):
+              raise IndexError
+          except IndexError:
+            data[i][j] = np.nan
 
       dataset[hgt+pftvalue[0]][:] = data
 
@@ -198,7 +220,7 @@ with nc.Dataset(outdir+LC_out, mode='w', format=outNETCDF_format) as dataset:
   dataset.setncattr("title", "Estimated Land Cover")
   dataset.setncattr("data_sources", "LUT: {} Biomes: {}".format(LUT_file, biome_file))
   dataset.setncattr("data_version", LC_dataversion)
-  dataset.setncattr("description", "@@METADATA_DESCRIPTION")
+  dataset.setncattr("description", metadata_description)
   dataset.setncattr("contact", "james.lui@nasa.gov, nancy.y.kiang@nasa.gov")
   dataset.setncattr("institution", "NASA Goddard Institute for Space Studies")
   dataset.setncattr("date_created", datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
@@ -227,13 +249,19 @@ with nc.Dataset(outdir+LC_out, mode='w', format=outNETCDF_format) as dataset:
       for i in range(dimlat):
         for j in range(dimlon):
           KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
-          data[i][j] = LC[pft-1][KG-1]
+          try:
+            data[i][j] = LC[pft-1][KG-1]
+            if (KG < 1):
+              raise IndexError
+          except IndexError:
+            data[i][j] = np.nan
 
       dataset[pftvalue[0]][:] = data
       checksum += data
 
 checkones = np.isclose(checksum, 1.0)
+isnans = np.isnan(checksum)
 for i in range(dimlat):
   for j in range(dimlon):
-    if (not checkones[i][j]):
+    if (not checkones[i][j] and not isnans[i][j]):
       print("Sum of fractions in cell {}, {} is not 1.0! ({:.5f})".format(i,j,checksum[i][j]))
