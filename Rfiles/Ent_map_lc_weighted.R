@@ -94,12 +94,17 @@ heightwtdlc = Ent_calc_lc_weighted_map_GISS(
 
 #LAImax cover-weighted map
 filelaimax = fnames[match("laimax", fnames[,1]),2]
+#colorsfn = colorRampPalette(c("tan", "green", "dark green", "dark blue"), space="rgb")
+colorsfn = colorRampPalette(c( "tan", "yellow", "green", "dark green", "dark blue"), space="rgb")
+colors=colorsfn(50)[c(1,5, 10:47)]
 laimaxwtdlc = Ent_calc_lc_weighted_map_GISS(
 	filelc=paste(pathin, filelc, sep=""),
 	filevar= paste(pathin, filelaimax, sep=""),
 	pathout=pathout,
 	varname="laimax",  longname="leaf area index (LAI) annual maximum", vardescr="cover-weighted maximum annual LAI", varpre="",
 	units="m^2/m^2", lctypes=EntGVSD_COV13, 
+        #colors=colorsfn(40),    
+        colors=colors,
 	if.pdf=if.pdf, zlim=c(0,6),
 	info=filelaimax)
 
@@ -111,6 +116,7 @@ laiwtdlc = Ent_calc_lc_weighted_map_GISS(
 	pathout=pathout,
 	varname="lai",  longname="leaf area index (LAI) monthly", vardescr="cover-weighted monthly LAI", varpre="", 
 	units="m^2/m^2", lctypes=EntGVSD_COV13, 
+        colors=colors,    
 	if.time=TRUE, if.pdf=if.pdf, zlim=c(0,6),
 	info=filelai)
 

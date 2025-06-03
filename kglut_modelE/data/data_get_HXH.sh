@@ -27,6 +27,7 @@ if [ -d $DATAPATH ]; then
   ln -s ${DATAPATH}/${height}
   ln -s ${DATAPATH}/${laimax}
   ln -s ${DATAPATH}/${lai}
+  ln -s ${DATAPATH}/${lc}
 else
   wget ${DATAPORTAL}/${ts}
   wget ${DATAPORTAL}/${prec}

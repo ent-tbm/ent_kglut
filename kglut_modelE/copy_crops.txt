@@ -57,7 +57,10 @@ if [ $RES == '720x360' ]; then
 ncks -A -v crops_herb ../../kglut_modelE/data/V${RES}_EntGVSD16_MM_lai_max_trimmed_scaled_v1.0b.nc V${RES}_laimax_${VERSION}cr.nc
 
 #Height
-ncks -A -v crops_herb -s 'hgt_crops_herb=crops_herb' ../../kglut_modelE/data/V${RES}_EntGVSD16_MM_height_trimmed_scaled_v1.0b.nc V${RES}_height_${VERSION}cr.nc
+#ncks -A -v crops_herb -s 'hgt_crops_herb=crops_herb' ../../kglut_modelE/data/V${RES}_EntGVSD16_MM_height_trimmed_scaled_v1.0b.nc V${RES}_height_${VERSION}cr.nc
+ncrename -O -v hgt_crops_herb,crops_herb V${RES}_height_${VERSION}cr.nc
+ncks -A -v crops_herb ../../kglut_modelE/data/V${RES}_EntGVSD16_MM_height_trimmed_scaled_v1.0b.nc V${RES}_height_${VERSION}cr.nc
+ncrename -O -v crops_herb,hgt_crops_herb V${RES}_height_${VERSION}cr.nc
 
 #LAI monthly
 ncks -A -v crops_herb ../../kglut_modelE/data/V${RES}_EntGVSD16_MM_lai_trimmed_scaled_v1.0b.nc V${RES}_lai_${VERSION}cr.nc

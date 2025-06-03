@@ -1322,7 +1322,7 @@ Ent_calc_npftgrid = function(file, npft=17) {
 
 #------------
 Ent_calc_lc_weighted_map_GISS = function(filelc, filevar, pathout=".",
-	varname, longname="", vardescr="", varpre="", units="", lctypes=EntGVSD_COV13, if.time=FALSE, if.pdf=TRUE, zlim=NULL, if.ncout=TRUE, undef=-1.e30, info=Sys.time()) {
+	varname, longname="", vardescr="", varpre="", units="", lctypes=EntGVSD_COV13, colors=NULL,if.time=FALSE, if.pdf=TRUE, zlim=NULL, if.ncout=TRUE, undef=-1.e30, info=Sys.time()) {
 	#Calculate maps of land cover (lc) -weighted averages from ModelE input file format.
 	#filelc = path and file name for lc
 	#filevar = path and file name for var to be weighted averaged.
@@ -1402,12 +1402,15 @@ Ent_calc_lc_weighted_map_GISS = function(filelc, filevar, pathout=".",
 	if (if.pdf) {
 		pdf(file=paste(pathout, fileoutpre, "_lcwtd.pdf", sep=""), width=9.6, height=6)
 		par(omi=c(0,0,0,0), oma=c(0,0,0,4))
+                if (is.null(colors)) {
+			colors=giss.palette.nowhite(40)
+                }
 		if (!if.time) {
-			plot.grid.continuous(mapz=varwtdlc, res=res.from.IM.JM(IM,JM), colors=giss.palette.nowhite(40), legend.lab=NULL, xlab="longitude", ylab="latitude", xaxt="s", yaxt="s", titletext=filevar, zlim=zlim, ADD=FALSE, if.fill=TRUE, if.coasts=TRUE, ask=TRUE) 
+			plot.grid.continuous(mapz=varwtdlc, res=res.from.IM.JM(IM,JM), colors=colors, legend.lab=NULL, xlab="longitude", ylab="latitude", xaxt="s", yaxt="s", titletext=filevar, zlim=zlim, ADD=FALSE, if.fill=TRUE, if.coasts=TRUE, ask=TRUE) 
 			mtext(info)
 		} else {
 			for (td in 1:TIMEDIM) {
-			plot.grid.continuous(mapz=varwtdlc[,,td], res=res.from.IM.JM(IM,JM), colors=giss.palette.nowhite(40), legend.lab=NULL, xlab="longitude", ylab="latitude", xaxt="s", yaxt="s", titletext=filevar, zlim=zlim, ADD=FALSE, if.fill=TRUE, if.coasts=TRUE, ask=TRUE) 
+			plot.grid.continuous(mapz=varwtdlc[,,td], res=res.from.IM.JM(IM,JM), colors=colors, legend.lab=NULL, xlab="longitude", ylab="latitude", xaxt="s", yaxt="s", titletext=filevar, zlim=zlim, ADD=FALSE, if.fill=TRUE, if.coasts=TRUE, ask=TRUE) 
 			mtext(paste(info, "t =", td))
 			}
 		}		
