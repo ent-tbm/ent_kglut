@@ -76,7 +76,7 @@ C     n-no, s-yes, extend std dev and write to the output file.
       character :: optstd
 C     Prefix to output variable (optional, but requires ifstdev to be specified)
 C     In some versions of the HITEent file, the array names are 'hgt_<pft>' and in some there is no 'hgt_' prefix.
-      character :: optprefix 
+      character*10 :: optprefix 
       
 C     Get file to read and write from command line
       ARGSOK = .false.
@@ -104,7 +104,7 @@ C     Get file to read and write from command line
 
       if (NARGS.gt.3) then
         call getarg(4, optstd)
-        if ((optstd.ne.'s').or.(optstd.ne.'n')) then
+        if ((optstd.ne.'s').and.(optstd.ne.'n')) then
           write(*,*) "optstd: ",optstd
      &     , "not recognized"
           RETURN
