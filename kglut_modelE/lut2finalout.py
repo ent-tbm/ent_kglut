@@ -126,7 +126,7 @@ with nc.Dataset(outdir+LAI_out, mode='w', format=outNETCDF_format) as dataset:
           KG = default_biome if isinstance(biomes[i][j], np.ma.core.MaskedConstant) else int(biomes[i][j])
           for month in range(12):
             try:
-              data[month][i][j] = LAIs[pft-1][KG-1][month]
+              data[month][i][j] = LAI[pft-1][KG-1][month]
               if (KG < 1):
                 raise IndexError
             except IndexError:
