@@ -554,7 +554,7 @@ grid.lon.lat = function(res) {
         j = j*2
         i = i/2.5
         j = j/2
-    } else if (res=="4x5" | res=="4X5") {
+    } else if (res=="4x5" | res=="4X5" | res=="72x46" | res=="72X46") {
         di = 5
         i = ((-180/di):((180-di)/di))*di + di/2
         dj = 4

@@ -17,7 +17,7 @@ fi
 
 generateKGonly=false #default
 if [ $# -eq 2 ]; then
-  generateKGonly=$(echo $2 | tr [:lower:] [:upper:])
+  arg=$(echo $2 | tr [:lower:] [:upper:])
   if [ "$arg" = "YES" ] || [ "$arg" = "Y" ] || [ "$arg" = "TRUE" ] || [ "$arg" = "T" ]; then
     generateKGonly=true
   else

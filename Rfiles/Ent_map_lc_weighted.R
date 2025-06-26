@@ -57,6 +57,8 @@ if (!dir.exists(pathout)) {
 }
 
 #Dominant land cover
+cat('pathin', pathin, '\n')
+cat('filelc', filelc, '\n')
 domlc = Ent_calc_domlc_GISS(file=paste(pathin, filelc, sep=""), lctypes=EntGVSD_PFTs)
 fnameout = paste(filelc, "_domlc.nc", sep="")
 if (if.pdf) {
@@ -67,6 +69,7 @@ if (if.pdf) {
 	dev.off()
 }
 fileoutnc = paste(pathout, filelc, "_domlc.nc", sep="")
+cat('domlc fileoutnc', fileoutnc, '\n')
 create.map.template.nc(res=res.from.IM.JM(dim(domlc)[1],dim(domlc)[2]), varname="domlc", longname="dominant Ent land cover", units="category", vardescr="dominant Ent land cover catergory", description=paste("source file:", filelc), undef=-1e30,  fileout=fileoutnc, contact="Nancy.Y.Kiang@nasa.gov", vartype='NC_FLOAT') 
 nc = open.nc(con=fileoutnc, write=TRUE)
 var.put.nc(nc, "domlc", domlc)
