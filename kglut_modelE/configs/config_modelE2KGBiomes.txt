@@ -1,6 +1,6 @@
-aij_dir=/discover/nobackup/nkiang/Lakes/L0_control_tr/gij
-aij_jan=JAN2000-2009.gijL0_control_tr.nc
+aij_dir=/discover/nobackup/projects/giss/prod_runs/E151OCNf10aF40_2noa2c/aij
+aij_jan=JAN1980-1989.aijE151OCNf10aF40_2noa2c.nc
 resolution=2X2H
-outdir=../user/output/
+outdir=../user/output
 netcdf_format=NETCDF3_CLASSIC
-suffix=KG_ONLY
+suffix=
