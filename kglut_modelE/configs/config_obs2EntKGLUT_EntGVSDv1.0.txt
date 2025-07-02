@@ -1,8 +1,8 @@
 temp=./data/cru_ts3.22_TS_means_2001-2010_HXH.nc
 prec=./data/GPCC_v6_PREC_means_2001-2010_HXH.nc
-lai=./data/V720x360_EntGVSD16_MM_lai_trimmed_scaled_v1.0b.nc
-laimax=./data/V720x360_EntGVSD16_MM_lai_max_trimmed_scaled_nocrops_v1.0b.nc
-height=./data/V720x360_EntGVSD16_MM_height_trimmed_scaled_nocrops_v1.0b.nc
+lai=./data/V720x360_EntGVSD16_MM_lai_trimmed_scaled_v1.0b_ext.nc
+laimax=./data/V720x360_EntGVSD16_MM_lai_max_trimmed_scaled_v1.0b_ext.nc
+height=./data/V720x360_EntGVSD16_MM_height_trimmed_scaled_v1.0b_ext.nc
 lc=./data/V720x360_EntGVSD16_MM_lc_max_trimmed_scaled_nocrops_v1.0b.nc
 resolution=HXH
 regression=kde
