@@ -191,6 +191,13 @@ B-1. modelE2KGBiomes.sh
 
 This script makes it easier to convert modelE diagnostics files into a Koeppen-Geiger map. This is essentially just the first two steps of the LUTaltclimate2modelEinput.sh script. Its input config file, config_modelE2KGBiomes.txt is the same config file as config_LUTaltclimate2modelEinput
 
+***********************************************
+B-2. paleo_entcover.py
+
+This script takes any set of vegetation boundary conditions netcdf files  (cover, LAI maximum, height, monthly LAI) and replaces modern vegetation with the relevant paleo-vegetation, given the input year in Mya.  It runs from the command line.  Below is a template command, in which the file names can be changed to the user's file names.
+
+python ../../kglut_modelE/paleo_entcover.py  -i V72x46_lc_${RUN}_${DATE}.nc -o V72x46_lc_${RUN}_paleo.nc -ilm V72x46_laimax_${RUN}_${DATE}.nc -olm V72x46_laimax_${RU
+N}_paleo.nc -il V72x46_lai_${RUN}_${DATE}.nc -ol V72x46_lai_${RUN}_paleo.nc -ih V72x46_height_${RUN}_${DATE}.nc -oh V72x46_height_${RUN}_paleo.nc -t {$Mya}
 
 ***********************************************
 
