@@ -30,7 +30,7 @@ A. obs2EntKGLUT.sh:
 
 This script generates a look up table of vegetation boundary conditions (height, LAI, LAImax, land cover fraction) based on regression of values over a Koeppen-Geiger biome. The user does not need to run this script unless they wish to generate alternative lookup tables (LUT) with other data sets. The default LUT of vegetation boundary conditions by Koeppen-Geiger biome type and Ent PFT as published is included in the repository.
 
-  frozen LUT:  Ent_utils/kglut_modelE/data/EntKoeppenGeigerLUTv1.0_hxh_a62e225-2025-04-07.nc
+  frozen LUT:  Ent_utils/kglut_modelE/EntKGLUT_HXH_fc9fd9b-2025-05-29_default.nc
 
 This script takes observed climate and vegetation maps and generates a Koeppen-Geiger climate-biome classification of Ent PFT and bare soil pcover fraction, height, annual maximum LAI, and monthly LAI in a lookup table (LUT). Input data files and some parameter settings are specified by a configuration file. Relative paths are relative to the kglut_modelE directory.
 

@@ -302,9 +302,9 @@ ex "${userout}csv2lut_${append_rng}.py" <<EOF
   29s/@@LAIMAX_CSV_FILE/${outdir}${laimax_csv_file}/
   30s/@@HEIGHT_CSV_FILE/${outdir}${height_csv_file}/
   31s/@@LC_CSV_FILE/${outdir}${lc_csv_file}/
-  160s/@@METADATA_FILENAMES/$metadata_filenames/
-  162s/@@METADATA_DATAVERSION/$metadata_dataversion/
-  165s/@@METADATA_DESCRIPTION/$metadata_description/
+  140s/@@METADATA_FILENAMES/$metadata_filenames/
+  142s/@@METADATA_DATAVERSION/$metadata_dataversion/
+  145s/@@METADATA_DESCRIPTION/$metadata_description/
   26s/@@NETCDF_FORMAT/$netcdf_format/
   33s/@@OUTDIR/$outdir/
   34s/@@LUT_OUT/$lut_out/
