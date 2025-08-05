@@ -2,7 +2,9 @@
 #Author: Nancy.Y.Kiang@nasa.gov
 #Generate scaleacc files.
 #To run:
-# source com_scaleacc.source <RUN> <ACCDIR>
+# Run from a subdirectory where you want outputs to go.
+# Output directory should be at same directory level as the ACC directory.
+# source ../com_scaleacc.source <RUN> <ACCDIR> <xijkl> <NMOVAV> <YR1> <YR2>
 
 date=$(date '+%Y-%m-%d')
 echo $date
@@ -25,7 +27,9 @@ echo "NMONAV = < MON | SEASON | YEAR | MONPER | SEASONPER | YEARPER >";
 echo "YR1 = first year";
 echo "YR2 = last year";
 echo "where MON, SEASON, YEAR are options for specific years from YR1 to YR2,";
-echo "and MONPER, SEASONPER, YEARPER are options for period averages over YR1-YR2.";
+echo "      for SEASON (DJF, MAM, JJA, SON) the years are DEC YR1-1 to NOV YR2;"
+echo "and MONPER, SEASONPER, YEARPER are options for period averages over YR1-YR2,";
+echo "      for SEASON (DJF, MAM, JJA, SON) the years are DEC YR1-1 to NOV YR2."
 echo " ";
 
   return;
@@ -68,8 +72,8 @@ return;
 if [ $NMONAV == 'MONPER' ]; then
 k=0
 while [ $k -lt 12 ]; do
-  echo   ../ACC/${MON[$k]}${YR1}"0-"${YR2}".acc"$RUN".nc"
-  scaleacc ../ACC/${MON[$k]}${YR1}"0-"${YR2}".acc"$RUN".nc" $xijkl
+  echo   ../ACC/${MON[$k]}${YR1}"-"${YR2}".acc"$RUN".nc"
+  scaleacc ../ACC/${MON[$k]}${YR1}"-"${YR2}".acc"$RUN".nc" $xijkl
  let k=k+1
 done
 fi
@@ -77,27 +81,30 @@ fi
 #**** NOT FINISHED WITH THE BELOW ****
 if false; then
 #------------
-#Seasonal decadal:  1981-1989, because do not have DEC1979
+#Seasonal multi-decadal: DEC YR1-1 to NOV YR2
 if [ $NMONAV == 'SEASONPER' ]; then
 cd aij
 s=0
-n=198
- ls       ../ACC/${SEASON[$s]}${n}"1-"${n}"9.acc"$RUN".nc"
- scaleacc ../ACC/${SEASON[$s]}${n}"1-"${n}"9.acc"$RUN".nc" aij
+n1=$((YR1/10))
+let n0=$n-1
+n2=$((YR2/10))
+ ls       ../ACC/${SEASON[$s]}${n1}"0-"${n2}"9.acc"$RUN".nc"
+ scaleacc ../ACC/${SEASON[$s]}${n1}"0-"${n2}"9.acc"$RUN".nc" aij
  let s=s+1
  while [ $s -lt 4 ]; do
-  ls       ../ACC/${SEASON[$s]}${n}"0-"${n}"9.acc"$RUN".nc"
-  scaleacc ../ACC/${SEASON[$s]}${n}"0-"${n}"9.acc"$RUN".nc" aij
+  ls       ../ACC/${SEASON[$s]}${n1}"0-"${n2}"9.acc"$RUN".nc"
+  scaleacc ../ACC/${SEASON[$s]}${n1}"0-"${n2}"9.acc"$RUN".nc" aij
   let s=s+1
  done
 fi
+fi
+#if false-----
 
-#Seasonal decadal: 1990-2019
+
+#Seasonal decadal, single decades: 1980-1989, 1990-1999, 2000-2009, 2010-2019
 cd aij
-#n=199
-# while [ $n -le 200 ]; do
-n=201
- while [ $n -le 201 ]; do
+n=198
+while [ $n -le 201 ]; do
   s=0
  while [ $s -lt 4 ]; do
   ls       ../ACC/${SEASON[$s]}${n}"0-"${n}"9.acc"$RUN".nc"
@@ -117,7 +124,7 @@ while [ $n -le 201 ]; do
 done
 
 # * tar gzip * #
-
+if false; then
 cd aij
 #tar cf ${RUN}.ANN.DECADES.1980-2019.tar ANN*-*
 f=${RUN}.ANN.DECADES.1980-2019.tar
@@ -141,4 +148,3 @@ gzip ${f}
 #mv ${f}".gz" ${OUTDIR}/${RUN}
 
 fi
-
