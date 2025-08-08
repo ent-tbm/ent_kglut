@@ -82,6 +82,8 @@ soilfr = var.get.nc(ncid, "soilfr")/100
 bsfr = var.get.nc(ncid, "bsfr")/100
 vsfr = var.get.nc(ncid, "vsfr")/100
 lakefr = var.get.nc(ncid, "lakefr")/100
+mwl.kg.m2 = var.get.nc(ncid, "mwl")/axyp*1e10 #10^10 kg/cell --> kg m-2
+simass.kg.m2 = var.get.nc(ncid, "simass")  #Seaice mass is simulated for both ocean and lakes. Over grid cell.
 
 #Make 3D arrays for cover fractions
 soilfrz = array(soilfr, dim=dimdz)
@@ -198,6 +200,33 @@ cat('\n gavail \n')
 
     ghygro.kg.m2.soil = apply( hygro_lay*dz*rho.h2o, c(1,2), sum)
     gavail.kg.m2.soil = (gwtr.kg.m2-gice.kg.m2-ghygro.kg.m2.soil); gavail.kg.m2.soil[gavail.kg.m2.soil<0.0]=0.0
+
+#RAW: land relative available water = liquid water (soil, lake) relative soil saturation (0 to >1 when super-saturated). DOES NOT INCLUDE OCEAN.
+    lakeinteract = lakefr>=1e-10  #lakefr>0 not correct
+    lakeinteract3d = array(lakeinteract, dim=c(dim(lakeinteract), ngm) )
+    lakenointeract = lakefr<1e-10 & (mwl.kg.m2>0 | simass.kg.m2>0)
+    lakenointeract3d = array(lakenointeract, dim=c(dim(lakeinteract), ngm) )
+    cat('dim(poros)', dim(poros), '\n')
+    cat('(soildepth.m)', soildepth.m, '\n')
+    cat('dim(dz)', dim(dz),  '\n')
+    cat('dim(lakeinteract)', dim(lakeinteract), '\n')
+    lakesoil.h2o.kg.m2lk_lay = poros*rho.h2o*dz*lakeinteract3d #saturated soil water under lakes 
+    lakesoillakefr0.h2o.kg.m2lk_lay = poros*rho.h2o*dz*(lakenointeract3d) #saturated soil water under non-interacting small lakes
+    lakesoil.hygro.kg.m2lk_lay = hygro*rho.h2o*dz*(lakeinteract3d) #hygro water under interactive lakes
+    lakesoillakefr0.hygro.kg.m2lk_lay = hygro*rho.h2o*dz*(lakenointeract3d) #hygro water under non-interacting small lakes   
+    #totwat.kg.m2 = soilfr*gwtr.kg.m2soil + mwl.kg.m2 +
+    #   lakefr*lakesoil.h2o.kg.m2lk*lakeinteract + lakefr*lakesoillakefr0.h2o.kg.m2lk*lakenointeract +
+    #   lakefr*lakesoil.hygro.kg.m2lk*lakeinteract + lakefr*lakesoillakefr0.hygro.kg.m2lk*lakenointeract +
+    #   simass.kg.m2 + qatm.kg.m2 + cldw.kg.m2  + cldi.kg.m2 + snowdp.kg.m2
+
+    lakebottomfrozen = lakeinteract & mwl.kg.m2 <= 0 & simass.kg.m2>0  #Rough assumption that bottom of lakes is liquid if any.
+    lakebottomfrozen3d = array(lakebottomfrozen, dim=c(dim(lakebottomfrozen), ngm))
+    lakesoil.liq.kg.m2lk_lay = lakesoil.h2o.kg.m2lk_lay - lakesoil.hygro.kg.m2lk_lay; 
+       lakesoil.liq.kg.m2lk_lay[lakebottomfrozen3d] = 0.0
+    soil.satvol.m = apply(poros*dz, c(1,2), sum) #total pore volume of soil (m)
+    lakesoil.liq.kg.m2lk = apply(lakesoil.liq.kg.m2lk_lay, c(1,2), sum)  #total saturated soil water under lakes
+    rew.lk = (div0.array2(mwl.kg.m2,lakefr) + lakesoil.liq.kg.m2lk)/rho.h2o/soil.satvol.m #lake + soil under lakes water over lakefr, REW can be > 1.
+    h2o.surf.RAW.tot = soilfr*rew + lakefr*rew.lk #With lake + lakesoil water can be > 1. h2o.surf.relavail.tot
 
 #Create netcdf file
 temp = strsplit(AIJ, "/")[[1]]
@@ -403,6 +432,15 @@ att.put.nc(nco, "gavail_tot", "long_name", "NC_CHAR", "TOTAL SOIL AVAILABLE WATE
 att.put.nc(nco, "gavail_tot", "units", "NC_CHAR", "kg/m^2 soil")
 att.put.nc(nco, "gavail_tot", "missing_value", "NC_FLOAT", undef)
 
+    mapz = h2o.surf.RAW.tot
+
+#cat(" \n")
+var.def.nc(nco, "h2o.surf.RAW.tot", "NC_FLOAT", dimensions=c("lon","lat"))
+att.put.nc(nco, "h2o.surf.RAW.tot", "long_name", "NC_CHAR", "RELATIVE AVAILABLE WATER")
+att.put.nc(nco, "h2o.surf.RAW.tot", "units", "NC_CHAR", "kg/m^2 soil")
+att.put.nc(nco, "h2o.surf.RAW.tot", "missing_value", "NC_FLOAT", undef)
+
+
 #-- Put variables
 
 
@@ -438,6 +476,7 @@ var.put.nc(nco, "gavail_bs_lay", gavail_bs_lay.kg.m2.soil)
 var.put.nc(nco, "gavail_vs_lay", gavail_vs_lay.kg.m2.soil)
 var.put.nc(nco, "gavail_lay", gavail_lay.kg.m2.soil)
 var.put.nc(nco, "gavail_tot", gavail.kg.m2.soil)
+var.put.nc(nco, "h2o.surf.RAW.tot", h2o.surf.RAW.tot)
 
 close.nc(nco)
 
