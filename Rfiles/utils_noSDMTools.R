@@ -2676,4 +2676,31 @@ get.nc4 = function(ncid, nc4, varname) {
     return( list(mapz, units, undef) )
 }
 
+Area.grid = function(Radius=6371000, lon, lat, if.modelE=FALSE) {
+	#Returns axyp of area of grid cells in m^2
+	#Radius is any length units.  Default is ModelE Earth radius 6371000 m.
+	#lon and lat inputs are in degrees at grid centers
+	#lat 1st element at South Pole
+	#if.modelE lat is specified at grid centers EXCEPT the poles are exactly at -90 and 90.
+	
+	IM = length(lon); JM = length(lat)
+	#Convert to radians
+	dlond = unique(lon[2:IM] - lon[1:(IM-1)])[1]; dlatd = unique(lat[2:JM] - lat[1:(JM-1)])
+	if (if.modelE) {
+		dlatd = min(dlatd)
+		latd = lat
+		latd[1] = lat[2] - dlatd
+		latd[JM] = lat[JM-1] + dlatd
+	} else {
+		latd=lat
+		dlatd = dlatd[1]  #R have to convert from array to scalar
+	}
+	lt=latd*pi/180
+	dlon = dlond*pi/180; dlat = dlatd*pi/180
+	
+	alat = dlon * (sin(lt + dlat/2) - sin(lt - dlat/2))
+	agrid = t(array(rep(alat, IM), dim=c(JM, IM)))
+	return( Radius^2 * agrid )
+}
  
+
