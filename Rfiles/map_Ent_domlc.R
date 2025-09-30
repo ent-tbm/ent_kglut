@@ -57,7 +57,7 @@ var.put.nc(nc, "domlc", domlc)
   pdf(paste0(file,"_domlc.pdf"), width=10, height=6)
   Ent_domlc_plot(lctype=domlc, numpft=numPFT, res=res, legend.cex=0.6, Entcolors=Entcolors, if.new=FALSE)
   mtext(outer=TRUE, file, line=-1.5)
-  mtext("Dominant land cover type")
+  mtext("Dominant land cover type", line=0.5)
   dev.off()
 
  

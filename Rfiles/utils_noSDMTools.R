@@ -534,7 +534,7 @@ grid.lon.lat = function(res) {
         #1/12 degree
         i = (-12*180):(12*180 -1) + 0.5
         j = (-12*90):(12*90 -1) + 0.5
-    } else if (res=="QxQ" | res=="qxq"| res=="1440x720") {
+    } else if (res=="QxQ" | res=="QXQ" | res=="qxq"| res=="1440x720") {
         #0.25 degree
         i = ((-4*180):(4*180 -1) + 0.5)/(4)
         j = ((-4*90):(4*90 -1) + 0.5    )/(4)
