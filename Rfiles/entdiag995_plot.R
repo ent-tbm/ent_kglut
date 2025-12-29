@@ -120,12 +120,13 @@ fluxdmat = plot995r(day=NULL,fort.995[,2:ncol(fort.995)],
 
 if (if.acts) {
   cat('Plotting ACTS \n')
-  fort.1082 = read.table(paste0(runpath, "fort.1082"), header=FALSE)
+  fort.1082 = read.table(paste0(runpath, "fort.1082"), header=TRUE)
   fort.1080 = read.table(paste0(runpath, "fort.1080"), header=FALSE)
   d = 1 + (fort.995[,"timecum"] - fort.995[1,"timecum"])/86400
   temp=plotgort1082(d, fort.1082, lai=fort.995[,"lai"], alim=0.6, titletext=runname)
   plotacts1080(d, fort.1080, alim=0.6, titletext=runname)
 
+  #cat(if.clump)
   if (if.clump) {
   cat('Plotting clumping factors \n')
   system( paste0("grep clump ", runpath,  "fort.1078  > fort.1078.clump"))
