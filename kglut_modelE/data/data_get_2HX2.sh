@@ -12,6 +12,9 @@ height="V144x90_EntGVSD_v1.0_MM16_height_trimmed_scaled.nc"
 laimax="V144x90_EntGVSD_v1.0_MM16_lai_max_trimmed_scaled.nc"
 lai="V144x90_EntGVSD_v1.0_MM16_lai_trimmed_scaled.nc"
 lc="V144x90_EntGVSD_v1.0_MM16_lc_max_trimmed_scaled.nc"
+height_ext="V144x90_EntMM16_height_trimmed_scaled_ext.nc"
+laimax_ext="V144x90_EntMM16_lai_max_trimmed_scaled_ext.nc"
+lai_ext="V144x90_EntMM16_lai_trimmed_scaled_ext.nc"
 
 if [ -d $DATAPATH ]; then
   ln -s ${DATAPATH}/${ts}
@@ -20,6 +23,9 @@ if [ -d $DATAPATH ]; then
   ln -s ${DATAPATH}/${laimax}
   ln -s ${DATAPATH}/${lai}
   ln -s ${DATAPATH}/${lc}
+  ln -s ${DATAPATH}/${height_ext}
+  ln -s ${DATAPATH}/${laimax_ext}
+  ln -s ${DATAPATH}/${lai_ext}
 else
   wget ${DATAPORTAL}/${ts}
   wget ${DATAPORTAL}/${prec}
@@ -27,4 +33,7 @@ else
   wget ${DATAPORTAL}/${laimax}
   wget ${DATAPORTAL}/${lai}
   wget ${DATAPORTAL}/${lc}
+  wget ${DATAPORTAL}/${height_ext}
+  wget ${DATAPORTAL}/${laimax_ext}
+  wget ${DATAPORTAL}/${lai_ext}
 fi
