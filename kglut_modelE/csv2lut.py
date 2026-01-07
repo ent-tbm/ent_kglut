@@ -217,15 +217,17 @@ mStyles = ["o","v","^","<",">","1","2","3","4","s","p","P","*","H","X","D"]
 ran = range(1,13)
 with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
   for PFT in range(16):
-    fig = plt.figure(figsize=(30, 20))
+    fig = plt.figure(figsize=(30, 30))
     fig.suptitle("{} LAI monthly regression - lookup table".format(lcn_names[PFT].decode('utf-8').strip()), fontsize = 30)
     for KG in range(40):
       plt.subplot(8, 5, KG+1)
-      plt.title("{}: {}".format(biome_names[KG].decode('utf-8').strip(), biome_desc[KG].decode('utf-8').strip()))
-      plt.ylabel("LAI (m²/m²)")
-      plt.xlabel("Month")
+      plt.title("{}: {}".format(biome_names[KG].decode('utf-8').strip(), biome_desc[KG].decode('utf-8').strip()), fontsize=15)
+      plt.ylabel("LAI (m²/m²)", fontsize=15)
+      plt.xlabel("Month", fontsize=15)
       plt.xlim(1, 12)
       plt.ylim(0, 7)
+      plt.xticks(fontsize=15)
+      plt.yticks(fontsize=15)
       if (LC[PFT,KG] == 0):
         continue
       plt.plot(ran, np.full((12), LAImax[PFT,KG]), color='black', label="LAImax", linestyle='dashed', alpha=0.5)
@@ -243,11 +245,13 @@ with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
   for KG in range(40):
     legend=False
     plt.subplot(40,2,KG*2+1) # Northern
-    plt.title("{}: {} Northern".format(biome_names[KG].decode('utf-8').strip(), biome_desc[KG].decode('utf-8').strip()))
-    plt.ylabel("LAI (m²/m²)")
+    plt.title("{}: {} Northern".format(biome_names[KG].decode('utf-8').strip(), biome_desc[KG].decode('utf-8').strip()), fontsize=15)
+    plt.ylabel("LAI (m²/m²)", fontsize=15)
     plt.xlim(0.8, 12.2)
-    plt.xlabel("Month")
+    plt.xlabel("Month", fontsize=15)
     plt.ylim(0, 7)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
     for PFT in range(16):
       if (LC[PFT,KG] == 0):
         continue
@@ -259,11 +263,13 @@ with PdfPages("{}{}{}".format(outdir, LUT_out, "_LAIplot.pdf")) as LAIpdf:
 
     legend=False
     plt.subplot(40,2,KG*2+2) # Southern
-    plt.title("{}: {} Southern".format(biome_names[KG].decode('utf-8').strip(), biome_desc[KG].decode('utf-8').strip()))
-    plt.ylabel("LAI (m²/m²)")
+    plt.title("{}: {} Southern".format(biome_names[KG].decode('utf-8').strip(), biome_desc[KG].decode('utf-8').strip()), fontsize=15)
+    plt.ylabel("LAI (m²/m²)", fontsize=15)
     plt.xlim(0.8, 12.2)
-    plt.xlabel("Month")
+    plt.xlabel("Month", fontsize=15)
     plt.ylim(0, 7)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
     for PFT in range(16):
       if (LC[PFT,KG] == 0):
         continue

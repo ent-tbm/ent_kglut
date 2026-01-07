@@ -561,16 +561,18 @@ biome_desc = np.array([
 ran = range(1,13)
 with PdfPages("{}{}{}".format(outdir, regressionlai, "_LAIplot.pdf")) as LAIpdf:
   for PFT in range(16):
-    fig = plt.figure(figsize=(30, 20))
+    fig = plt.figure(figsize=(30, 30))
     fig.suptitle("{} LAI monthly regression - raw data".format(lcn_names[PFT]), fontsize = 30)
     for KG in range(40):
       legend=False
       plt.subplot(8, 5, KG+1)
-      plt.title("{}: {}".format(biome_names[KG], biome_desc[KG].decode('utf-8').strip()))
-      plt.ylabel("LAI (m²/m²)")
-      plt.xlabel("Month")
+      plt.title("{}: {}".format(biome_names[KG], biome_desc[KG].decode('utf-8').strip()), fontsize=15)
+      plt.ylabel("LAI (m²/m²)", fontsize=15)
+      plt.xlabel("Month", fontsize=15)
       plt.xlim(1, 12)
       plt.ylim(0, 7)
+      plt.xticks(fontsize=15)
+      plt.yticks(fontsize=15)
       if (sampleCode[0,PFT,KG] != 'X') or (sampleCode[1,PFT,KG] != 'X'):
         plt.plot(ran, np.full((12), LAImax[PFT,KG]), color='black', label="LAImax", linestyle='dashed', alpha=0.5)
         plt.fill_between(ran, np.full((12), LAImax[PFT,KG]+stdLAImax[PFT,KG]), np.full((12), LAImax[PFT,KG]-stdLAImax[PFT,KG]), color='black', alpha=0.05)
@@ -596,15 +598,17 @@ with PdfPages("{}{}{}".format(outdir, regressionlai, "_LAIplot.pdf")) as LAIpdf:
 
 # LAI month by biome
   fig = plt.figure(figsize=(30, 150))
-  fig.suptitle("LAImax by Biome - raw data", fontsize = 30, y=0.997)
+  fig.suptitle("Monthly LAI by Biome - raw data", fontsize = 30, y=0.997)
   for KG in range(40):
     legend=False
     plt.subplot(40,2,KG*2+1) # Northern
-    plt.title("{}: {} Northern".format(biome_names[KG], biome_desc[KG].decode('utf-8').strip()))
-    plt.ylabel("LAI (m²/m²)")
+    plt.title("{}: {} Northern".format(biome_names[KG], biome_desc[KG].decode('utf-8').strip()), fontsize=15)
+    plt.ylabel("LAI (m²/m²)", fontsize=15)
     plt.xlim(0.8, 12.2)
-    plt.xlabel("Month")
+    plt.xlabel("Month", fontsize=15)
     plt.ylim(0, 7)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
     for PFT in range(16):
       if (sampleCode[0,PFT,KG] == 'X') or (sampleCode[0,PFT,KG] == 'R'):
         continue
@@ -618,11 +622,13 @@ with PdfPages("{}{}{}".format(outdir, regressionlai, "_LAIplot.pdf")) as LAIpdf:
 
     legend=False
     plt.subplot(40,2,KG*2+2) # Southern
-    plt.title("{}: {} Southern".format(biome_names[KG], biome_desc[KG].decode('utf-8').strip()))
-    plt.ylabel("LAI (m²/m²)")
+    plt.title("{}: {} Southern".format(biome_names[KG], biome_desc[KG].decode('utf-8').strip()), fontsize=15)
+    plt.ylabel("LAI (m²/m²)", fontsize=15)
     plt.xlim(0.8, 12.2)
-    plt.xlabel("Month")
+    plt.xlabel("Month", fontsize=15)
     plt.ylim(0, 7)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
     for PFT in range(16):
       if (sampleCode[1,PFT,KG] == 'X') or (sampleCode[1,PFT,KG] == 'R'):
         continue
